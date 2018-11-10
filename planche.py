@@ -29,6 +29,8 @@ class Planche:
         Returns:
             La pièce à cette position s'il y en a une, None autrement.
         """
+        # TODO: reçoit exemple (2, 5) comme position et retourne noir, blanc ou
+        # TODO:                                                            none
         pass
 
     def position_valide(self, position):
@@ -41,6 +43,10 @@ class Planche:
         Returns:
             True si la position est valide, False autrement
         """
+        # TODO: reçoit exemple (2, 4) et retourne True pour confirmer que chaque
+        # TODO: coordonées rentre dans le board
+        # TODO: position (x,y) if x in range (8) and y in range(8) return
+        # TODO: True, else return False
         pass
 
     def obtenir_positions_mangees(self, position, couleur):
@@ -68,6 +74,13 @@ class Planche:
         Returns:
             une liste contenant toutes les positions qui seraient mangées par le coup.
         """
+        # TODO: faire obtenir_positions_mangees_direction avant
+        # TODO: appeller obtenir_posi... pour chaque direction. Ajouter chaque
+        # TODO: return à une liste et retourner la liste finale
+        # TODO: après appel pour Nord, Sud, Est, Ouest, Nord-Est, Nord-Ouest,
+        # TODO: Sud-Est, Sud-Ouest
+        # TODO: pour appel de obtenir_posi: position = coup joué, couleur du
+        # TODO: joueur, direction cardinale
         pass
 
     def obtenir_positions_mangees_direction(self, couleur, direction, position):
@@ -100,6 +113,16 @@ class Planche:
         Returns:
             La liste (peut-être vide) de toutes les positions mangées à partir du coup et de la direction donnés.
         """
+        # compliqué en esti ça caliss
+        # TODO: possiblement dans un while loop qui break quand x or y == 8. Il
+        # TODO: faut "parcourir la direction demandée à partir de position.
+        # TODO: (Nord, Sud, Est, Ouest, NO, NE, SO, SE) avec un loop qui fait,
+        # TODO: sur le vecteur position (x, y), une opération: {N(x, y+=1),
+        # TODO: S(x,y-=1), E(x+=1,y), O(x-=1,y), NE(x+=1,y+=1) NO(x-=1,y+=1)
+        # TODO: SE(x+=1,y-=1), SO(x-=1,y-=1)} À chaque opération, vérifier dans
+        # TODO: if: if case vide: return None; if case couleur ennemi: append
+        # TODO: liste de miam miam, si couleur joueur, return liste miam miam
+
         pass
 
     def coup_est_possible(self, position, couleur):
@@ -113,6 +136,9 @@ class Planche:
         Returns:
             True, si le coup est valide, False sinon
         """
+        # TODO: if obtenir_positions_mangees() retourne une liste vide, return
+        # TODO: False, else return True
+        # TODO: si ya rien à bouffer dans la liste coup pas possible
         pass
 
     def lister_coups_possibles_de_couleur(self, couleur):
@@ -128,6 +154,10 @@ class Planche:
         Returns:
             Une liste de positions de coups possibles pour la couleur "couleur"
         """
+        # TODO: pour la couleur en arg, appeler "coup est possible" sur chaque
+        # TODO: ostie de case du board, et append liste_coups_possibles avec la
+        # TODO: position vérifiée chaque fois qu'on reçoit True.
+
         pass
 
     def jouer_coup(self, position, couleur):
@@ -149,6 +179,7 @@ class Planche:
         Returns:
             "ok" si le déplacement a été effectué car il est valide, "erreur" autrement.
         """
+        # TODO: prendre un grand caliss de respire
         pass
 
     def convertir_en_chaine(self):
@@ -162,6 +193,7 @@ class Planche:
         Returns:
             La chaîne de caractères.
         """
+        # TODO: déboucher une bière pour oublier
         pass
 
     def charger_dune_chaine(self, chaine):
@@ -173,6 +205,7 @@ class Planche:
         Args:
             chaine: La chaîne de caractères, un string.
         """
+        # TODO: hurler
         pass
 
     def initialiser_planche_par_default(self):
@@ -184,6 +217,7 @@ class Planche:
         self.cases[(3, 4)] = Piece("noir")
         self.cases[(4, 3)] = Piece("noir")
         self.cases[(4, 4)] = Piece("blanc")
+
 
     def __repr__(self):
         """

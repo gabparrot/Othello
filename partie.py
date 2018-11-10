@@ -1,5 +1,6 @@
 from othello.planche import Planche
 from othello.joueur import JoueurOrdinateur, JoueurHumain
+types_joueurs = ("Humain", "Ordinateur")
 
 class Partie:
     def __init__(self, nom_fichier=None):
@@ -39,7 +40,11 @@ class Partie:
 
         Pour créer les objets joueur, faites appel à demander_type_joueur()
         """
-        pass
+
+        self.joueur_noir = self.demander_type_joueur("noir")
+        self.joueur_blanc = self.demander_type_joueur("blanc")
+        self.joueur_courant = ("noir") #pascorrectpasmalsûr
+        #TODO initialiser jouer_courant correctement
 
     def demander_type_joueur(self, couleur):
         """
@@ -56,7 +61,15 @@ class Partie:
             Un objet Joueur, de type JoueurHumain si l'usager a entré 'Humain', JoueurOrdinateur s'il a entré
             'Ordinateur'.
         """
-        pass
+        type_joueur = ""
+        while type_joueur not in types_joueurs:
+            type_joueur = (f"Est-ce que le joueur {couleur} sera un Humain ou"
+                           " un Ordinateur? ").title()
+            if type_joueur not in types_joueurs:
+                print("Erreur, type invalide, veuillez réessayer.")
+            else:
+                return self.creer_joueur(type_joueur, couleur)
+
 
     def creer_joueur(self, type, couleur):
         """
@@ -72,8 +85,12 @@ class Partie:
         Returns:
             Un objet JoueurHumain si le type est "Humain", JoueurOrdinateur sinon
         """
-        pass
-
+        if type == "Ordinateur":
+            joueur = JoueurOrdinateur(couleur)
+            return joueur
+        else:
+            joueur = JoueurHumain(couleur)
+            return joueur
 
     def valider_position_coup(self, position_coup):
         """
@@ -121,7 +138,7 @@ class Partie:
         Affiche un message indiquant que le joueur de la couleur courante ne peut jouer avec l'état actuel de la
         planche et qu'il doit donc passer son tour.
         """
-        pass
+        print(f"Aucun coup possible, joueur {self.couleur_joueur_courant} passe son tour")
 
     def partie_terminee(self):
         """

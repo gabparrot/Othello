@@ -68,6 +68,7 @@ class JoueurHumain(Joueur):
         """
         try:
             # Votre code doit être ici, entre try: et except
+
             pass
 
         except ValueError:

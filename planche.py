@@ -1,5 +1,5 @@
 from othello.piece import Piece
-
+import numpy as np
 
 class Planche:
     """
@@ -10,7 +10,8 @@ class Planche:
         """
         Méthode spéciale initialisant une nouvelle planche.
         """
-        # Dictionnaire de cases. La clé est une position (ligne, colonne), et la valeur une instance de la classe Piece.
+        # Dictionnaire de cases. La clé est une position (ligne, colonne),
+        # et la valeur une instance de la classe Piece.
         self.cases = {}
 
         # Appel de la méthode qui initialise une planche par défaut.
@@ -19,12 +20,19 @@ class Planche:
         # On joue au Othello 8x8
         self.nb_cases = 8
 
+        matrice_cases = np.ones((8, 8), int)
+
+        self.liste_cases = []
+        for i in np.argwhere(matrice_cases == 1):
+            self.liste_cases.append(tuple(i))
+
     def get_piece(self, position):
         """
         Récupère une pièce dans la planche.
 
         Args:
-            position: La position où récupérer la pièce, un tuple de coordonnées matricielles (ligne, colonne).
+            position: La position où récupérer la pièce, un tuple de
+            coordonnées matricielles (ligne, colonne).
 
         Returns:
             La pièce à cette position s'il y en a une, None autrement.
@@ -54,18 +62,26 @@ class Planche:
 
     def obtenir_positions_mangees(self, position, couleur):
         """
-        Détermine quelles positions seront mangées si un coup de la couleur passée est joué à la position passée.
+        Détermine quelles positions seront mangées si un coup de la couleur
+        passée est joué à la position passée.
 
-        ***RETOURNEZ SEULEMENT LA LISTE DES POSITIONS MANGÉES, NE FAITES PAS APPEL À piece.echange_couleur() ICI.***
+        ***RETOURNEZ SEULEMENT LA LISTE DES POSITIONS MANGÉES, NE FAITES PAS
+        APPEL À piece.echange_couleur() ICI.***
 
-        Ici, commencez par considérer que, pour la position évaluée, des pièces peuvent être mangées dans 8 directions
-        distinctes représentant les 8 cases qui entourent la position évaluée. Vous devez donc vérifier, pour chacune
-        de ces directions, combien de pièces sont mangées et retourner une liste regroupant les pièces mangées dans
+        Ici, commencez par considérer que, pour la position évaluée, des pièces
+         peuvent être mangées dans 8 directions
+        distinctes représentant les 8 cases qui entourent la position évaluée.
+        Vous devez donc vérifier, pour chacune
+        de ces directions, combien de pièces sont mangées et retourner une
+        liste regroupant les pièces mangées dans
         toutes les directions.
 
-        Ici, une direction représente une liste de 2 entiers pour la déplacement en x et y. Par exemple, pour la
-        direction diagonale où en explore vers le bas et vers la droite, on utiliserait la liste [1, 1]. De même, pour
-        la direction gauche, on utiliserait la liste [-1, 0]. Il y a donc un total de 8 directions, représentant les
+        Ici, une direction représente une liste de 2 entiers pour la
+        déplacement en x et y. Par exemple, pour la
+        direction diagonale où en explore vers le bas et vers la droite, on
+        utiliserait la liste [1, 1]. De même, pour
+        la direction gauche, on utiliserait la liste [-1, 0]. Il y a donc un
+        total de 8 directions, représentant les
         8 positions auxquelles la position actuelle peut toucher.
 
         Pensez à faire appel à la fonction obtenir_positions_mangees_direction().
@@ -75,7 +91,8 @@ class Planche:
             couleur: La couleur du coup à jouer.
 
         Returns:
-            une liste contenant toutes les positions qui seraient mangées par le coup.
+            une liste contenant toutes les positions qui seraient mangées par
+            le coup.
         """
         # TODO: faire obtenir_positions_mangees_direction avant
         # TODO: appeller obtenir_posi... pour chaque direction. Ajouter chaque
@@ -88,24 +105,34 @@ class Planche:
 
     def obtenir_positions_mangees_direction(self, couleur, direction, position):
         """
-        Détermine les positions qui seront mangées si un coup de couleur "couleur" est joué à la position "position",
+        Détermine les positions qui seront mangées si un coup de couleur
+        "couleur" est joué à la position "position",
         si on parcourt la planche dans une direction "direction".
 
-        Pour une direction donnée, vous devez parcourir la planche de jeu dans la direction. Tant que votre déplacement
-        vous mène sur une pièce de la couleur mangée, vous continuez de vous déplacer. Trois situations surviennent
+        Pour une direction donnée, vous devez parcourir la planche de jeu dans
+        la direction. Tant que votre déplacement
+        vous mène sur une pièce de la couleur mangée, vous continuez de vous
+        déplacer. Trois situations surviennent
         alors pour mettre un terme au parours dans la direction :
 
-        1) Vous arrivez sur une case vide. Dans ce cas, aucune pièce n'est mangée.
+        1) Vous arrivez sur une case vide. Dans ce cas, aucune pièce n'est
+        mangée.
 
-        2) Vous arrivez sur une case extérieure à la planche. Encore une fois, aucune pièce n'est mangée.
+        2) Vous arrivez sur une case extérieure à la planche. Encore une fois,
+        aucune pièce n'est mangée.
 
-        3) Vous arrivez sur une case de la même couleur que le coup initial. Toutes les pièces de la couleur opposée
-        que vous avez alors rencontrées dans votre parcours doivent alors être ajoutées à grande liste des pièces
+        3) Vous arrivez sur une case de la même couleur que le coup initial.
+        Toutes les pièces de la couleur opposée
+        que vous avez alors rencontrées dans votre parcours doivent alors être
+        ajoutées à grande liste des pièces
         mangées cumulées.
 
-        N.B. : Cette méthode peut être implémentée par au moins deux techniques différentes alors laissez place à votre
-        imagination et explorez ! Une méthode faisant une boucle d'exploration complète et une méthode de parcours
-        récursif  sont quelques-unes des façons de faire que vous pouvez explorer. Il se peut même que votre solution
+        N.B. : Cette méthode peut être implémentée par au moins deux techniques
+         différentes alors laissez place à votre
+        imagination et explorez ! Une méthode faisant une boucle d'exploration
+        complète et une méthode de parcours
+        récursif  sont quelques-unes des façons de faire que vous pouvez
+        explorer. Il se peut même que votre solution
         ne soit pas dans les solutions énumérées précédemment.
 
         Args:
@@ -114,7 +141,8 @@ class Planche:
             position: La position du coup évalué
 
         Returns:
-            La liste (peut-être vide) de toutes les positions mangées à partir du coup et de la direction donnés.
+            La liste (peut-être vide) de toutes les positions mangées à partir
+            du coup et de la direction donnés.
         """
         # compliqué en esti ça caliss
         # TODO: possiblement dans un while loop qui break quand x or y == 8. Il
@@ -130,7 +158,8 @@ class Planche:
 
     def coup_est_possible(self, position, couleur):
         """
-        Détermine si un coup est possible. Un coup est possible si au moins une pièce est mangée par celui-ci.
+        Détermine si un coup est possible. Un coup est possible si au moins une
+        pièce est mangée par celui-ci. ET s'il n'y a pas déjà une pièce présente
 
         Args:
             position: La position du coup évalué
@@ -139,29 +168,38 @@ class Planche:
         Returns:
             True, si le coup est valide, False sinon
         """
-        # TODO: if obtenir_positions_mangees() retourne une liste vide, return
-        # TODO: False, else return True
-        # TODO: si ya rien à bouffer dans la liste coup pas possible
-        pass
+        if position in self.lister_coups_possibles_de_couleur(couleur):
+            return True
+        return False
+
+        #TODO finie (en théorie)
 
     def lister_coups_possibles_de_couleur(self, couleur):
         """
-        Fonction retournant la liste des coups possibles d'une certaine couleur. Un coup est considéré possible
-        si au moins une pièce est mangée quand la couleur "couleur" joue à une certaine position, ne l'oubliez pas!
-
-        ATTENTION: ne dupliquez pas de code déjà écrit! Réutilisez les fonctions déjà programmées!
+        Fonction retournant la liste des coups possibles d'une certaine
+        couleur. Un coup est considéré possible
+        si au moins une pièce est mangée quand la couleur "couleur" joue à une
+        certaine position, ne l'oubliez pas!
+        ET SI CASE EST VIDE
+        ATTENTION: ne dupliquez pas de code déjà écrit! Réutilisez les
+        fonctions déjà programmées!
 
         Args:
-            couleur: La couleur ("blanc", "noir") des pièces dont on considère le déplacement, un string
+            couleur: La couleur ("blanc", "noir") des pièces dont on considère
+            le déplacement, un string
 
         Returns:
             Une liste de positions de coups possibles pour la couleur "couleur"
         """
-        # TODO: pour la couleur en arg, appeler "coup est possible" sur chaque
-        # TODO: ostie de case du board, et append liste_coups_possibles avec la
-        # TODO: position vérifiée chaque fois qu'on reçoit True.
 
-        pass
+        liste_coups_possibles = []
+        for case in self.liste_cases:
+            if (case not in self.cases and
+               self.obtenir_positions_mangees(case, couleur) != []):
+                liste_coups_possibles.append(case)
+            return liste_coups_possibles
+
+        #TODO pas sûr ca va marcher, et ajouter comments clarifier.
 
     def jouer_coup(self, position, couleur):
         """
@@ -172,8 +210,10 @@ class Planche:
         - Faire les changements de couleur pour les pièces mangées par le coup.
         - Retourner un message indiquant "ok" ou "erreur".
 
-        ATTENTION: Ne dupliquez pas de code! Vous savez déjà qu'un coup est valide si au moins une pièce est mangée
-                   par celui-ci. Vous avez une méthode qui fait exactement ce travail à programmer !
+        ATTENTION: Ne dupliquez pas de code! Vous savez déjà qu'un coup est
+                   valide si au moins une pièce est mangée par celui-ci. Vous
+                   avez une méthode qui fait exactement ce travail à
+                   programmer !
 
         Args:
             position: La position du coup.
@@ -182,8 +222,16 @@ class Planche:
         Returns:
             "ok" si le déplacement a été effectué car il est valide, "erreur" autrement.
         """
-        # TODO: prendre un grand caliss de respire
-        pass
+        try:
+            assert self.coup_est_possible(position, couleur)
+            self.cases[position] = Piece(couleur)
+            pieces_mangees = self.obtenir_positions_mangees(position, couleur)
+            for piece_mangee in pieces_mangees: #devrait marcher quand il va recevoir une liste en retour
+                self.cases[piece_mangee] = Piece.echange_couleur()
+            return "ok"
+        except(AssertionError):
+            return "erreur"
+        #TODO CHÉ PU
 
     def convertir_en_chaine(self):
         """

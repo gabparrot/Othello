@@ -1,11 +1,11 @@
 from random import choice
-
+#TODO en théorie la partie joueur.py est finie (fonctionnelle, optimisable)
 
 class Joueur:
     """
     Classe générale de joueur. Vous est fournie.
     """
-
+    #TODO on touche aucune méthode de la classe Joueur, tout est tiguidou
     def __init__(self, couleur):
         """
         Le constructeur global de Joueur.
@@ -49,9 +49,11 @@ class JoueurHumain(Joueur):
         Cette méthode va construire un objet Joueur et l'initialiser avec la bonne couleur.
         """
         super().__init__(couleur)
+        #TODO finie
 
     def obtenir_type_joueur(self):
         return "Humain"
+        #TODO finie
 
     def choisir_coup(self, coups_possibles):
         """
@@ -67,9 +69,9 @@ class JoueurHumain(Joueur):
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
         try:
-            # Votre code doit être ici, entre try: et except
-
-            pass
+            input_row = int(input("Sur quelle ligne (0 à 7) voulez vous jouer votre coup? "))
+            input_col = int(input("Et sur quelle colonne? (0 à 7 "))
+            return(input_row, input_col)
 
         except ValueError:
             print("Position invalide.\n")
@@ -77,6 +79,7 @@ class JoueurHumain(Joueur):
             # L'usager a fait une erreur de saisie, on retourne donc un coup que l'on sait invalide.
             # Ceci forcera le programme à redemander le coup au joueur.
             return (-1, -1)
+        #TODO: Finie (supposé =/)
 
 
 class JoueurOrdinateur(Joueur):
@@ -88,9 +91,11 @@ class JoueurOrdinateur(Joueur):
         Cette méthode va construire un objet Joueur et l'initialiser avec la bonne couleur.
         """
         super().__init__(couleur)
+        #TODO finie
 
     def obtenir_type_joueur(self):
         return "Ordinateur"
+        #TODO finie
 
     def choisir_coup(self, coups_possibles):
         """
@@ -106,4 +111,7 @@ class JoueurOrdinateur(Joueur):
         Returns:
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
-        pass
+        return choice(coups_possibles)
+        #TODO finie                 (fonctionnelle, peut être améliorée)
+        #TODO possiblement retourner qu'on passe le tour si coups_possibles est vide
+        #TODO possiblement faire meillleure AI pour choisir coup optimal par ordi

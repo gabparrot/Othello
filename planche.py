@@ -29,13 +29,17 @@ class Planche:
         Returns:
             La pièce à cette position s'il y en a une, None autrement.
         """
-        # TODO: reçoit exemple (2, 5) comme position et retourne noir, blanc ou
-        # TODO:                                                            none
-        pass
+        if position in self.cases:
+            return self.cases[position]
+        else:
+            return None
+
+        # TODO: Finie (J'pense)
 
     def position_valide(self, position):
         """
-        Vérifie si une position est valide (chaque coordonnée doit être dans les bornes).
+        Vérifie si une position est valide (chaque coordonnée doit être dans
+        les bornes).
 
         Args:
             position: Un couple (ligne, colonne), tuple de deux éléments.
@@ -43,11 +47,10 @@ class Planche:
         Returns:
             True si la position est valide, False autrement
         """
-        # TODO: reçoit exemple (2, 4) et retourne True pour confirmer que chaque
-        # TODO: coordonées rentre dans le board
-        # TODO: position (x,y) if x in range (8) and y in range(8) return
-        # TODO: True, else return False
-        pass
+        if position[0] in range(8) and position[1] in range(8):
+            return True
+        return False
+        # TODO: Finie
 
     def obtenir_positions_mangees(self, position, couleur):
         """

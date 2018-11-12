@@ -1,13 +1,20 @@
 class Piece:
+
+    #TODO On touche rien de l'onglet pièce, tout est fait, référence seulement
+
     """
     Classe modélisant une pièce d'un jeu d'Othello.
     """
     def __init__(self, couleur):
         """
-        La méthode spéciale __init__ d'une classe est appelée lorsqu'on instancie un nouvel objet. Elle peut prendre
-        des paramètres supplémentaires (ici, "couleur"), qui sont les paramètres nécessaires lorsqu'on crée un nouvel
-        objet. Le mot clé "self" permet de stocker des informations dans l'instance de l'objet. Chaque instance a son
-        propre espace mémoire et peut donc contenir des valeurs différentes dans ses variables membres.
+        La méthode spéciale __init__ d'une classe est appelée lorsqu'on
+        instancie un nouvel objet. Elle peut prendre
+        des paramètres supplémentaires (ici, "couleur"), qui sont les
+        paramètres nécessaires lorsqu'on crée un nouvel
+        objet. Le mot clé "self" permet de stocker des informations dans
+        l'instance de l'objet. Chaque instance a son
+        propre espace mémoire et peut donc contenir des valeurs différentes
+        dans ses variables membres.
 
         Args:
             couleur: couleur de la pièce ("blanc", "noir"), un string.
@@ -42,8 +49,10 @@ class Piece:
 
     def __repr__(self):
         """
-        Cette méthode spéciale permet de modifier le comportement d'une instance de la classe Piece pour l'affichage.
-        Faire un print(une_piece) affichera un caractère unicode représentant le dessin d'une pièce.
+        Cette méthode spéciale permet de modifier le comportement d'une
+        instance de la classe Piece pour l'affichage.
+        Faire un print(une_piece) affichera un caractère unicode représentant
+        le dessin d'une pièce.
         """
         if self.est_noir():
             return "\u26C0"

@@ -1,9 +1,0 @@
-noir
-False
-False
-Humain
-Humain
-3,3,blanc
-3,4,noir
-4,3,noir
-4,4,blanc

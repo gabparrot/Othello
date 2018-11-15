@@ -26,7 +26,7 @@ class Joueur:
         '''
         pass
 
-    def choisir_coup(self, coups_possibles, range_possible):
+    def choisir_coup(self, coups_possibles):
         '''
         Cette méthode sera implémentée par les sous-classes JoueurHumain et JoueurOrdinateur.
 
@@ -46,7 +46,8 @@ class JoueurHumain(Joueur):
 
     def __init__(self, couleur):
         """
-        Cette méthode va construire un objet Joueur et l'initialiser avec la bonne couleur.
+        Cette méthode va construire un objet Joueur et l'initialiser avec la
+        bonne couleur.
         """
         super().__init__(couleur)
         #TODO finie
@@ -73,12 +74,10 @@ class JoueurHumain(Joueur):
         try:
             input_row = int(input("Sur quelle ligne (0 à 7) voulez vous jouer votre coup? "))
             input_col = int(input("Et sur quelle colonne? (0 à 7) "))
-            if input_col in range(nb)
             return(input_row, input_col)
 
         except ValueError:
-            print("Position invalide.\n")
-            print("")
+            print("Position invalide.\n\n")
             # L'usager a fait une erreur de saisie, on retourne donc un coup que l'on sait invalide.
             # Ceci forcera le programme à redemander le coup au joueur.
             return (-1, -1)

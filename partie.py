@@ -72,11 +72,12 @@ class Partie:
             'Ordinateur'.
         """
         type_joueur = ""
+        types_joueurs = ("Humain", "Ordinateur")
 
         while type_joueur not in types_joueurs:         # variable haut de page
             type_joueur = ("Est-ce que le joueur {} sera un Humain ou"
                             "un Ordinateur? ").format(couleur).title()
-            if type_joueur not in ("Humain", "Ordinateur"):
+            if type_joueur not in types_joueurs:
                 print("Erreur, type invalide, veuillez réessayer.")
             else:
                 return self.creer_joueur(type_joueur, couleur)
@@ -101,6 +102,7 @@ class Partie:
             joueur = JoueurOrdinateur(couleur)
         else:
             joueur = JoueurHumain(couleur)
+
         return joueur
 
         #TODO finie
@@ -151,9 +153,15 @@ class Partie:
         cette classe et la classe planche
         possède à son tour une méthode pour jouer un coup, utilisez-les !***
         """
-        range_possible = self.planche.nb_cases - 1
+        coup_demander = ""
 
-        self.joueur_courant.choisir_coup(coups_possible_joueur_courant, range_possible)
+        while not self.valider_position_coup(coup_demander)[0]:  # si invalide
+            print(self.valider_position_coup(coup_demander)[1])  # msg d'erreur
+            coup_demander = self.\
+                joueur_courant.choisir_coup(self.coups_possibles)
+        else:
+            self.planche.jouer_coup(coup_demander, self.couleur_joueur_courant)
+
 
 
     def passer_tour(self):
@@ -218,25 +226,31 @@ class Partie:
            couleur c'est le tour de jouer. Pour afficher une planche, faites
            appel à print(self.planche)
 
-        2) On détermine les coups possibles pour le joueur actuel. Pensez à utiliser une fonction que vous avez à
-           implémenter pour Planche, et à entreposer les coups possibles dans un attribut approprié de la partie.
+        2) On détermine les coups possibles pour le joueur actuel. Pensez à
+          utiliser une fonction que vous avez à
+           implémenter pour Planche, et à entreposer les coups possibles dans
+           un attribut approprié de la partie.
 
-        3) Faire appel à tour() ou à passer_tour(), en fonction du nombre de coups disponibles pour le joueur actuel.
-           Mettez aussi à jour les attributs self.tour_precedent_passe et self.deux_tours_passes.
+        3) Faire appel à tour() ou à passer_tour(), en fonction du nombre de
+            coups disponibles pour le joueur actuel.
+           Mettez aussi à jour les attributs self.tour_precedent_passe et
+           self.deux_tours_passes.
 
-        4) Effectuer le changement de joueur. Modifiez à la fois les attributs self.joueur_courant et
+        4) Effectuer le changement de joueur. Modifiez à la fois les attributs
+            self.joueur_courant et
            self.couleur_joueur_courant.
 
-        5) Lorsque la partie est terminée, afficher un message mentionnant le résultat de la partie. Vous avez une
+        5) Lorsque la partie est terminée, afficher un message mentionnant le
+            résultat de la partie. Vous avez une
            fonction à implémenter que vous pourriez tout simplement appeler.
         """
 
         while not self.partie_terminee():
             print(self.planche)
-            self.coups_possibles_joueur_courant = \
-                Planche.lister_coups_possibles_de_couleur(self.
-                                                          joueur_noir.couleur)
-            if not self.coups_possibles_joueur_courant:
+            self.coups_possibles = \
+                self.planche.lister_coups_possibles_de_couleur(
+                    self.joueur_courant.couleur).keys
+            if len(self.coups_possibles) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:
                     self.tour_precedent_passe = True
@@ -244,6 +258,12 @@ class Partie:
                     self.deux_tours_passes = True
             else:
                 self.tour()
+                if self.couleur_joueur_courant == "noir":
+                    self.joueur_courant = self.joueur_blanc
+                    self.couleur_joueur_courant = "blanc"
+                else:
+                    self.joueur_courant = self.joueur_noir
+                    self.couleur_joueur_courant = "noir"
 
         print(self.planche)
         self.determiner_gagnant()

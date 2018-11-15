@@ -232,7 +232,8 @@ class Planche:
             couleur: La couleur du coup.
 
         Returns:
-            "ok" si le déplacement a été effectué car il est valide, "erreur" autrement.
+            "ok" si le déplacement a été effectué car il est valide,
+            "erreur" autrement.
         """
         try:
             assert self.position_valide(position)

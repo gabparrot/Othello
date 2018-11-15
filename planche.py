@@ -20,8 +20,10 @@ class Planche:
         # On joue au Othello 8x8
         self.nb_cases = 8
 
-        matrice_cases = np.ones((8, 8), int)
+        # Matrice de cases numpy
+        matrice_cases = np.ones((self.nb_cases, self.nb_cases), int)
 
+        # Liste des index de cases [(0,0), (0,1), etc]
         self.liste_cases = []
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
@@ -55,7 +57,7 @@ class Planche:
         Returns:
             True si la position est valide, False autrement
         """
-        if position[0] in range(8) and position[1] in range(8):
+        if position in self.liste_cases:
             return True
         return False
         # TODO: Finie
@@ -69,20 +71,17 @@ class Planche:
         APPEL À piece.echange_couleur() ICI.***
 
         Ici, commencez par considérer que, pour la position évaluée, des pièces
-         peuvent être mangées dans 8 directions
-        distinctes représentant les 8 cases qui entourent la position évaluée.
-        Vous devez donc vérifier, pour chacune
-        de ces directions, combien de pièces sont mangées et retourner une
-        liste regroupant les pièces mangées dans
-        toutes les directions.
+        peuvent être mangées dans 8 directions distinctes représentant les 8
+        cases qui entourent la position évaluée. Vous devez donc vérifier, pour
+        chacune de ces directions, combien de pièces sont mangées et retourner
+        une liste regroupant les pièces mangées dans toutes les directions.
 
         Ici, une direction représente une liste de 2 entiers pour la
-        déplacement en x et y. Par exemple, pour la
-        direction diagonale où en explore vers le bas et vers la droite, on
-        utiliserait la liste [1, 1]. De même, pour
-        la direction gauche, on utiliserait la liste [-1, 0]. Il y a donc un
-        total de 8 directions, représentant les
-        8 positions auxquelles la position actuelle peut toucher.
+        déplacement en x et y. Par exemple, pour la direction diagonale où en
+        explore vers le bas et vers la droite, on utiliserait la liste [1, 1].
+        De même, pour la direction gauche, on utiliserait la liste [-1, 0].
+        Il y a donc un total de 8 directions, représentant les 8 positions
+        auxquelles la position actuelle peut toucher.
 
         Pensez à faire appel à la fonction obtenir_positions_mangees_direction().
 
@@ -94,16 +93,26 @@ class Planche:
             une liste contenant toutes les positions qui seraient mangées par
             le coup.
         """
-        # TODO: faire obtenir_positions_mangees_direction avant
-        # TODO: appeller obtenir_posi... pour chaque direction. Ajouter chaque
-        # TODO: return à une liste et retourner la liste finale
-        # TODO: après appel pour Nord, Sud, Est, Ouest, Nord-Est, Nord-Ouest,
-        # TODO: Sud-Est, Sud-Ouest
-        # TODO: pour appel de obtenir_posi: position = coup joué, couleur du
-        # TODO: joueur, direction cardinale
-        pass
+        pieces_mangees = []
+        directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
+                     (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
+                      "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
 
-    def obtenir_positions_mangees_direction(self, couleur, direction, position):
+        for direction in directions.values():
+            piece_mangees_par_direction = \
+                (self.obtenir_positions_mangees_direction(couleur, direction,
+                                                          position))
+            for chaque_piece in piece_mangees_par_direction:
+                pieces_mangees.append(chaque_piece)
+
+        if len(pieces_mangees) == 0:
+            return None
+        return pieces_mangees
+
+        #TODO finie
+
+    def obtenir_positions_mangees_direction(self, couleur, direction,
+                                            position):
         """
         Détermine les positions qui seront mangées si un coup de couleur
         "couleur" est joué à la position "position",
@@ -144,17 +153,21 @@ class Planche:
             La liste (peut-être vide) de toutes les positions mangées à partir
             du coup et de la direction donnés.
         """
-        # compliqué en esti ça caliss
-        # TODO: possiblement dans un while loop qui break quand x or y == 8. Il
-        # TODO: faut "parcourir la direction demandée à partir de position.
-        # TODO: (Nord, Sud, Est, Ouest, NO, NE, SO, SE) avec un loop qui fait,
-        # TODO: sur le vecteur position (x, y), une opération: {N(x, y+=1),
-        # TODO: S(x,y-=1), E(x+=1,y), O(x-=1,y), NE(x+=1,y+=1) NO(x-=1,y+=1)
-        # TODO: SE(x+=1,y-=1), SO(x-=1,y-=1)} À chaque opération, vérifier dans
-        # TODO: if: if case vide: return None; if case couleur ennemi: append
-        # TODO: liste de miam miam, si couleur joueur, return liste miam miam
+        pieces_mangees_direction = []
 
-        pass
+        while self.position_valide(position):
+            if position not in self.cases:
+                return None
+            elif self.get_piece(position).couleur == couleur:
+                return pieces_mangees_direction
+            else:
+                pieces_mangees_direction.append(position)
+                position = (position[0] + direction[0],
+                            position[1] + direction[1])
+
+        return None
+
+        #TODO: finie
 
     def coup_est_possible(self, position, couleur):
         """
@@ -172,17 +185,14 @@ class Planche:
             return True
         return False
 
-        #TODO finie (en théorie)
+        #TODO finie
 
     def lister_coups_possibles_de_couleur(self, couleur):
         """
         Fonction retournant la liste des coups possibles d'une certaine
-        couleur. Un coup est considéré possible
-        si au moins une pièce est mangée quand la couleur "couleur" joue à une
-        certaine position, ne l'oubliez pas!
-        ET SI CASE EST VIDE
-        ATTENTION: ne dupliquez pas de code déjà écrit! Réutilisez les
-        fonctions déjà programmées!
+        couleur. Un coup est considéré possible si au moins une pièce est
+        mangée quand la couleur "couleur" joue à une certaine position, ne
+        l'oubliez pas (et si cette case est vide)
 
         Args:
             couleur: La couleur ("blanc", "noir") des pièces dont on considère
@@ -192,12 +202,14 @@ class Planche:
             Une liste de positions de coups possibles pour la couleur "couleur"
         """
 
-        liste_coups_possibles = []
+        pieces_mangees_par_coup_possible = {}
+
         for case in self.liste_cases:
-            if (case not in self.cases and
-               self.obtenir_positions_mangees(case, couleur) != []):
-                liste_coups_possibles.append(case)
-            return liste_coups_possibles
+            if (not self.get_piece(case) and
+               self.obtenir_positions_mangees(case, couleur)):
+                pieces_mangees_par_coup_possible[case] = \
+                    self.obtenir_positions_mangees(case, couleur)
+            return pieces_mangees_par_coup_possible
 
         #TODO pas sûr ca va marcher, et ajouter comments clarifier.
 
@@ -223,11 +235,12 @@ class Planche:
             "ok" si le déplacement a été effectué car il est valide, "erreur" autrement.
         """
         try:
+            assert self.position_valide(position)
             assert self.coup_est_possible(position, couleur)
             self.cases[position] = Piece(couleur)
             pieces_mangees = self.obtenir_positions_mangees(position, couleur)
-            for piece_mangee in pieces_mangees: #devrait marcher quand il va recevoir une liste en retour
-                self.cases[piece_mangee] = Piece.echange_couleur()
+            for piece_mangee in pieces_mangees:
+                self.cases[piece_mangee] = Piece.echange_couleur
             return "ok"
         except(AssertionError):
             return "erreur"
@@ -235,8 +248,8 @@ class Planche:
 
     def convertir_en_chaine(self):
         """
-        Retourne une chaîne de caractères où chaque case est écrite sur une ligne distincte.
-        Chaque ligne contient l'information suivante :
+        Retourne une chaîne de caractères où chaque case est écrite sur une
+        ligne distincte. Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
 
         Cette méthode pourrait par la suite être réutilisée pour sauvegarder une planche dans un fichier.

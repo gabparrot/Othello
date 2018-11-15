@@ -26,7 +26,7 @@ class Joueur:
         '''
         pass
 
-    def choisir_coup(self, coups_possibles):
+    def choisir_coup(self, coups_possibles, range_possible):
         '''
         Cette méthode sera implémentée par les sous-classes JoueurHumain et JoueurOrdinateur.
 
@@ -57,10 +57,12 @@ class JoueurHumain(Joueur):
 
     def choisir_coup(self, coups_possibles):
         """
-        Demande successivement à l'usager à quelle ligne, puis à quelle colonne il désire jouer.
+        Demande successivement à l'usager à quelle ligne, puis à quelle
+        colonne il désire jouer.
 
-        Nous vous avons déjà fourni une portion de code permettant d'attrapper au passage les erreurs qui peuvent
-        survenir lorsque l'utilisateur entre autre chose qu'un nombre entier.
+        Nous vous avons déjà fourni une portion de code permettant d'attrapper
+        au passage les erreurs qui peuvent survenir lorsque l'utilisateur entre
+        autre chose qu'un nombre entier.
 
         Args:
             coups_possibles: La liste des coups possibles
@@ -70,7 +72,8 @@ class JoueurHumain(Joueur):
         """
         try:
             input_row = int(input("Sur quelle ligne (0 à 7) voulez vous jouer votre coup? "))
-            input_col = int(input("Et sur quelle colonne? (0 à 7 "))
+            input_col = int(input("Et sur quelle colonne? (0 à 7) "))
+            if input_col in range(nb)
             return(input_row, input_col)
 
         except ValueError:
@@ -88,7 +91,8 @@ class JoueurOrdinateur(Joueur):
     """
     def __init__(self, couleur):
         """
-        Cette méthode va construire un objet Joueur et l'initialiser avec la bonne couleur.
+        Cette méthode va construire un objet Joueur et l'initialiser avec la
+        bonne couleur.
         """
         super().__init__(couleur)
         #TODO finie
@@ -99,11 +103,13 @@ class JoueurOrdinateur(Joueur):
 
     def choisir_coup(self, coups_possibles):
         """
-        Pour votre joueur ordinateur, vous n'avez qu'à sélectionner un coup au hasard parmi la liste des coups
-        possibles. Affichez ensuite en console les numéros de ligne et de colonne.
+        Pour votre joueur ordinateur, vous n'avez qu'à sélectionner un coup au
+        hasard parmi la liste des coups possibles. Affichez ensuite en console
+        les numéros de ligne et de colonne.
 
-        Pour faire un choix au hasard, vous devrez faire appel à la libraire random de Python. Explorez là, elle
-        possède même une fonction retournant précisément un choix aléatoire parmi une liste.
+        Pour faire un choix au hasard, vous devrez faire appel à la libraire
+        random de Python. Explorez là, elle possède même une fonction
+        retournant précisément un choix aléatoire parmi une liste.
 
         Args:
             coups_possibles: La liste des coups possibles

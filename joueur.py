@@ -66,17 +66,23 @@ class JoueurHumain(Joueur):
         autre chose qu'un nombre entier.
 
         Args:
-            coups_possibles: La liste des coups possibles
+            coups_possibles: Le dictionnaire des coups possibles
 
         Returns:
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
         try:
-            input_row = int(input("Sur quelle ligne (0 à 7) voulez vous jouer votre coup? "))
+            print(coups_possibles)
+            input_row = int(input("Sur quelle ligne (0 à 7) voulez vous "
+                                  "jouer votre coup? "))
             input_col = int(input("Et sur quelle colonne? (0 à 7) "))
+            coup_input = (input_row, input_col)
+            assert coup_input in coups_possibles
+            print("les coups possibles sont", coups_possibles)
+            print(input_row, input_col)
             return(input_row, input_col)
 
-        except ValueError:
+        except (ValueError, AssertionError):
             print("Position invalide.\n\n")
             # L'usager a fait une erreur de saisie, on retourne donc un coup que l'on sait invalide.
             # Ceci forcera le programme à redemander le coup au joueur.
@@ -111,12 +117,19 @@ class JoueurOrdinateur(Joueur):
         retournant précisément un choix aléatoire parmi une liste.
 
         Args:
-            coups_possibles: La liste des coups possibles
+            coups_possibles: Le dictionnaire des coups possibles
 
         Returns:
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
-        return choice(coups_possibles)
-        #TODO finie                 (fonctionnelle, peut être améliorée)
-        #TODO possiblement retourner qu'on passe le tour si coups_possibles est vide
-        #TODO possiblement faire meillleure AI pour choisir coup optimal par ordi
+        pieces_mangees_max = 0
+        coups_les_plus_forts = []
+
+        for coup in coups_possibles:
+            if len(coup.value) >= pieces_mangees_max:
+                pieces_mangees_max = len(coup.value)
+                coups_les_plus_forts.append(coup.key)
+
+        # return coup qui mange le plus de pièces.
+        # si plusieurs coups mangent autant de pièce, choisi au hasard
+        return choice(coups_les_plus_forts)

@@ -31,6 +31,7 @@ class Partie:
 
         self.coups_possibles = []
 
+        self.pieces_mangees_par_coup_possible = {}
         if nom_fichier is not None:
             self.charger(nom_fichier)
         else:
@@ -75,8 +76,8 @@ class Partie:
         types_joueurs = ("Humain", "Ordinateur")
 
         while type_joueur not in types_joueurs:         # variable haut de page
-            type_joueur = ("Est-ce que le joueur {} sera un Humain ou"
-                            "un Ordinateur? ").format(couleur).title()
+            type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
+                            " un Ordinateur? ".format(couleur)).title()
             if type_joueur not in types_joueurs:
                 print("Erreur, type invalide, veuillez réessayer.")
             else:
@@ -133,7 +134,17 @@ class Partie:
             position (True ou False), et le
             deuxième élément est un éventuel message d'erreur.
         """
-        pass
+        if not self.planche.position_valide(position_coup):
+            return (False, "Position ne respecte pas les bornes de la planche."
+                    " Veuillez recommencer. ")
+        elif position_coup not in self.coups_possibles:
+            if self.planche.get_piece(position_coup):
+                return (False, "Coup impossible. Il y a déjà une pièce à cette"
+                               " position. Veuillez recommencer. ")
+            return (False, "Coup impossible car aucune pièce ne serait "
+                           "mangée! Veuillez recommencer.")
+        else:
+            return True, ""
 
     def tour(self):
         """
@@ -153,12 +164,14 @@ class Partie:
         cette classe et la classe planche
         possède à son tour une méthode pour jouer un coup, utilisez-les !***
         """
-        coup_demander = ""
+        coup_demander = self.joueur_courant.choisir_coup(self.
+                                              pieces_mangees_par_coup_possible)
 
         while not self.valider_position_coup(coup_demander)[0]:  # si invalide
             print(self.valider_position_coup(coup_demander)[1])  # msg d'erreur
             coup_demander = self.\
-                joueur_courant.choisir_coup(self.coups_possibles)
+                joueur_courant.choisir_coup(self.
+                                            pieces_mangees_par_coup_possible)
         else:
             self.planche.jouer_coup(coup_demander, self.couleur_joueur_courant)
 
@@ -179,7 +192,12 @@ class Partie:
         les cases de la planche sont remplies ou si deux tours consécutifs ont
         été passés (pensez à l'attribut self.deux_tours_passes).
         """
-        pass
+        if self.deux_tours_passes:
+            return True
+        elif len(self.planche.cases) == self.planche.nb_cases ** 2:
+            return True
+        else:
+            return False
 
     def determiner_gagnant(self):
         """
@@ -194,10 +212,11 @@ class Partie:
         pieces_blanches = 0
 
         for case in self.planche.liste_cases:
-            if self.planche.get_piece(case).couleur == "blanc":
-                pieces_blanches += 1
-            elif self.planche.get_piece(case).couleur == ("noir"):
-                pieces_noires += 1
+            if self.planche.get_piece(case):
+                if self.planche.get_piece(case).couleur == "blanc":
+                    pieces_blanches += 1
+                elif self.planche.get_piece(case).couleur == ("noir"):
+                    pieces_noires += 1
 
         if pieces_noires > pieces_blanches:
             gagnant = self.joueur_noir
@@ -211,8 +230,8 @@ class Partie:
                   .format(gagnant.couleur, max(pieces_noires, pieces_blanches),
                           min(pieces_noires, pieces_blanches)))
         else:
-            print("Partie nulle! Les deux joueurs terminent avec un score de{}"
-                  .format(pieces_noires))  # noir ou blanc même chose
+            print("Partie nulle! Les deux joueurs terminent avec un score "
+                  "de {}".format(pieces_noires))  # noir ou blanc même chose
 
 
 
@@ -247,9 +266,10 @@ class Partie:
 
         while not self.partie_terminee():
             print(self.planche)
-            self.coups_possibles = \
+            self.pieces_mangees_par_coup_possible = \
                 self.planche.lister_coups_possibles_de_couleur(
-                    self.joueur_courant.couleur).keys
+                    self.joueur_courant.couleur)
+            self.coups_possibles = self.pieces_mangees_par_coup_possible.keys()
             if len(self.coups_possibles) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:

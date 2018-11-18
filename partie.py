@@ -144,7 +144,7 @@ class Partie:
             return (False, "Coup impossible car aucune pièce ne serait "
                            "mangée! Veuillez recommencer.")
         else:
-            return True, ""
+            return True, "Coup accepté"
 
     def tour(self):
         """
@@ -172,8 +172,8 @@ class Partie:
             coup_demander = self.\
                 joueur_courant.choisir_coup(self.
                                             pieces_mangees_par_coup_possible)
-        else:
-            self.planche.jouer_coup(coup_demander, self.couleur_joueur_courant)
+        print(self.planche.jouer_coup(coup_demander,
+                                      self.couleur_joueur_courant))
 
 
 
@@ -266,16 +266,19 @@ class Partie:
 
         while not self.partie_terminee():
             print(self.planche)
+            self.pieces_mangees_par_coup_possible.clear()
             self.pieces_mangees_par_coup_possible = \
                 self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
-            self.coups_possibles = self.pieces_mangees_par_coup_possible.keys()
-            if len(self.coups_possibles) < 1:
+            self.coups_possibles = list(self.pieces_mangees_par_coup_possible.keys())
+            if len(self.pieces_mangees_par_coup_possible) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:
                     self.tour_precedent_passe = True
                 else:
+                    self.tour_precedent_passe = True
                     self.deux_tours_passes = True
+                    self.partie_terminee()
             else:
                 self.tour()
                 if self.couleur_joueur_courant == "noir":
@@ -284,6 +287,7 @@ class Partie:
                 else:
                     self.joueur_courant = self.joueur_noir
                     self.couleur_joueur_courant = "noir"
+                self.tour_precedent_passe = False
 
         print(self.planche)
         self.determiner_gagnant()
@@ -308,20 +312,15 @@ class Partie:
             nom_fichier: Le nom du fichier où sauvegarder, un string.
         """
         self.ma_partie = nom_fichier
-
         ma_partie = input("Nom du fichier : ")
-
         fichier = open("{}.txt", "x".format(ma_partie))
-
         fichier.write(self.couleur_joueur_courant + "\n" +
                       str(self.tour_precedent_passe) + "\n" +
                       str(self.deux_tours_passes) + "\n" +
                       str(self.joueur_blanc) + "\n" +
                       str(self.joueur_noir) + "\n" +
                       str(convertir_en_chaine()))
-
         fichier.close()
-
 
     def charger(self, nom_fichier):
         """
@@ -331,17 +330,10 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier à charger, un string.
         """
-
         self.ma_partie = nom_fichier
-
         ma_partie = input("Entrez le nom de la partie à charger : ")
-
         fichier = open("{}.txt", "r".format(ma_partie))
-
         print(fichier.read())
-
         fichier.close()
-
-
 
 

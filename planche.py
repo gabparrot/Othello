@@ -44,8 +44,6 @@ class Planche:
         else:
             return None
 
-        # TODO: effacer print
-
     def position_valide(self, position):
         """
         Vérifie si une position est valide (chaque coordonnée doit être dans
@@ -58,12 +56,10 @@ class Planche:
             True si la position est valide, False autrement
         """
         if position in self.liste_cases:
-            #print("pos. valide")
             return True
         else:
-            #print("pos invalide")
             return False
-        # TODO: Finie; enlever print
+        # TODO: Finie
 
     def obtenir_positions_mangees(self, position, couleur):
         """
@@ -100,9 +96,7 @@ class Planche:
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
                      (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
                       "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
-
         for direction in directions.values():
-            #print(direction, "direction")
             piece_mangees_par_direction = \
                 (self.obtenir_positions_mangees_direction(couleur, direction,
                                                           position))
@@ -158,29 +152,21 @@ class Planche:
             La liste (peut-être vide) de toutes les positions mangées à partir
             du coup et de la direction donnés.
         """
-        pieces_mangees_direction = []
-        #print("ici")
-        while self.position_valide(position):
-            #print("B")
-            if self.get_piece(position) and self.get_piece(position).couleur \
-                  == couleur:
-                    #print("C")
-                    if len(pieces_mangees_direction) == 0:
-                        #print("direct sur ma couleur")
-                        return None
-                    else:
-                        #print("retourne la liste mangée")
-                        return pieces_mangees_direction
-            elif not self.get_piece(position):
-                #print("D")
-                return None
-            else:
-                #print("ajout d'une pièce mangée à la liste")
-                pieces_mangees_direction.append(position)
-                position = (position[0] + direction[0],
-                            position[1] + direction[1])
 
-        #TODO: effacer prints
+        pieces_mangees = []
+        avancer = lambda x, y: tuple(np.array(x) + np.array(y))
+
+        position = avancer(position, direction)
+        while self.position_valide(position):
+            if self.get_piece(position):
+                if str(self.cases[position].couleur) == couleur:
+                    return pieces_mangees
+                else:
+                    pieces_mangees.append(position)
+                    position = avancer(position, direction)
+            else:
+                return []
+        return []
 
     def coup_est_possible(self, position, couleur):
         """
@@ -194,7 +180,8 @@ class Planche:
         Returns:
             True, si le coup est valide, False sinon
         """
-        if position in self.lister_coups_possibles_de_couleur(couleur):
+        if not self.get_piece(position) and position in \
+                self.lister_coups_possibles_de_couleur(couleur):
             return True
         return False
 
@@ -217,11 +204,11 @@ class Planche:
 
         pieces_mangees_par_coup_possible = {}
         for case in self.liste_cases:
-            #print("pour la case:", case)
-            pieces_mangees_par_coup_possible[case] = self.obtenir_positions_mangees(case, couleur) if True else None
-            # if self.obtenir_positions_mangees(case, couleur):
-            #     pieces_mangees_par_coup_possible[case] = \
-            #         self.obtenir_positions_mangees(case, couleur)
+           # pieces_mangees_par_coup_possible[case] = self.obtenir_positions_mangees(case, couleur) if True else None
+            if self.obtenir_positions_mangees(case, couleur):
+                pieces_mangees_par_coup_possible[case] = \
+                    self.obtenir_positions_mangees(case, couleur)
+
         return pieces_mangees_par_coup_possible
 
         #TODO pas sûr ca va marcher, et ajouter comments clarifier.
@@ -253,8 +240,8 @@ class Planche:
             assert self.coup_est_possible(position, couleur)
             self.cases[position] = Piece(couleur)
             pieces_mangees = self.obtenir_positions_mangees(position, couleur)
-            for piece_mangee in pieces_mangees:
-                self.cases[piece_mangee] = Piece.echange_couleur
+            for chaque_piece in pieces_mangees:
+                self.cases[chaque_piece].echange_couleur()
             return "ok"
         except(AssertionError):
             return "erreur"
@@ -271,10 +258,10 @@ class Planche:
         Returns:
             La chaîne de caractères.
         """
+        # TODO: déboucher une bière pour oublier
         ligne = 0
         colonne = 0
         chaine = ""
-
         while ligne <= self.nb_cases in self.cases[(colonne, ligne)]:
             if colonne == self.nb_cases:
                 colonne = 0
@@ -282,9 +269,7 @@ class Planche:
             else:
                 chaine += colonne, ligne, Piece, "\n"
             colonne += 1
-
         return chaine
-
 
     def charger_dune_chaine(self, chaine):
         """
@@ -295,6 +280,7 @@ class Planche:
         Args:
             chaine: La chaîne de caractères, un string.
         """
+        # TODO: hurler
         a=0
         b=0
         c=0
@@ -303,7 +289,6 @@ class Planche:
             a += 3
             b += 3
             c += 3
-
 
     def initialiser_planche_par_default(self):
         """

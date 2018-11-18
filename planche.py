@@ -200,13 +200,15 @@ class Planche:
             Une liste de positions de coups possibles pour la couleur "couleur"
         """
 
-        pieces_mangees_par_coup_possible = {}
+        pieces_mangees_par_coup = {}
+        pieces_mangees_par_coup.clear()
+
         for case in self.liste_cases:
             if self.obtenir_positions_mangees(case, couleur):
-                pieces_mangees_par_coup_possible[case] = \
+                pieces_mangees_par_coup[case] = \
                     self.obtenir_positions_mangees(case, couleur)
 
-        return pieces_mangees_par_coup_possible
+        return pieces_mangees_par_coup
 
     def jouer_coup(self, position, couleur):
         """

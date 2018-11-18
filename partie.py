@@ -130,13 +130,6 @@ class Partie:
             position (True ou False), et le
             deuxième élément est un éventuel message d'erreur.
         """
-        try:
-            assert type(position_coup) == tuple
-            assert len(position_coup) == 2
-            assert type(all(position_coup)) == int
-        except AssertionError:
-            return False, ("Saisie invalide. Entrez un chiffre entre 0 et 7. "
-                           "Veuillez reommencer. ")
         if position_coup == "erreur":
             print("Une erreur s'est produite, assurez vous d'entre un chiffre "
                   "entre 0 et 7 et qu'une pièce soit mangée. "
@@ -278,6 +271,7 @@ class Partie:
             self.pieces_mangees_par_coup_possible = \
                 self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
+            print(self.joueur_courant.couleur)
             self.coups_possibles = list(
                 self.pieces_mangees_par_coup_possible.keys())
             if len(self.pieces_mangees_par_coup_possible) < 1:

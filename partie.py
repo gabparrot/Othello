@@ -336,8 +336,27 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier à charger, un string.
         """
-        self.ma_partie = nom_fichier
-        ma_partie = input("Entrez le nom de la partie à charger : ")
-        fichier = open("{}.txt", "r".format(ma_partie))
-        print(fichier.read())
-        fichier.close()
+        self.nom_fichier = nom_fichier
+        nom_fichier = input("Entrez le nom de la partie à charger suivi de .txt : ")
+        f = open(nom_fichier, "r")
+
+        chaine = []
+
+        while True:
+            ligne = (f.readline().strip("\n"))
+            if ligne:
+                ligne = ligne.split(",")
+                chaine.append(ligne)
+            else:
+                break
+
+
+        self.planche.charger_dune_chaine(chaine)
+        self.joueur_noir = chaine[3]
+        self.joueur_blanc = chaine[4]
+        self.joueur_courant = chaine[0]
+        self.tour_precedent_passe = chaine[1]
+        self.tour_precedent_passe = chaine[2]
+
+        f.close()
+

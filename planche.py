@@ -208,6 +208,7 @@ class Planche:
                 pieces_mangees_par_coup[case] = \
                     self.obtenir_positions_mangees(case, couleur)
 
+
         return pieces_mangees_par_coup
 
     def jouer_coup(self, position, couleur):
@@ -263,7 +264,7 @@ class Planche:
                 colonne = 0
                 ligne += 1
             else:
-                chaine += colonne, ligne, Piece, "\n"
+                chaine += colonne,",", ligne,",", Piece, "\n"
             colonne += 1
 
         return chaine

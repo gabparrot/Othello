@@ -1,7 +1,5 @@
 class Piece:
 
-    #TODO On touche rien de l'onglet pièce, tout est fait, référence seulement
-
     """
     Classe modélisant une pièce d'un jeu d'Othello.
     """

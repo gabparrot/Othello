@@ -1,5 +1,6 @@
 from random import choice
 
+
 class Joueur:
     """
     Classe générale de joueur. Vous est fournie.
@@ -17,24 +18,26 @@ class Joueur:
         self.couleur = couleur
 
     def obtenir_type_joueur(self):
-        '''
-        Cette méthode sera utilisée par les sous-classes JoueurHumain et JoueurOrdinateur.
+        """
+        Cette méthode sera utilisée par les sous-classes JoueurHumain et
+        JoueurOrdinateur.
 
         Returns:
             Le type de joueur, 'Ordinateur' ou 'Humain'
-        '''
+        """
         pass
 
     def choisir_coup(self, coups_possibles):
-        '''
-        Cette méthode sera implémentée par les sous-classes JoueurHumain et JoueurOrdinateur.
+        """
+        Cette méthode sera implémentée par les sous-classes JoueurHumain et
+        JoueurOrdinateur.
 
         Args:
             coups_possibles: la liste des coups possibles
 
         Returns:
             un couple (ligne, colonne) représentant la positon du coup désiré.
-        '''
+        """
         pass
 
 
@@ -49,11 +52,9 @@ class JoueurHumain(Joueur):
         bonne couleur.
         """
         super().__init__(couleur)
-        #TODO finie
 
     def obtenir_type_joueur(self):
         return "Humain"
-        #TODO finie
 
     def choisir_coup(self, coups_possibles):
         """
@@ -71,21 +72,17 @@ class JoueurHumain(Joueur):
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
         try:
-            print(coups_possibles, "type")
+            print(coups_possibles)
             input_row = int(input("Sur quelle ligne (0 à 7) voulez vous "
                                   "jouer votre coup? "))
             input_col = int(input("Et sur quelle colonne? (0 à 7) "))
-            coup_input = (input_row, input_col)
-            print("coup joué:", coup_input)
-            assert coup_input in coups_possibles
             return input_row, input_col
 
-        except (ValueError, AssertionError):
+        except ValueError:
             print("Position invalide.\n\n")
-            # L'usager a fait une erreur de saisie, on retourne donc un coup que l'on sait invalide.
+            # Si usager fait entree invalide, on retourne tuple hors planche
             # Ceci forcera le programme à redemander le coup au joueur.
-            return (-1, -1)
-        #TODO: Finie (supposé =/)
+            return -1, -1
 
 
 class JoueurOrdinateur(Joueur):
@@ -98,11 +95,9 @@ class JoueurOrdinateur(Joueur):
         bonne couleur.
         """
         super().__init__(couleur)
-        #TODO finie
 
     def obtenir_type_joueur(self):
         return "Ordinateur"
-        #TODO finie
 
     def choisir_coup(self, coups_possibles):
         """
@@ -124,6 +119,7 @@ class JoueurOrdinateur(Joueur):
         pieces_mangees_max = 0
         coups_les_plus_forts = []
         print(coups_possibles)
+
         for coup in coups_possibles:
             if len(coups_possibles[coup]) >= pieces_mangees_max:
                 pieces_mangees_max = len(coups_possibles[coup])
@@ -131,5 +127,5 @@ class JoueurOrdinateur(Joueur):
 
         # return coup qui mange le plus de pièces.
         # si plusieurs coups mangent autant de pièce, choisi au hasard
-        print("les plus forts", coups_les_plus_forts)
-        return (-1, -1) if len(coups_les_plus_forts) == 0 else choice(coups_les_plus_forts)
+        return (-1, -1) if len(coups_les_plus_forts) == 0 \
+            else choice(coups_les_plus_forts)

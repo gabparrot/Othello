@@ -1,6 +1,7 @@
 from othello.piece import Piece
 import numpy as np
 
+
 class Planche:
     """
     Classe représentant la planche d'un jeu d'Othello.
@@ -59,7 +60,6 @@ class Planche:
             return True
         else:
             return False
-        # TODO: Finie
 
     def obtenir_positions_mangees(self, position, couleur):
         """
@@ -82,7 +82,8 @@ class Planche:
         Il y a donc un total de 8 directions, représentant les 8 positions
         auxquelles la position actuelle peut toucher.
 
-        Pensez à faire appel à la fonction obtenir_positions_mangees_direction().
+        Pensez à faire appel à la fonction
+        obtenir_positions_mangees_direction()
 
         Args:
             position: La position du coup à jouer.
@@ -94,7 +95,7 @@ class Planche:
         """
         pieces_mangees = []
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
-                     (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
+                      (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
                       "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
         for direction in directions.values():
             piece_mangees_par_direction = \
@@ -107,8 +108,6 @@ class Planche:
         if len(pieces_mangees) == 0:
             return None
         return pieces_mangees
-
-        #TODO effacer prints
 
     def obtenir_positions_mangees_direction(self, couleur, direction,
                                             position):
@@ -155,11 +154,11 @@ class Planche:
 
         pieces_mangees = []
         avancer = lambda x, y: tuple(np.array(x) + np.array(y))
-
         position = avancer(position, direction)
+
         while self.position_valide(position):
             if self.get_piece(position):
-                if str(self.cases[position].couleur) == couleur:
+                if self.cases[position].couleur == couleur:
                     return pieces_mangees
                 else:
                     pieces_mangees.append(position)
@@ -171,7 +170,8 @@ class Planche:
     def coup_est_possible(self, position, couleur):
         """
         Détermine si un coup est possible. Un coup est possible si au moins une
-        pièce est mangée par celui-ci. ET s'il n'y a pas déjà une pièce présente
+        pièce est mangée par celui-ci. ET s'il n'y a pas déjà une pièce
+        présente
 
         Args:
             position: La position du coup évalué
@@ -184,8 +184,6 @@ class Planche:
                 self.lister_coups_possibles_de_couleur(couleur):
             return True
         return False
-
-        #TODO finie
 
     def lister_coups_possibles_de_couleur(self, couleur):
         """
@@ -204,14 +202,11 @@ class Planche:
 
         pieces_mangees_par_coup_possible = {}
         for case in self.liste_cases:
-           # pieces_mangees_par_coup_possible[case] = self.obtenir_positions_mangees(case, couleur) if True else None
             if self.obtenir_positions_mangees(case, couleur):
                 pieces_mangees_par_coup_possible[case] = \
                     self.obtenir_positions_mangees(case, couleur)
 
         return pieces_mangees_par_coup_possible
-
-        #TODO pas sûr ca va marcher, et ajouter comments clarifier.
 
     def jouer_coup(self, position, couleur):
         """
@@ -236,16 +231,14 @@ class Planche:
             "erreur" autrement.
         """
         try:
-            assert self.position_valide(position)
             assert self.coup_est_possible(position, couleur)
             self.cases[position] = Piece(couleur)
             pieces_mangees = self.obtenir_positions_mangees(position, couleur)
             for chaque_piece in pieces_mangees:
                 self.cases[chaque_piece].echange_couleur()
             return "ok"
-        except(AssertionError):
+        except AssertionError:
             return "erreur"
-        #TODO CHÉ PU
 
     def convertir_en_chaine(self):
         """
@@ -253,15 +246,16 @@ class Planche:
         ligne distincte. Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
 
-        Cette méthode pourrait par la suite être réutilisée pour sauvegarder une planche dans un fichier.
+        Cette méthode pourrait par la suite être réutilisée pour sauvegarder
+        une planche dans un fichier.
 
         Returns:
             La chaîne de caractères.
         """
-        # TODO: déboucher une bière pour oublier
         ligne = 0
         colonne = 0
         chaine = ""
+
         while ligne <= self.nb_cases in self.cases[(colonne, ligne)]:
             if colonne == self.nb_cases:
                 colonne = 0
@@ -269,23 +263,25 @@ class Planche:
             else:
                 chaine += colonne, ligne, Piece, "\n"
             colonne += 1
+
         return chaine
 
     def charger_dune_chaine(self, chaine):
         """
-        Remplit la planche à partir d'une chaîne de caractères comportant l'information d'une pièce sur chaque ligne.
+        Remplit la planche à partir d'une chaîne de caractères comportant
+        l'information d'une pièce sur chaque ligne.
         Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
 
         Args:
             chaine: La chaîne de caractères, un string.
         """
-        # TODO: hurler
-        a=0
-        b=0
-        c=0
+        a = 0
+        b = 0
+        c = 0
+
         while True:
-            self.cases[(chaine[a],chaine[b])] = Piece(chaine[c])
+            self.cases[(chaine[a], chaine[b])] = Piece(chaine[c])
             a += 3
             b += 3
             c += 3
@@ -300,13 +296,14 @@ class Planche:
         self.cases[(4, 3)] = Piece("noir")
         self.cases[(4, 4)] = Piece("blanc")
 
-
     def __repr__(self):
         """
-        Cette méthode spéciale permet de modifier le comportement d'une instance de la classe Planche pour l'affichage.
-        Faire un print(une_planche) affichera la planche à l'écran.
+        Cette méthode spéciale permet de modifier le comportement d'une
+        instance de la classe Planche pour l'affichage. Faire un
+        print(une_planche) affichera la planche à l'écran.
         """
         s = "  +-0-+-1-+-2-+-3-+-4-+-5-+-6-+-7-+\n"
+
         for i in range(0, self.nb_cases):
             s += str(i)+" | "
             for j in range(0, self.nb_cases):

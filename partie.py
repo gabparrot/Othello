@@ -1,6 +1,7 @@
 from othello.planche import Planche
 from othello.joueur import JoueurOrdinateur, JoueurHumain
 
+
 class Partie:
     def __init__(self, nom_fichier=None):
         """
@@ -10,7 +11,8 @@ class Partie:
         - couleur_joueur_courant: le joueur à qui c'est le tour de jouer.
         - tour_precedent_passe: un booléen représentant si le joueur précédent
           a passé son tour parce qu'il n'avait aucun coup disponible.
-        - deux_tours_passes: un booléen représentant si deux tours ont été passés de suite, auquel cas la partie
+        - deux_tours_passes: un booléen représentant si deux tours ont été
+          passés de suite, auquel cas la partie
            devra se terminer.
         - coups_possibles : une liste de tous les coups possibles en fonction
           de l'état actuel de la planche, initialement vide.
@@ -32,12 +34,11 @@ class Partie:
         self.coups_possibles = []
 
         self.pieces_mangees_par_coup_possible = {}
+
         if nom_fichier is not None:
             self.charger(nom_fichier)
         else:
             self.initialiser_joueurs()
-
-        #TODO finie
 
     def initialiser_joueurs(self):
         """
@@ -50,8 +51,6 @@ class Partie:
         self.joueur_noir = self.demander_type_joueur("noir")
         self.joueur_blanc = self.demander_type_joueur("blanc")
         self.joueur_courant = self.joueur_noir
-
-        #TODO finie
 
     def demander_type_joueur(self, couleur):
         """
@@ -77,27 +76,26 @@ class Partie:
 
         while type_joueur not in types_joueurs:         # variable haut de page
             type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
-                            " un Ordinateur? ".format(couleur)).title()
+                                " un Ordinateur? ".format(couleur)).title()
             if type_joueur not in types_joueurs:
                 print("Erreur, type invalide, veuillez réessayer.")
             else:
                 return self.creer_joueur(type_joueur, couleur)
 
-        #TODO finie
-
     def creer_joueur(self, type, couleur):
         """
         Crée l'objet Joueur approprié, selon le type passé en paramètre.
 
-        Pour créer les objets, vous n'avez qu'à faire appel à leurs constructeurs, c'est-à-dire à
-        JoueurHumain(couleur), par exemple.
+        Pour créer les objets, vous n'avez qu'à faire appel à leurs
+        constructeurs, c'est-à-dire à JoueurHumain(couleur), par exemple.
 
         Args:
             type: le type de joueur, "Ordinateur" ou "Humain"
             couleur: la couleur du pion joué par le jouer, "blanc" ou "noir"
 
         Returns:
-            Un objet JoueurHumain si le type est "Humain", JoueurOrdinateur sinon
+            Un objet JoueurHumain si le type est "Humain", JoueurOrdinateur
+            sinon
         """
         if type == "Ordinateur":
             joueur = JoueurOrdinateur(couleur)
@@ -105,8 +103,6 @@ class Partie:
             joueur = JoueurHumain(couleur)
 
         return joueur
-
-        #TODO finie
 
     def valider_position_coup(self, position_coup):
         """
@@ -134,6 +130,17 @@ class Partie:
             position (True ou False), et le
             deuxième élément est un éventuel message d'erreur.
         """
+        try:
+            assert type(position_coup) == tuple
+            assert len(position_coup) == 2
+            assert type(all(position_coup)) == int
+        except AssertionError:
+            return False, ("Saisie invalide. Entrez un chiffre entre 0 et 7. "
+                           "Veuillez reommencer. ")
+        if position_coup == "erreur":
+            print("Une erreur s'est produite, assurez vous d'entre un chiffre "
+                  "entre 0 et 7 et qu'une pièce soit mangée. "
+                  "Veuillez recommencez. ")
         if not self.planche.position_valide(position_coup):
             return (False, "Position ne respecte pas les bornes de la planche."
                     " Veuillez recommencer. ")
@@ -142,9 +149,9 @@ class Partie:
                 return (False, "Coup impossible. Il y a déjà une pièce à cette"
                                " position. Veuillez recommencer. ")
             return (False, "Coup impossible car aucune pièce ne serait "
-                           "mangée! Veuillez recommencer.")
+                           "mangée! Veuillez recommencer. ")
         else:
-            return True, "Coup accepté"
+            return True, "Coup accepté. "
 
     def tour(self):
         """
@@ -164,18 +171,22 @@ class Partie:
         cette classe et la classe planche
         possède à son tour une méthode pour jouer un coup, utilisez-les !***
         """
-        coup_demander = self.joueur_courant.choisir_coup(self.
-                                              pieces_mangees_par_coup_possible)
+        coup_fait = False
+        coup_demander = self.joueur_courant.choisir_coup(
+                self.pieces_mangees_par_coup_possible)
 
-        while not self.valider_position_coup(coup_demander)[0]:  # si invalide
-            print(self.valider_position_coup(coup_demander)[1])  # msg d'erreur
-            coup_demander = self.\
-                joueur_courant.choisir_coup(self.
-                                            pieces_mangees_par_coup_possible)
+        # Tant que coup est invalide on affiche msg erreur et redemande
+        while not coup_fait:
+            if not self.valider_position_coup(coup_demander)[0]:
+                print(self.valider_position_coup(coup_demander)[1])
+                coup_demander = self.joueur_courant.choisir_coup(
+                    self.pieces_mangees_par_coup_possible)
+                continue
+            else:
+                coup_fait = True
+
         print(self.planche.jouer_coup(coup_demander,
                                       self.couleur_joueur_courant))
-
-
 
     def passer_tour(self):
         """
@@ -215,7 +226,7 @@ class Partie:
             if self.planche.get_piece(case):
                 if self.planche.get_piece(case).couleur == "blanc":
                     pieces_blanches += 1
-                elif self.planche.get_piece(case).couleur == ("noir"):
+                elif self.planche.get_piece(case).couleur == "noir":
                     pieces_noires += 1
 
         if pieces_noires > pieces_blanches:
@@ -232,9 +243,6 @@ class Partie:
         else:
             print("Partie nulle! Les deux joueurs terminent avec un score "
                   "de {}".format(pieces_noires))  # noir ou blanc même chose
-
-
-
 
     def jouer(self):
         """
@@ -270,7 +278,8 @@ class Partie:
             self.pieces_mangees_par_coup_possible = \
                 self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
-            self.coups_possibles = list(self.pieces_mangees_par_coup_possible.keys())
+            self.coups_possibles = list(
+                self.pieces_mangees_par_coup_possible.keys())
             if len(self.pieces_mangees_par_coup_possible) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:
@@ -292,21 +301,24 @@ class Partie:
         print(self.planche)
         self.determiner_gagnant()
 
-
     def sauvegarder(self, nom_fichier):
         """
         Sauvegarde une partie dans un fichier. Le fichier condiendra:
         - Une ligne indiquant la couleur du joueur courant.
         - Une ligne contenant True ou False, si le tour précédent a été passé.
-        - Une ligne contenant True ou False, si les deux derniers tours ont été passés.
+        - Une ligne contenant True ou False, si les deux derniers tours ont été
+          passés.
         - Une ligne contenant le type du joueur blanc.
         - Une ligne contenant le type du joueur noir.
-        - Le reste des lignes correspondant à la planche. Voir la méthode convertir_en_chaine de la planche
+        - Le reste des lignes correspondant à la planche. Voir la méthode
+          convertir_en_chaine de la planche
          pour le format.
 
-        ATTENTION : L'ORDRE DES PARAMÈTRES SAUVEGARDÉS EST OBLIGATOIRE À RESPECTER.
-                    Des tests automatiques seront roulés lors de la correction et ils prennent pour acquis que le
-                    format plus haut est respecté. Vous perdrez des points si vous dérogez du format.
+        ATTENTION : L'ORDRE DES PARAMÈTRES SAUVEGARDÉS EST OBLIGATOIRE À
+        RESPECTER.
+                    Des tests automatiques seront roulés lors de la correction
+                    et ils prennent pour acquis que le format plus haut est
+                    respecté. Vous perdrez des points si vous dérogez du format
 
         Args:
             nom_fichier: Le nom du fichier où sauvegarder, un string.
@@ -319,7 +331,7 @@ class Partie:
                       str(self.deux_tours_passes) + "\n" +
                       str(self.joueur_blanc) + "\n" +
                       str(self.joueur_noir) + "\n" +
-                      str(convertir_en_chaine()))
+                      str(self.planche.convertir_en_chaine()))
         fichier.close()
 
     def charger(self, nom_fichier):
@@ -335,5 +347,3 @@ class Partie:
         fichier = open("{}.txt", "r".format(ma_partie))
         print(fichier.read())
         fichier.close()
-
-

@@ -1,10 +1,11 @@
 from random import choice
+#TODO en théorie la partie joueur.py est finie (fonctionnelle, optimisable)
 
 class Joueur:
     """
     Classe générale de joueur. Vous est fournie.
     """
-
+    #TODO on touche aucune méthode de la classe Joueur, tout est tiguidou
     def __init__(self, couleur):
         """
         Le constructeur global de Joueur.
@@ -71,18 +72,15 @@ class JoueurHumain(Joueur):
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
         try:
-            print(coups_possibles, "type", type(coups_possibles))
+            print(coups_possibles)
             input_row = int(input("Sur quelle ligne (0 à 7) voulez vous "
                                   "jouer votre coup? "))
             input_col = int(input("Et sur quelle colonne? (0 à 7) "))
             coup_input = (input_row, input_col)
-            print(coup_input, type(coup_input))
-            print(type(coup_input[1]))
-            if coup_input in coups_possibles:
-                print("dedans")
-                return input_row, input_col
-            else:
-                print("pas dedans")
+            assert coup_input in coups_possibles
+            print("les coups possibles sont", coups_possibles)
+            print(input_row, input_col)
+            return(input_row, input_col)
 
         except (ValueError, AssertionError):
             print("Position invalide.\n\n")
@@ -124,16 +122,14 @@ class JoueurOrdinateur(Joueur):
         Returns:
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
-
         pieces_mangees_max = 0
         coups_les_plus_forts = []
-        print(coups_possibles)
+
         for coup in coups_possibles:
-            if len(coups_possibles[coup]) >= pieces_mangees_max:
-                pieces_mangees_max = len(coups_possibles[coup])
-                coups_les_plus_forts.append(coup)
+            if len(coup.value) >= pieces_mangees_max:
+                pieces_mangees_max = len(coup.value)
+                coups_les_plus_forts.append(coup.key)
 
         # return coup qui mange le plus de pièces.
         # si plusieurs coups mangent autant de pièce, choisi au hasard
-        print("les plus forts", coups_les_plus_forts)
-        return (-1, -1) if len(coups_les_plus_forts) == 0 else choice(coups_les_plus_forts)
+        return choice(coups_les_plus_forts)

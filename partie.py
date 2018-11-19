@@ -31,9 +31,7 @@ class Partie:
 
         self.deux_tours_passes = False
 
-        self.coups_possibles = []
-
-        self.pieces_mangees_par_coup_possible = {}
+        self.coups_possibles = {}
 
         if nom_fichier is not None:
             self.charger(nom_fichier)
@@ -47,7 +45,6 @@ class Partie:
 
         Pour créer les objets joueur, faites appel à demander_type_joueur()
         """
-
         self.joueur_noir = self.demander_type_joueur("noir")
         self.joueur_blanc = self.demander_type_joueur("blanc")
         self.joueur_courant = self.joueur_noir
@@ -74,9 +71,11 @@ class Partie:
         type_joueur = ""
         types_joueurs = ("Humain", "Ordinateur")
 
-        while type_joueur not in types_joueurs:         # variable haut de page
+        while type_joueur not in types_joueurs:
             type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
                                 " un Ordinateur? ".format(couleur)).title()
+            if type_joueur == "Ordi":
+                type_joueur = "Ordinateur"
             if type_joueur not in types_joueurs:
                 print("Erreur, type invalide, veuillez réessayer.")
             else:
@@ -130,14 +129,15 @@ class Partie:
             position (True ou False), et le
             deuxième élément est un éventuel message d'erreur.
         """
+
         if position_coup == "erreur":
-            print("Une erreur s'est produite, assurez vous d'entre un chiffre "
-                  "entre 0 et 7 et qu'une pièce soit mangée. "
-                  "Veuillez recommencez. ")
+            return (False, "Une erreur s'est produite, assurez vous d'entre un"
+                           " chiffre entre 0 et 7 et qu'une pièce soit mangée." 
+                           " Veuillez recommencez. ")
         if not self.planche.position_valide(position_coup):
             return (False, "Position ne respecte pas les bornes de la planche."
                     " Veuillez recommencer. ")
-        elif position_coup not in self.coups_possibles:
+        elif position_coup not in self.coups_possibles.keys():
             if self.planche.get_piece(position_coup):
                 return (False, "Coup impossible. Il y a déjà une pièce à cette"
                                " position. Veuillez recommencer. ")
@@ -166,20 +166,24 @@ class Partie:
         """
         coup_fait = False
         coup_demander = self.joueur_courant.choisir_coup(
-                self.pieces_mangees_par_coup_possible)
+                self.coups_possibles)
 
         # Tant que coup est invalide on affiche msg erreur et redemande
         while not coup_fait:
             if not self.valider_position_coup(coup_demander)[0]:
                 print(self.valider_position_coup(coup_demander)[1])
                 coup_demander = self.joueur_courant.choisir_coup(
-                    self.pieces_mangees_par_coup_possible)
-                continue
+                    self.coups_possibles)
             else:
                 coup_fait = True
-
-        print(self.planche.jouer_coup(coup_demander,
-                                      self.couleur_joueur_courant))
+        if self.joueur_courant.obtenir_type_joueur() == "Ordinateur":
+            print("L'ordinateur ({}) a joué sur le case {} et a mangé {} de "
+                  "vos pièces!".format(
+                self.couleur_joueur_courant, coup_demander,
+                len(self.planche.obtenir_positions_mangees(
+                        coup_demander, self.couleur_joueur_courant))))
+        self.planche.jouer_coup(coup_demander,
+                                self.couleur_joueur_courant)
 
     def passer_tour(self):
         """
@@ -267,30 +271,25 @@ class Partie:
 
         while not self.partie_terminee():
             print(self.planche)
-            self.pieces_mangees_par_coup_possible.clear()
-            self.pieces_mangees_par_coup_possible = \
+            self.coups_possibles = \
                 self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
-            print(self.joueur_courant.couleur)
-            self.coups_possibles = list(
-                self.pieces_mangees_par_coup_possible.keys())
-            if len(self.pieces_mangees_par_coup_possible) < 1:
+            print("Tour du joueur", self.joueur_courant.couleur)
+            if len(self.coups_possibles) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:
                     self.tour_precedent_passe = True
                 else:
-                    self.tour_precedent_passe = True
                     self.deux_tours_passes = True
-                    self.partie_terminee()
             else:
                 self.tour()
-                if self.couleur_joueur_courant == "noir":
-                    self.joueur_courant = self.joueur_blanc
-                    self.couleur_joueur_courant = "blanc"
-                else:
-                    self.joueur_courant = self.joueur_noir
-                    self.couleur_joueur_courant = "noir"
                 self.tour_precedent_passe = False
+            if self.couleur_joueur_courant == "noir":
+                self.joueur_courant = self.joueur_blanc
+                self.couleur_joueur_courant = "blanc"
+            else:
+                self.joueur_courant = self.joueur_noir
+                self.couleur_joueur_courant = "noir"
 
         print(self.planche)
         self.determiner_gagnant()
@@ -317,16 +316,17 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier où sauvegarder, un string.
         """
-        self.ma_partie = nom_fichier
-        ma_partie = input("Nom du fichier : ")
-        fichier = open("{}.txt", "x".format(ma_partie))
-        fichier.write(self.couleur_joueur_courant + "\n" +
-                      str(self.tour_precedent_passe) + "\n" +
-                      str(self.deux_tours_passes) + "\n" +
-                      str(self.joueur_blanc) + "\n" +
-                      str(self.joueur_noir) + "\n" +
-                      str(self.planche.convertir_en_chaine()))
-        fichier.close()
+        pass
+        # self.ma_partie = nom_fichier
+        # ma_partie = input("Nom du fichier : ")
+        # fichier = open("{}.txt", "x".format(ma_partie))
+        # fichier.write(self.couleur_joueur_courant + "\n" +
+        #               str(self.tour_precedent_passe) + "\n" +
+        #               str(self.deux_tours_passes) + "\n" +
+        #               str(self.joueur_blanc) + "\n" +
+        #               str(self.joueur_noir) + "\n" +
+        #               str(self.planche.convertir_en_chaine()))
+        # fichier.close()
 
     def charger(self, nom_fichier):
         """
@@ -336,27 +336,28 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier à charger, un string.
         """
-        self.nom_fichier = nom_fichier
-        nom_fichier = input("Entrez le nom de la partie à charger suivi de .txt : ")
-        f = open(nom_fichier, "r")
-
-        chaine = []
-
-        while True:
-            ligne = (f.readline().strip("\n"))
-            if ligne:
-                ligne = ligne.split(",")
-                chaine.append(ligne)
-            else:
-                break
-
-
-        self.planche.charger_dune_chaine(chaine)
-        self.joueur_noir = chaine[3]
-        self.joueur_blanc = chaine[4]
-        self.joueur_courant = chaine[0]
-        self.tour_precedent_passe = chaine[1]
-        self.tour_precedent_passe = chaine[2]
-
-        f.close()
+        pass
+        # self.nom_fichier = nom_fichier
+        # nom_fichier = input("Entrez le nom de la partie à charger suivi de .txt : ")
+        # f = open(nom_fichier, "r")
+        #
+        # chaine = []
+        #
+        # while True:
+        #     ligne = (f.readline().strip("\n"))
+        #     if ligne:
+        #         ligne = ligne.split(",")
+        #         chaine.append(ligne)
+        #     else:
+        #         break
+        #
+        #
+        # self.planche.charger_dune_chaine(chaine)
+        # self.joueur_noir = chaine[3]
+        # self.joueur_blanc = chaine[4]
+        # self.joueur_courant = chaine[0]
+        # self.tour_precedent_passe = chaine[1]
+        # self.tour_precedent_passe = chaine[2]
+        #
+        # f.close()
 

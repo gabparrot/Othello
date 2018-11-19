@@ -72,8 +72,7 @@ class JoueurHumain(Joueur):
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
         try:
-            print(coups_possibles)
-            input_row = int(input("Sur quelle ligne (0 à 7) voulez vous "
+            input_row = int(input("Sur quelles lignes (0 à 7) voulez vous "
                                   "jouer votre coup? "))
             input_col = int(input("Et sur quelle colonne? (0 à 7) "))
             return input_row, input_col
@@ -124,6 +123,7 @@ class JoueurOrdinateur(Joueur):
             if len(coups_possibles[coup]) >= pieces_mangees_max:
                 pieces_mangees_max = len(coups_possibles[coup])
                 coups_les_plus_forts.append(coup)
+        print("coups les plus forts", coups_les_plus_forts)
 
         # return coup qui mange le plus de pièces.
         # si plusieurs coups mangent autant de pièce, choisi au hasard

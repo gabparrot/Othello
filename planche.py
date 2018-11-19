@@ -97,17 +97,19 @@ class Planche:
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
                       (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
                       "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
+
         for direction in directions.values():
             piece_mangees_par_direction = \
-                (self.obtenir_positions_mangees_direction(couleur, direction,
-                                                          position))
-            if piece_mangees_par_direction:
+                self.obtenir_positions_mangees_direction(couleur, direction,
+                                                         position)
+            if len(piece_mangees_par_direction) > 0:
                 for chaque_piece in piece_mangees_par_direction:
                     pieces_mangees.append(chaque_piece)
 
         if len(pieces_mangees) == 0:
-            return None
-        return pieces_mangees
+            return []
+        else:
+            return pieces_mangees
 
     def obtenir_positions_mangees_direction(self, couleur, direction,
                                             position):
@@ -158,7 +160,7 @@ class Planche:
 
         while self.position_valide(position):
             if self.get_piece(position):
-                if self.cases[position].couleur == couleur:
+                if self.get_piece(position).couleur == couleur:
                     return pieces_mangees
                 else:
                     pieces_mangees.append(position)
@@ -181,7 +183,7 @@ class Planche:
             True, si le coup est valide, False sinon
         """
         if not self.get_piece(position) and position in \
-                self.lister_coups_possibles_de_couleur(couleur):
+                self.lister_coups_possibles_de_couleur(couleur).keys():
             return True
         return False
 
@@ -197,17 +199,18 @@ class Planche:
             le déplacement, un string
 
         Returns:
-            Une liste de positions de coups possibles pour la couleur "couleur"
+            Un dictionnaire de positions de coups possibles pour la couleur
+            "couleur"
         """
 
         pieces_mangees_par_coup = {}
-        pieces_mangees_par_coup.clear()
 
         for case in self.liste_cases:
-            if self.obtenir_positions_mangees(case, couleur):
-                pieces_mangees_par_coup[case] = \
-                    self.obtenir_positions_mangees(case, couleur)
-
+            if not self.get_piece(case):
+                positions_mangees = self.obtenir_positions_mangees(case,
+                                                                   couleur)
+                if len(positions_mangees) > 0:
+                    pieces_mangees_par_coup[case] = positions_mangees
 
         return pieces_mangees_par_coup
 
@@ -235,11 +238,16 @@ class Planche:
         """
         try:
             assert self.coup_est_possible(position, couleur)
+            assert position not in self.cases.keys()
             self.cases[position] = Piece(couleur)
             pieces_mangees = self.obtenir_positions_mangees(position, couleur)
-            for chaque_piece in pieces_mangees:
-                self.cases[chaque_piece].echange_couleur()
-            return "ok"
+            if len(pieces_mangees) > 0:
+                for chaque_piece in pieces_mangees:
+                    self.cases[chaque_piece].echange_couleur()
+                return "ok"
+            else:
+                raise AssertionError
+
         except AssertionError:
             return "erreur"
 
@@ -255,19 +263,20 @@ class Planche:
         Returns:
             La chaîne de caractères.
         """
-        ligne = 0
-        colonne = 0
-        chaine = ""
-
-        while ligne <= self.nb_cases in self.cases[(colonne, ligne)]:
-            if colonne == self.nb_cases:
-                colonne = 0
-                ligne += 1
-            else:
-                chaine += colonne,",", ligne,",", Piece, "\n"
-            colonne += 1
-
-        return chaine
+        pass
+        # ligne = 0
+        # colonne = 0
+        # chaine = ""
+        #
+        # while ligne <= self.nb_cases in self.cases[(colonne, ligne)]:
+        #     if colonne == self.nb_cases:
+        #         colonne = 0
+        #         ligne += 1
+        #     else:
+        #         chaine += colonne,",", ligne,",", Piece, "\n"
+        #     colonne += 1
+        #
+        # return chaine
 
     def charger_dune_chaine(self, chaine):
         """
@@ -279,15 +288,16 @@ class Planche:
         Args:
             chaine: La chaîne de caractères, un string.
         """
-        a = 0
-        b = 0
-        c = 0
-
-        while True:
-            self.cases[(chaine[a], chaine[b])] = Piece(chaine[c])
-            a += 3
-            b += 3
-            c += 3
+        pass
+        # a = 0
+        # b = 0
+        # c = 0
+        #
+        # while True:
+        #     self.cases[(chaine[a], chaine[b])] = Piece(chaine[c])
+        #     a += 3
+        #     b += 3
+        #     c += 3
 
     def initialiser_planche_par_default(self):
         """

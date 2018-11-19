@@ -318,12 +318,12 @@ class Planche:
         s = "  +-0-+-1-+-2-+-3-+-4-+-5-+-6-+-7-+\n"
 
         for i in range(0, self.nb_cases):
-            s += str(i)+" | "
+            s += str(i)+" |   " if (i, 0) in self.cases else str(i) + " | "
             for j in range(0, self.nb_cases):
                 if (i, j) in self.cases:
-                    s += str(self.cases[(i, j)])+" | "
+                    s += (str(self.cases[(i, j)]) + "  |   ")
                 else:
-                    s += "  | "
+                    s += "         |   "
             s += str(i)
             if i != self.nb_cases - 1:
                 s += "\n  +---+---+---+---+---+---+---+---+\n"

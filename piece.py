@@ -1,5 +1,4 @@
-class Piece:
-
+class Piece():
     """
     Classe modélisant une pièce d'un jeu d'Othello.
     """

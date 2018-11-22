@@ -29,6 +29,9 @@ class Planche:
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
 
+        for piece in self.cases:
+            print(piece)
+
     def get_piece(self, position):
         """
         Récupère une pièce dans la planche.
@@ -97,7 +100,6 @@ class Planche:
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
                       (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
                       "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
-
         for direction in directions.values():
             piece_mangees_par_direction = \
                 self.obtenir_positions_mangees_direction(couleur, direction,
@@ -157,7 +159,6 @@ class Planche:
         pieces_mangees = []
         avancer = lambda x, y: tuple(np.array(x) + np.array(y))
         position = avancer(position, direction)
-
         while self.position_valide(position):
             if self.get_piece(position):
                 if self.get_piece(position).couleur == couleur:
@@ -204,7 +205,7 @@ class Planche:
         """
 
         pieces_mangees_par_coup = {}
-
+        pieces_mangees_par_coup.clear()
         for case in self.liste_cases:
             if not self.get_piece(case):
                 positions_mangees = self.obtenir_positions_mangees(case,
@@ -263,20 +264,15 @@ class Planche:
         Returns:
             La chaîne de caractères.
         """
-        pass
-        # ligne = 0
-        # colonne = 0
-        # chaine = ""
-        #
-        # while ligne <= self.nb_cases in self.cases[(colonne, ligne)]:
-        #     if colonne == self.nb_cases:
-        #         colonne = 0
-        #         ligne += 1
-        #     else:
-        #         chaine += colonne,",", ligne,",", Piece, "\n"
-        #     colonne += 1
-        #
-        # return chaine
+
+
+        chaine_planche = ""
+
+
+        for piece in self.cases:
+            chaine_planche = chaine_planche + str(piece[0]) + "," + str(piece[1])+ "," + self.cases[piece].couleur + "\n"
+
+        return chaine_planche
 
     def charger_dune_chaine(self, chaine):
         """
@@ -288,16 +284,23 @@ class Planche:
         Args:
             chaine: La chaîne de caractères, un string.
         """
-        pass
-        # a = 0
-        # b = 0
-        # c = 0
-        #
-        # while True:
-        #     self.cases[(chaine[a], chaine[b])] = Piece(chaine[c])
-        #     a += 3
-        #     b += 3
-        #     c += 3
+
+        chaine = chaine.replace("\n", ",")
+        chaine = chaine.split(",")
+
+        x = 0
+
+        self.cases.clear()
+
+        while x in range(len(chaine)-1):
+            position = []
+
+            position.append(int(chaine[x]))
+            position.append(int(chaine[x+1]))
+            position = tuple(position)
+            self.cases[position] = Piece(chaine[x+2])
+            x += 3
+
 
     def initialiser_planche_par_default(self):
         """
@@ -323,7 +326,7 @@ class Planche:
                 if (i, j) in self.cases:
                     s += (str(self.cases[(i, j)]) + "  |   ")
                 else:
-                    s += "         |   "
+                    s += "       |   "
             s += str(i)
             if i != self.nb_cases - 1:
                 s += "\n  +---+---+---+---+---+---+---+---+\n"

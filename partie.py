@@ -273,7 +273,7 @@ class Partie:
             print(self.planche)
             self.coups_possibles = \
                 self.planche.lister_coups_possibles_de_couleur(
-                    self.joueur_courant.couleur)
+                    self.couleur_joueur_courant)
             print("Tour du joueur", self.joueur_courant.couleur)
             if len(self.coups_possibles) < 1:
                 self.passer_tour()
@@ -292,6 +292,10 @@ class Partie:
                 self.couleur_joueur_courant = "noir"
 
         print(self.planche)
+        nom_fichier = input("Pour sauvegarder la partie, entrez le nom du fichier désiré, sinon entrez 'N': ")
+        if not nom_fichier == "N":
+            self.sauvegarder(nom_fichier)
+
         self.determiner_gagnant()
 
     def sauvegarder(self, nom_fichier):
@@ -316,17 +320,15 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier où sauvegarder, un string.
         """
-        pass
-        # self.ma_partie = nom_fichier
-        # ma_partie = input("Nom du fichier : ")
-        # fichier = open("{}.txt", "x".format(ma_partie))
-        # fichier.write(self.couleur_joueur_courant + "\n" +
-        #               str(self.tour_precedent_passe) + "\n" +
-        #               str(self.deux_tours_passes) + "\n" +
-        #               str(self.joueur_blanc) + "\n" +
-        #               str(self.joueur_noir) + "\n" +
-        #               str(self.planche.convertir_en_chaine()))
-        # fichier.close()
+
+        fichier = open(nom_fichier, "w")
+        fichier.write(self.couleur_joueur_courant + "\n" +
+                      str(self.tour_precedent_passe) + "\n" +
+                      str(self.deux_tours_passes) + "\n" +
+                      str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
+                      str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
+                      self.planche.convertir_en_chaine())
+        fichier.close()
 
     def charger(self, nom_fichier):
         """
@@ -336,28 +338,37 @@ class Partie:
         Args:
             nom_fichier: Le nom du fichier à charger, un string.
         """
-        pass
-        # self.nom_fichier = nom_fichier
-        # nom_fichier = input("Entrez le nom de la partie à charger suivi de .txt : ")
-        # f = open(nom_fichier, "r")
-        #
-        # chaine = []
-        #
-        # while True:
-        #     ligne = (f.readline().strip("\n"))
-        #     if ligne:
-        #         ligne = ligne.split(",")
-        #         chaine.append(ligne)
-        #     else:
-        #         break
-        #
-        #
-        # self.planche.charger_dune_chaine(chaine)
-        # self.joueur_noir = chaine[3]
-        # self.joueur_blanc = chaine[4]
-        # self.joueur_courant = chaine[0]
-        # self.tour_precedent_passe = chaine[1]
-        # self.tour_precedent_passe = chaine[2]
-        #
-        # f.close()
 
+        self.nom_fichier = nom_fichier
+
+        nom_fichier = input("Entrez le nom de la partie à charger : ")
+        nom_fichier = nom_fichier + ".txt"
+        f = open(nom_fichier, "r")
+
+        self.couleur_joueur_courant = f.readline().strip("\n")
+
+        self.planche.cases.clear()
+        if f.readline() == "True":
+            self.tour_precedent_passe = True
+        else:
+            self.tour_precedent_passe = False
+
+        if f.readline() == "True":
+            self.deux_tours_passes = True
+        else:
+            self.deux_tours_passes = False
+        if f.readline() == "Ordinateur":
+            self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
+        else:
+            self.joueur_noir = self.creer_joueur("Humain", "noir")
+        if f.readline() == "Ordinateur":
+            self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
+        else:
+            self.joueur_blanc = self.creer_joueur("Humain", "blanc")
+        if self.couleur_joueur_courant == "noir":
+            self.joueur_courant = self.joueur_noir
+        else:
+            self.joueur_courant = self.joueur_blanc
+        self.planche.charger_dune_chaine(f.read())
+
+        f.close()

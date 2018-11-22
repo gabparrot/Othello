@@ -1,28 +1,6 @@
-#TODO fix save/load
-      empêcher save load de modifier la valeur de joueur courant pour autre chose qu'un objet joueur
-      empêcher save load de s'exécuter si on fait une nouvelle partie
-
 #TODO Faire les docstrings
       enlever les instructions du prof et juste laisser la définition, args et return
       
-#TODO Changer dictionnaire pour liste
-      L'AI sera dans lister_coups_possibles ou dans une nouvelle méthode que j'ajoute à la suite
-      si le joueur courant est un computer
-      
-#TODO transférer AI dans lister_coups_possibles si joueur_courant == computer
-      POUR L'AI la stratégie sera, dans cet ordre:
-      1- joue coins si coins possibles
-      2- priorise les cases à 2 cases des coins, en lignes droite
-      3- priorise les cases à 2 cases des coins, en diagonale
-      4- priorise les coups qui ne permettent pas à l'adversaire de jouer un coin
-      5- priorise les coups qui ne permettent pas à l'adversaire de joueer à 2 cases des coins, en lignes droite
-      6- priorise les coups qui ne permettent pas à l'adversaire de jouer à 2 cases des coins, en diagonale
-      7- priorise les coups qui mangent le plus de pièces
-      8- priorise parmis ce qui reste, ceux qui limitent le plus possible le nombre de pièces maximum mangées par l'adversaire
-      9- si plusieurs coups sont égaux, choisis au hasard parmi ceux-ci
-      
-      
-
 #TODO nettoyer redondance validation
   
       VALIDATION EXPLICATION DU PROF:

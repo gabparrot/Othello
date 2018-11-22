@@ -114,18 +114,7 @@ class JoueurOrdinateur(Joueur):
         Returns:
             un couple (ligne, colonne) représentant la position du coup désiré.
         """
-
-        pieces_mangees_max = 0
-        coups_les_plus_forts = []
-        print(coups_possibles)
-
-        for coup in coups_possibles:
-            if len(coups_possibles[coup]) >= pieces_mangees_max:
-                pieces_mangees_max = len(coups_possibles[coup])
-                coups_les_plus_forts.append(coup)
-        print("coups les plus forts", coups_les_plus_forts)
-
-        # return coup qui mange le plus de pièces.
-        # si plusieurs coups mangent autant de pièce, choisi au hasard
-        return (-1, -1) if len(coups_les_plus_forts) == 0 \
-            else choice(coups_les_plus_forts)
+        if len(coups_possibles) == 0:
+            return -1, -1
+        else:
+            return choice(coups_possibles)

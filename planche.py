@@ -21,6 +21,9 @@ class Planche:
         # On joue au Othello 8x8
         self.nb_cases = 8
 
+        # Liste des coups pour la couleur courante
+        self.coups_possibles = []
+
         # Matrice de cases numpy
         matrice_cases = np.ones((self.nb_cases, self.nb_cases), int)
 
@@ -28,9 +31,6 @@ class Planche:
         self.liste_cases = []
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
-
-        for piece in self.cases:
-            print(piece)
 
     def get_piece(self, position):
         """
@@ -100,6 +100,7 @@ class Planche:
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
                       (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
                       "Sud-Est": (1, -1), "Sud-Ouest": (-1, -1)}
+
         for direction in directions.values():
             piece_mangees_par_direction = \
                 self.obtenir_positions_mangees_direction(couleur, direction,
@@ -157,15 +158,16 @@ class Planche:
         """
 
         pieces_mangees = []
-        avancer = lambda x, y: tuple(np.array(x) + np.array(y))
-        position = avancer(position, direction)
+
+        position = tuple(np.array(position) + np.array(direction))
+
         while self.position_valide(position):
             if self.get_piece(position):
                 if self.get_piece(position).couleur == couleur:
                     return pieces_mangees
                 else:
                     pieces_mangees.append(position)
-                    position = avancer(position, direction)
+                    position = tuple(np.array(position) + np.array(direction))
             else:
                 return []
         return []
@@ -184,7 +186,7 @@ class Planche:
             True, si le coup est valide, False sinon
         """
         if not self.get_piece(position) and position in \
-                self.lister_coups_possibles_de_couleur(couleur).keys():
+                self.lister_coups_possibles_de_couleur(couleur):
             return True
         return False
 
@@ -200,20 +202,19 @@ class Planche:
             le déplacement, un string
 
         Returns:
-            Un dictionnaire de positions de coups possibles pour la couleur
-            "couleur"
+            Une liste de positions de coups possibles pour la couleur "couleur"
         """
 
-        pieces_mangees_par_coup = {}
-        pieces_mangees_par_coup.clear()
+        self.coups_possibles = []
+
         for case in self.liste_cases:
             if not self.get_piece(case):
                 positions_mangees = self.obtenir_positions_mangees(case,
                                                                    couleur)
                 if len(positions_mangees) > 0:
-                    pieces_mangees_par_coup[case] = positions_mangees
+                    self.coups_possibles.append(case)
 
-        return pieces_mangees_par_coup
+        return self.coups_possibles
 
     def jouer_coup(self, position, couleur):
         """
@@ -257,20 +258,17 @@ class Planche:
         Retourne une chaîne de caractères où chaque case est écrite sur une
         ligne distincte. Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
-
         Cette méthode pourrait par la suite être réutilisée pour sauvegarder
         une planche dans un fichier.
-
         Returns:
             La chaîne de caractères.
         """
 
-
         chaine_planche = ""
 
-
         for piece in self.cases:
-            chaine_planche = chaine_planche + str(piece[0]) + "," + str(piece[1])+ "," + self.cases[piece].couleur + "\n"
+            chaine_planche = chaine_planche + str(piece[0]) + "," + str(
+                piece[1]) + "," + self.cases[piece].couleur + "\n"
 
         return chaine_planche
 
@@ -280,7 +278,6 @@ class Planche:
         l'information d'une pièce sur chaque ligne.
         Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
-
         Args:
             chaine: La chaîne de caractères, un string.
         """
@@ -292,15 +289,15 @@ class Planche:
 
         self.cases.clear()
 
-        while x in range(len(chaine)-1):
+        while x in range(len(chaine) - 1):
             position = []
 
             position.append(int(chaine[x]))
-            position.append(int(chaine[x+1]))
+            position.append(int(chaine[x + 1]))
             position = tuple(position)
-            self.cases[position] = Piece(chaine[x+2])
-            x += 3
+            self.cases[position] = Piece(chaine[x + 2])
 
+            x += 3
 
     def initialiser_planche_par_default(self):
         """
@@ -326,7 +323,7 @@ class Planche:
                 if (i, j) in self.cases:
                     s += (str(self.cases[(i, j)]) + "  |   ")
                 else:
-                    s += "       |   "
+                    s += "         |   "
             s += str(i)
             if i != self.nb_cases - 1:
                 s += "\n  +---+---+---+---+---+---+---+---+\n"
@@ -334,3 +331,201 @@ class Planche:
         s += "\n  +-0-+-1-+-2-+-3-+-4-+-5-+-6-+-7-+\n"
 
         return s
+
+
+class IntelligenceArtificielle(Planche):
+    """
+    Classe représentant l'intelligence artificielle de l'ordinateur et
+    possédant des méthodes de tris pour déterminer les meilleurs coups
+    possibles
+    """
+    def __init__(self):
+        super().__init__()
+        self.coups_possibles = []
+
+    def filtrer_meilleurs_coups(self, coups_possibles, couleur):
+        """
+        Prend la liste des coups possibles et retourne une liste contenant le
+        ou les meilleurs coups dans une liste de tuple positionnels selon la
+        stratégie de contrôle des coins suivante, dans cet ordre de priorités:
+
+        1- Les coins;
+        2- Les cases à 2 cases des coins, en lignes droite;
+        3- Les cases à 2 cases des coins, en diagonale;
+        4- Les cases qui bordent les côtés de la planche;
+        5- Les coups qui mangent le plus de pièces;
+        Nous retournons une liste contenant le meilleur coup s'il n'y en a
+        qu'un, ou la liste de tous les meilleurs coups égaux
+
+        :param coups_possibles: liste des coups possibles pour le joueur
+                                ordinateur courant.
+        :param couleur: couleur du joueur courant
+
+        :return: liste de tuples représentant le ou les meilleurs coups à jouer
+        """
+        # TODO ajouter filtre nuire_ennemi() à chaque étape pour prendre le
+        # TODO coup qui nuit le plus à l'ennemi si plusieurs égaux
+
+        # à chaque priorité on append au lieu de return direct car AI grossira
+        coups_les_plus_forts = []
+        self.coups_possibles = coups_possibles
+
+        # Priorité 1: si on peut jouer des coins, en retourner la liste
+        if self.verifier_priorite_1(self.coups_possibles):
+            coups_les_plus_forts = self.verifier_priorite_1(self.coups_possibles)
+            return coups_les_plus_forts
+
+        # Priorité 2: Si aucun en priorité 1, refaire avec 2, et ainsi de suite
+        if self.verifier_priorite_2(self.coups_possibles):
+            coups_les_plus_forts = self.verifier_priorite_2(self.coups_possibles)
+            return coups_les_plus_forts
+
+        # Priorité 3:
+        if self.verifier_priorite_3(self.coups_possibles):
+            coups_les_plus_forts = self.verifier_priorite_3(self.coups_possibles)
+            return coups_les_plus_forts
+
+        # Priorité 4:
+        if self.verifier_priorite_4(self.coups_possibles):
+            coups_les_plus_forts = self.verifier_priorite_4(self.coups_possibles)
+            return coups_les_plus_forts
+
+        # Priorité 5:
+        coups_les_plus_forts = self.verifier_priorite_5(self.coups_possibles, couleur)
+
+        return coups_les_plus_forts
+
+    def verifier_priorite_1(self, coups_a_verifier):
+        """
+        Permet de vérifier si l'IA peut jouer des coups sur les coins de la
+        planche. Si plusieurs coups aux coins sont possibles, elle tente de
+        trouver le meilleur coup en appelant tri_vs_ennemi(), puis s'il en
+        reste toujours plusieurs, en appelant limiter_degats(). Elle retourne
+        le meilleur coup ou les meilleurs coups égaux dans une liste. S'il n'y
+        en a aucun, elle retourne None
+
+        :param coups_a_verifier: liste des coups possibles
+
+        :return: le ou les coups aux coins, None sinon
+        """
+        coins = [(0, 0), (0, self.nb_cases-1), (self.nb_cases-1, 0),
+                 (self.nb_cases-1, self.nb_cases-1)]
+        coups_coins = []
+
+        for coup in coups_a_verifier:
+            if coup in coins:
+                coups_coins.append(coup)
+
+        if len(coups_coins) > 0:
+            return coups_coins
+        else:
+            return None
+
+    def verifier_priorite_2(self, coups_a_verifier):
+        """
+        Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
+        la planche, en ligne droite de ceux-ci. Si oui, en retourne la liste,
+        sinon, return None
+
+        :param coups_a_verifier: liste des coups à verifier
+
+        :return: liste des coups correspondants, None si aucun
+        """
+        deux_cases_du_coin_en_ligne = [(0, 2), (2, 0), (0, self.nb_cases-3),
+                                       (2, self.nb_cases-1),
+                                       (self.nb_cases-3, 0),
+                                       (self.nb_cases-1, 2),
+                                       (self.nb_cases-3, self.nb_cases-1),
+                                       (self.nb_cases-1, self.nb_cases-3)]
+        coups_prio_2 = []
+
+        for coup in coups_a_verifier:
+            if coup in deux_cases_du_coin_en_ligne:
+                coups_prio_2.append(coup)
+
+        if len(coups_prio_2) > 0:
+            return coups_prio_2
+        else:
+            return None
+
+    def verifier_priorite_3(self, coups_a_verifier):
+        """
+        Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
+        la planche, en diagonale de ceux-ci. Si oui, en retourne la liste,
+        sinon, return None
+
+        :param coups_a_verifier: liste des coups à verifier
+
+        :return: liste des coups correspondants, None si aucun
+        """
+        deux_cases_du_coin_en_diago = [(2, 2), (2, self.nb_cases - 3),
+                                       (self.nb_cases - 3, 2),
+                                       (self.nb_cases - 3, self.nb_cases - 3)]
+        coups_prio_3 = []
+
+        for coup in coups_a_verifier:
+            if coup in deux_cases_du_coin_en_diago:
+                coups_prio_3.append(coup)
+
+        if len(coups_prio_3) > 0:
+            return coups_prio_3
+        else:
+            return None
+
+    def verifier_priorite_4(self, coups_a_verifier):
+        """
+        Permet de verifier si l'IA peut jouer des coups sur les bordures de
+        la planche, excluant les cases en contact avec les coins, afin d'éviter
+        que le joueur adverse puisse jouer aux coins au prochain tour.
+
+        :param coups_a_verifier: liste des coups à verifier
+
+        :return: liste des coups correspondants, None si aucun
+        """
+        cases_bordures = []
+
+        for i in range(self.nb_cases):
+            if i == 0 or i == self.nb_cases-1:
+                for j in range(3, self.nb_cases - 3):
+                    cases_bordures.append((i, j))
+            else:
+                if i in range(3, self.nb_cases - 3):
+                    for j in range(self.nb_cases):
+                        if j == 0 or j == self.nb_cases-1:
+                            cases_bordures.append((i, j))
+
+        coups_prio_4 = []
+
+        for coup in coups_a_verifier:
+            if coup in cases_bordures:
+                coups_prio_4.append(coup)
+
+        if len(coups_prio_4) > 0:
+            return coups_prio_4
+        else:
+            return None
+
+    def verifier_priorite_5(self, coups_a_verifier, couleur):
+        """
+        Trouve le ou les coups qui mangent le plus de pièces ennemies et en
+        retourne la liste.
+
+        :param coups_a_verifier: liste des coups à vérifier
+
+        :param couleur: couleur du joueur courant
+
+        :return: liste du ou des coups mangeant le plus de pièces
+        """
+        coups_qui_mangent_le_plus = []
+        max_pieces_mangees = 0
+
+        for coup in coups_a_verifier:
+            position_mangees = Planche.obtenir_positions_mangees(self,coup, couleur)
+            if len(position_mangees) > max_pieces_mangees:
+                coups_qui_mangent_le_plus = []
+                coups_qui_mangent_le_plus.append(coup)
+                max_pieces_mangees = len(position_mangees)
+            elif len(position_mangees) == max_pieces_mangees:
+                coups_qui_mangent_le_plus.append(coup)
+
+        return coups_qui_mangent_le_plus

@@ -1,4 +1,4 @@
-from othello.planche import Planche
+from othello.planche import Planche, IntelligenceArtificielle
 from othello.joueur import JoueurOrdinateur, JoueurHumain
 
 
@@ -25,13 +25,15 @@ class Partie:
         """
         self.planche = Planche()
 
+        self.intelligenceartificielle = IntelligenceArtificielle()
+
         self.couleur_joueur_courant = "noir"
 
         self.tour_precedent_passe = False
 
         self.deux_tours_passes = False
 
-        self.coups_possibles = {}
+        self.coups_possibles = []
 
         if nom_fichier is not None:
             self.charger(nom_fichier)
@@ -137,7 +139,7 @@ class Partie:
         if not self.planche.position_valide(position_coup):
             return (False, "Position ne respecte pas les bornes de la planche."
                     " Veuillez recommencer. ")
-        elif position_coup not in self.coups_possibles.keys():
+        elif position_coup not in self.coups_possibles:
             if self.planche.get_piece(position_coup):
                 return (False, "Coup impossible. Il y a déjà une pièce à cette"
                                " position. Veuillez recommencer. ")
@@ -165,34 +167,71 @@ class Partie:
         possède à son tour une méthode pour jouer un coup, utilisez-les !***
         """
         coup_fait = False
-        coup_demander = self.joueur_courant.choisir_coup(
-                self.coups_possibles)
+        coup_demander = self.demander_coup()
 
         # Tant que coup est invalide on affiche msg erreur et redemande
         while not coup_fait:
             if not self.valider_position_coup(coup_demander)[0]:
                 print(self.valider_position_coup(coup_demander)[1])
-                coup_demander = self.joueur_courant.choisir_coup(
-                    self.coups_possibles)
+                if self.joueur_courant.obtenir_type_joueur() == "Humain":
+                    coup_demander = self.demander_coup()
+                else:  # En cas d'erreur de l'IA
+                    if coup_demander == (-1, -1):
+                        print("Aucun coup possible pour le joueur {}. Il passe"
+                              " donc son tour. ")
+                    else:
+                        print("Erreur dans le coup demandé par l'ordinateur. "
+                              "Il passe donc son tour")
+                        coup_fait = True
             else:
                 coup_fait = True
+
         if self.joueur_courant.obtenir_type_joueur() == "Ordinateur":
             print("L'ordinateur ({}) a joué sur le case {} et a mangé {} de "
                   "vos pièces!".format(
                 self.couleur_joueur_courant, coup_demander,
                 len(self.planche.obtenir_positions_mangees(
-                        coup_demander, self.couleur_joueur_courant))))
+                    coup_demander, self.couleur_joueur_courant))))
         self.planche.jouer_coup(coup_demander,
                                 self.couleur_joueur_courant)
+
+    def demander_coup(self):
+        """
+        Demande au joueur courant le coup qu'il souhaite jouer. Si le joueur
+        courant est un humain, on appelle directement
+        self.joueur_courant.choisir_coup() pour ce faire. S'il s'agit d'un
+        ordinateur, on commence par filtrer les meilleurs coups avec
+        self.intelligenceartificielle.filtrer_meilleurs_coups() avant de faire
+        choisir coup.
+
+        :return coup_demander: un couple positionnel sous forme de tuple
+            représentant le coup demandé par le joueur.
+        """
+
+        if self.joueur_courant.obtenir_type_joueur() == "Humain":
+            coup_choisi = self.joueur_courant.choisir_coup(
+                    self.coups_possibles)
+        else:
+            self.intelligenceartificielle = IntelligenceArtificielle()
+            coups_ia = self.intelligenceartificielle.\
+                filtrer_meilleurs_coups(self.coups_possibles,
+                                        self.couleur_joueur_courant)
+            coup_choisi = self.joueur_courant.choisir_coup(coups_ia)
+        return coup_choisi
 
     def passer_tour(self):
         """
         Affiche un message indiquant que le joueur de la couleur courante ne
-        peut jouer avec l'état actuel de la
-        planche et qu'il doit donc passer son tour.
+        peut jouer avec l'état actuel de la planche et qu'il doit donc passer
+        son tour.
         """
-        print("Aucun coup possible, joueur {} passe son tour".format(
-                  self.couleur_joueur_courant))
+        if self.joueur_courant.obtenir_type_joueur() == "Humain":
+            print("Aucun coup possible, joueur {} passe son tour".format(
+                    self.couleur_joueur_courant))
+        else:
+            print("Erreur dans le coup demandé par l'ordinateur")
+            print("Le joueur ordinateur {} passe son tour".format(
+                self.couleur_joueur_courant))
 
     def partie_terminee(self):
         """
@@ -273,7 +312,7 @@ class Partie:
             print(self.planche)
             self.coups_possibles = \
                 self.planche.lister_coups_possibles_de_couleur(
-                    self.couleur_joueur_courant)
+                    self.joueur_courant.couleur)
             print("Tour du joueur", self.joueur_courant.couleur)
             if len(self.coups_possibles) < 1:
                 self.passer_tour()
@@ -292,83 +331,78 @@ class Partie:
                 self.couleur_joueur_courant = "noir"
 
         print(self.planche)
-        nom_fichier = input("Pour sauvegarder la partie, entrez le nom du fichier désiré, sinon entrez 'N': ")
-        if not nom_fichier == "N":
-            self.sauvegarder(nom_fichier)
-
         self.determiner_gagnant()
 
-    def sauvegarder(self, nom_fichier):
-        """
-        Sauvegarde une partie dans un fichier. Le fichier condiendra:
-        - Une ligne indiquant la couleur du joueur courant.
-        - Une ligne contenant True ou False, si le tour précédent a été passé.
-        - Une ligne contenant True ou False, si les deux derniers tours ont été
-          passés.
-        - Une ligne contenant le type du joueur blanc.
-        - Une ligne contenant le type du joueur noir.
-        - Le reste des lignes correspondant à la planche. Voir la méthode
-          convertir_en_chaine de la planche
-         pour le format.
+        def sauvegarder(self, nom_fichier):
+            """
+            Sauvegarde une partie dans un fichier. Le fichier condiendra:
+            - Une ligne indiquant la couleur du joueur courant.
+            - Une ligne contenant True ou False, si le tour précédent a été passé.
+            - Une ligne contenant True ou False, si les deux derniers tours ont été
+              passés.
+            - Une ligne contenant le type du joueur blanc.
+            - Une ligne contenant le type du joueur noir.
+            - Le reste des lignes correspondant à la planche. Voir la méthode
+              convertir_en_chaine de la planche
+             pour le format.
+            ATTENTION : L'ORDRE DES PARAMÈTRES SAUVEGARDÉS EST OBLIGATOIRE À
+            RESPECTER.
+                        Des tests automatiques seront roulés lors de la correction
+                        et ils prennent pour acquis que le format plus haut est
+                        respecté. Vous perdrez des points si vous dérogez du format
+            Args:
+                nom_fichier: Le nom du fichier où sauvegarder, un string.
+            """
 
-        ATTENTION : L'ORDRE DES PARAMÈTRES SAUVEGARDÉS EST OBLIGATOIRE À
-        RESPECTER.
-                    Des tests automatiques seront roulés lors de la correction
-                    et ils prennent pour acquis que le format plus haut est
-                    respecté. Vous perdrez des points si vous dérogez du format
+            fichier = open(nom_fichier, "w")
+            fichier.write(self.couleur_joueur_courant + "\n" +
+                          str(self.tour_precedent_passe) + "\n" +
+                          str(self.deux_tours_passes) + "\n" +
+                          str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
+                          str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
+                          self.planche.convertir_en_chaine())
 
-        Args:
-            nom_fichier: Le nom du fichier où sauvegarder, un string.
-        """
+            fichier.close()
 
-        fichier = open(nom_fichier, "w")
-        fichier.write(self.couleur_joueur_courant + "\n" +
-                      str(self.tour_precedent_passe) + "\n" +
-                      str(self.deux_tours_passes) + "\n" +
-                      str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
-                      str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
-                      self.planche.convertir_en_chaine())
-        fichier.close()
+        def charger(self, nom_fichier):
+            """
+            Charge une partie dans à partir d'un fichier. Le fichier a le même
+            format que la méthode de sauvegarde.
+            Args:
+                nom_fichier: Le nom du fichier à charger, un string.
+            """
 
-    def charger(self, nom_fichier):
-        """
-        Charge une partie dans à partir d'un fichier. Le fichier a le même
-        format que la méthode de sauvegarde.
+            self.nom_fichier = nom_fichier
 
-        Args:
-            nom_fichier: Le nom du fichier à charger, un string.
-        """
+            nom_fichier = input("Entrez le nom de la partie à charger : ")
+            nom_fichier = nom_fichier + ".txt"
+            f = open(nom_fichier, "r")
 
-        self.nom_fichier = nom_fichier
+            self.couleur_joueur_courant = f.readline().strip("\n")
 
-        nom_fichier = input("Entrez le nom de la partie à charger : ")
-        nom_fichier = nom_fichier + ".txt"
-        f = open(nom_fichier, "r")
+            self.planche.cases.clear()
+            if f.readline() == "True":
+                self.tour_precedent_passe = True
+            else:
+                self.tour_precedent_passe = False
 
-        self.couleur_joueur_courant = f.readline().strip("\n")
+            if f.readline() == "True":
+                self.deux_tours_passes = True
+            else:
+                self.deux_tours_passes = False
+            if f.readline() == "Ordinateur":
+                self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
+            else:
+                self.joueur_noir = self.creer_joueur("Humain", "noir")
+            if f.readline() == "Ordinateur":
+                self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
+            else:
+                self.joueur_blanc = self.creer_joueur("Humain", "blanc")
+            if self.couleur_joueur_courant == "noir":
+                self.joueur_courant = self.joueur_noir
+            else:
+                self.joueur_courant = self.joueur_blanc
+            self.planche.charger_dune_chaine(f.read())
 
-        self.planche.cases.clear()
-        if f.readline() == "True":
-            self.tour_precedent_passe = True
-        else:
-            self.tour_precedent_passe = False
+            f.close()
 
-        if f.readline() == "True":
-            self.deux_tours_passes = True
-        else:
-            self.deux_tours_passes = False
-        if f.readline() == "Ordinateur":
-            self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
-        else:
-            self.joueur_noir = self.creer_joueur("Humain", "noir")
-        if f.readline() == "Ordinateur":
-            self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
-        else:
-            self.joueur_blanc = self.creer_joueur("Humain", "blanc")
-        if self.couleur_joueur_courant == "noir":
-            self.joueur_courant = self.joueur_noir
-        else:
-            self.joueur_courant = self.joueur_blanc
-        self.planche.charger_dune_chaine(f.read())
-
-        f.close()

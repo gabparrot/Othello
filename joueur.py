@@ -8,11 +8,14 @@ class Joueur:
 
     def __init__(self, couleur):
         """
-        Le constructeur global de Joueur.
+       Le constructeur global de Joueur.
 
-        Args:
-            couleur: La couleur qui sera jouée par le joueur.
-        """
+       Args:
+           couleur: La couleur qui sera jouée par le joueur.
+
+       Returns:
+           La couleur "noir" ou "blanc" du joueur
+       """
         assert couleur in ["blanc", "noir"], "Piece: couleur invalide."
 
         self.couleur = couleur
@@ -44,12 +47,24 @@ class Joueur:
 class JoueurHumain(Joueur):
     """
     Classe modélisant un joueur humain.
+
+        Args:
+            Le joueur humain.
+
+        Returns:
+            La modélisation du joueur humain.
     """
 
     def __init__(self, couleur):
         """
         Cette méthode va construire un objet Joueur et l'initialiser avec la
         bonne couleur.
+
+        Args:
+            La coulour du joueur.
+
+        Returns:
+            Objet Joueur de la bonne couleur.
         """
         super().__init__(couleur)
 
@@ -60,10 +75,6 @@ class JoueurHumain(Joueur):
         """
         Demande successivement à l'usager à quelle ligne, puis à quelle
         colonne il désire jouer.
-
-        Nous vous avons déjà fourni une portion de code permettant d'attrapper
-        au passage les erreurs qui peuvent survenir lorsque l'utilisateur entre
-        autre chose qu'un nombre entier.
 
         Args:
             coups_possibles: Le dictionnaire des coups possibles
@@ -87,11 +98,23 @@ class JoueurHumain(Joueur):
 class JoueurOrdinateur(Joueur):
     """
     Classe modélisant un joueur Ordinateur.
+
+        Args:
+            La couleur du joueur Ordinateur
+
+        Returns:
+            La modélisation du joueur Ordinateur
     """
     def __init__(self, couleur):
         """
         Cette méthode va construire un objet Joueur et l'initialiser avec la
         bonne couleur.
+
+        Args:
+            La coulour du joueur
+
+        Returns:
+            Objet Joueur de la bonne couleur
         """
         super().__init__(couleur)
 
@@ -100,13 +123,7 @@ class JoueurOrdinateur(Joueur):
 
     def choisir_coup(self, coups_possibles):
         """
-        Pour votre joueur ordinateur, vous n'avez qu'à sélectionner un coup au
-        hasard parmi la liste des coups possibles. Affichez ensuite en console
-        les numéros de ligne et de colonne.
-
-        Pour faire un choix au hasard, vous devrez faire appel à la libraire
-        random de Python. Explorez là, elle possède même une fonction
-        retournant précisément un choix aléatoire parmi une liste.
+        Intelligence artificielle du joueur ordinateur.
 
         Args:
             coups_possibles: Le dictionnaire des coups possibles

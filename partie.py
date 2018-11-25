@@ -56,12 +56,6 @@ class Partie:
         Demande à l'usager quel type de joueur ('Humain' ou 'Ordinateur') il
         désire pour le joueur de la couleur.
 
-        Tant que l'entrée n'est pas valide, on continue de demander à
-        l'utilisateur.
-
-        Faites appel à self.creer_joueur() pour créer le joueur lorsque
-        vous aurez le type.
-
         Args:
             couleur: La couleur pour laquelle on veut le type de joueur.
 
@@ -86,9 +80,6 @@ class Partie:
     def creer_joueur(self, type, couleur):
         """
         Crée l'objet Joueur approprié, selon le type passé en paramètre.
-
-        Pour créer les objets, vous n'avez qu'à faire appel à leurs
-        constructeurs, c'est-à-dire à JoueurHumain(couleur), par exemple.
 
         Args:
             type: le type de joueur, "Ordinateur" ou "Humain"
@@ -116,12 +107,6 @@ class Partie:
         2) Une pièce se trouve déjà à la position souhaitée.
 
         3) Le coup ne fait pas partie de la liste des coups valides.
-
-        ATTENTION: Utilisez les méthodes et attributs de self.planche ainsi que
-                   la liste self.coups_possibles pour connaître les
-                   informations nécessaires.
-        ATTENTION: Bien que cette méthode valide plusieurs choses, les méthodes
-                   programmées dans la planche vous simplifieront la tâche!
 
         Args:
             position_coup: La position du coup à valider.
@@ -162,9 +147,8 @@ class Partie:
         - Jouer le coup sur la planche de jeu, avec la bonne couleur.
         - Si le résultat du coup est "erreur", afficher un message d'erreur.
 
-        ***Vous disposez d'une méthode pour demander le coup à l'usager dans
-        cette classe et la classe planche
-        possède à son tour une méthode pour jouer un coup, utilisez-les !***
+        Returns:
+            La simulation du tour d'un joueur
         """
         coup_fait = False
         coup_demander = self.demander_coup()
@@ -204,7 +188,7 @@ class Partie:
         self.intelligenceartificielle.filtrer_meilleurs_coups() avant de faire
         choisir coup.
 
-        :return coup_demander: un couple positionnel sous forme de tuple
+        Returne: coup_demander: un couple positionnel sous forme de tuple
             représentant le coup demandé par le joueur.
         """
 
@@ -222,8 +206,8 @@ class Partie:
     def passer_tour(self):
         """
         Affiche un message indiquant que le joueur de la couleur courante ne
-        peut jouer avec l'état actuel de la planche et qu'il doit donc passer
-        son tour.
+        peut jouer avec l'état actuel de la
+        planche et qu'il doit donc passer son tour.
         """
         if self.joueur_courant.obtenir_type_joueur() == "Humain":
             print("Aucun coup possible, joueur {} passe son tour".format(
@@ -250,10 +234,6 @@ class Partie:
         """
         Détermine le gagnant de la partie. Le gagnant est simplement la couleur
         pour laquelle il y a le plus de pions sur la planche de jeu.
-
-        Affichez un message indiquant la couleur gagnante ainsi que le nombre
-        de pièces de sa couleur ou encore un message annonçant un match nul,
-        le cas échéant.
         """
         pieces_noires = 0
         pieces_blanches = 0
@@ -345,13 +325,12 @@ class Partie:
             - Le reste des lignes correspondant à la planche. Voir la méthode
               convertir_en_chaine de la planche
              pour le format.
-            ATTENTION : L'ORDRE DES PARAMÈTRES SAUVEGARDÉS EST OBLIGATOIRE À
-            RESPECTER.
-                        Des tests automatiques seront roulés lors de la correction
-                        et ils prennent pour acquis que le format plus haut est
-                        respecté. Vous perdrez des points si vous dérogez du format
+
             Args:
                 nom_fichier: Le nom du fichier où sauvegarder, un string.
+
+            Returns:
+                Fichier .txt contenant les informations de la partie sauvegardée
             """
 
             fichier = open(nom_fichier, "w")
@@ -368,8 +347,12 @@ class Partie:
             """
             Charge une partie dans à partir d'un fichier. Le fichier a le même
             format que la méthode de sauvegarde.
+
             Args:
                 nom_fichier: Le nom du fichier à charger, un string.
+
+            Returns:
+                La partie à charger
             """
 
             self.nom_fichier = nom_fichier
@@ -381,6 +364,7 @@ class Partie:
             self.couleur_joueur_courant = f.readline().strip("\n")
 
             self.planche.cases.clear()
+
             if f.readline() == "True":
                 self.tour_precedent_passe = True
             else:
@@ -390,18 +374,22 @@ class Partie:
                 self.deux_tours_passes = True
             else:
                 self.deux_tours_passes = False
+
             if f.readline() == "Ordinateur":
                 self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
             else:
                 self.joueur_noir = self.creer_joueur("Humain", "noir")
+
             if f.readline() == "Ordinateur":
                 self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
             else:
                 self.joueur_blanc = self.creer_joueur("Humain", "blanc")
+
             if self.couleur_joueur_courant == "noir":
                 self.joueur_courant = self.joueur_noir
             else:
                 self.joueur_courant = self.joueur_blanc
+
             self.planche.charger_dune_chaine(f.read())
 
             f.close()

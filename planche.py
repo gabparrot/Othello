@@ -50,14 +50,13 @@ class Planche:
 
     def position_valide(self, position):
         """
-        Vérifie si une position est valide (chaque coordonnée doit être dans
-        les bornes).
+        Vérifie si une position est valide.
 
         Args:
             position: Un couple (ligne, colonne), tuple de deux éléments.
 
         Returns:
-            True si la position est valide, False autrement
+            True si la position est valide, False autrement.
         """
         if position in self.liste_cases:
             return True
@@ -69,28 +68,9 @@ class Planche:
         Détermine quelles positions seront mangées si un coup de la couleur
         passée est joué à la position passée.
 
-        ***RETOURNEZ SEULEMENT LA LISTE DES POSITIONS MANGÉES, NE FAITES PAS
-        APPEL À piece.echange_couleur() ICI.***
-
-        Ici, commencez par considérer que, pour la position évaluée, des pièces
-        peuvent être mangées dans 8 directions distinctes représentant les 8
-        cases qui entourent la position évaluée. Vous devez donc vérifier, pour
-        chacune de ces directions, combien de pièces sont mangées et retourner
-        une liste regroupant les pièces mangées dans toutes les directions.
-
-        Ici, une direction représente une liste de 2 entiers pour la
-        déplacement en x et y. Par exemple, pour la direction diagonale où en
-        explore vers le bas et vers la droite, on utiliserait la liste [1, 1].
-        De même, pour la direction gauche, on utiliserait la liste [-1, 0].
-        Il y a donc un total de 8 directions, représentant les 8 positions
-        auxquelles la position actuelle peut toucher.
-
-        Pensez à faire appel à la fonction
-        obtenir_positions_mangees_direction()
-
         Args:
-            position: La position du coup à jouer.
-            couleur: La couleur du coup à jouer.
+            position: La position du coup à jouer
+            couleur: La couleur du coup à jouer
 
         Returns:
             une liste contenant toutes les positions qui seraient mangées par
@@ -120,32 +100,6 @@ class Planche:
         Détermine les positions qui seront mangées si un coup de couleur
         "couleur" est joué à la position "position",
         si on parcourt la planche dans une direction "direction".
-
-        Pour une direction donnée, vous devez parcourir la planche de jeu dans
-        la direction. Tant que votre déplacement
-        vous mène sur une pièce de la couleur mangée, vous continuez de vous
-        déplacer. Trois situations surviennent
-        alors pour mettre un terme au parours dans la direction :
-
-        1) Vous arrivez sur une case vide. Dans ce cas, aucune pièce n'est
-        mangée.
-
-        2) Vous arrivez sur une case extérieure à la planche. Encore une fois,
-        aucune pièce n'est mangée.
-
-        3) Vous arrivez sur une case de la même couleur que le coup initial.
-        Toutes les pièces de la couleur opposée
-        que vous avez alors rencontrées dans votre parcours doivent alors être
-        ajoutées à grande liste des pièces
-        mangées cumulées.
-
-        N.B. : Cette méthode peut être implémentée par au moins deux techniques
-         différentes alors laissez place à votre
-        imagination et explorez ! Une méthode faisant une boucle d'exploration
-        complète et une méthode de parcours
-        récursif  sont quelques-unes des façons de faire que vous pouvez
-        explorer. Il se peut même que votre solution
-        ne soit pas dans les solutions énumérées précédemment.
 
         Args:
             couleur: La couleur du coup évalué
@@ -199,10 +153,11 @@ class Planche:
 
         Args:
             couleur: La couleur ("blanc", "noir") des pièces dont on considère
-            le déplacement, un string
+            le déplacement, un string.
 
         Returns:
-            Une liste de positions de coups possibles pour la couleur "couleur"
+            Un dictionnaire de positions de coups possibles pour la couleur
+            "couleur".
         """
 
         self.coups_possibles = []
@@ -220,15 +175,9 @@ class Planche:
         """
         Joue une pièce de la couleur "couleur" à la position "position".
 
-        Cette méthode doit également:
         - Ajouter la pièce aux pièces de la planche.
         - Faire les changements de couleur pour les pièces mangées par le coup.
         - Retourner un message indiquant "ok" ou "erreur".
-
-        ATTENTION: Ne dupliquez pas de code! Vous savez déjà qu'un coup est
-                   valide si au moins une pièce est mangée par celui-ci. Vous
-                   avez une méthode qui fait exactement ce travail à
-                   programmer !
 
         Args:
             position: La position du coup.
@@ -258,8 +207,10 @@ class Planche:
         Retourne une chaîne de caractères où chaque case est écrite sur une
         ligne distincte. Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
+
         Cette méthode pourrait par la suite être réutilisée pour sauvegarder
         une planche dans un fichier.
+
         Returns:
             La chaîne de caractères.
         """
@@ -278,8 +229,12 @@ class Planche:
         l'information d'une pièce sur chaque ligne.
         Chaque ligne contient l'information suivante :
         ligne,colonne,couleur
+
         Args:
             chaine: La chaîne de caractères, un string.
+
+        Returns:
+            Remplit la planche selon les informations données dans une chaîne.
         """
 
         chaine = chaine.replace("\n", ",")

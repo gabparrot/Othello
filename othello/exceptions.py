@@ -15,3 +15,12 @@ De cette manière, le code de votre interface n’aura pas à valider la positio
 par l’usager (avec un clic de souris) : si le coup demandé était invalide, aucun coup ne sera
 joué et l’interface attrapera l’exception et affichera un message d’avertissement correspon-
 dant."""
+
+class ErreurPositionCoup:
+    """
+    Classe définissant les coups invalides et qui comporte des méthodes afin
+    d'afficher à l'utilisateur un message correspondant.
+    """
+    def __init__(self):
+        pass
+    #wtfisthisshit

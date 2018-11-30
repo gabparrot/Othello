@@ -156,20 +156,27 @@ class Planche:
             le déplacement, un string.
 
         Returns:
-            Un dictionnaire de positions de coups possibles pour la couleur
+            Une liste de positions de coups possibles pour la couleur
             "couleur".
         """
 
         self.coups_possibles = []
+        self.impossible_piece_la = []
+        self.impossible_zero_mangee = []
 
         for case in self.liste_cases:
-            if not self.get_piece(case):
-                positions_mangees = self.obtenir_positions_mangees(case,
-                                                                   couleur)
-                if len(positions_mangees) > 0:
-                    self.coups_possibles.append(case)
+            if self.get_piece(case):
+                self.impossible_piece_la.append(case)
+                continue
+            positions_mangees = self.obtenir_positions_mangees(case,
+                                                               couleur)
+            if len(positions_mangees) > 0:
+                self.coups_possibles.append(case)
+            else:
+                self.impossible_zero_mangee.append(case)
 
-        return self.coups_possibles
+        return self.coups_possibles, self.impossible_piece_la, \
+            self.impossible_zero_mangee
 
     def jouer_coup(self, position, couleur):
         """

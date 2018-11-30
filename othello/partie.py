@@ -1,6 +1,6 @@
 from othello.planche import Planche, IntelligenceArtificielle
 from othello.joueur import JoueurOrdinateur, JoueurHumain
-
+from othello.exceptions import ErreurPositionCoup
 
 class Partie:
     def __init__(self, nom_fichier=None):
@@ -34,6 +34,12 @@ class Partie:
         self.deux_tours_passes = False
 
         self.coups_possibles = []
+        self.impossible_piece_la = []
+        self.impossible_zero_mangee = []
+
+        self.exceptions = ErreurPositionCoup(self.coups_possibles,
+                                             self.impossible_piece_la,
+                                             self.impossible_zero_mangee)
 
         if nom_fichier is not None:
             self.charger(nom_fichier)
@@ -290,9 +296,11 @@ class Partie:
 
         while not self.partie_terminee():
             print(self.planche)
-            self.coups_possibles = \
-                self.planche.lister_coups_possibles_de_couleur(
+            coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
+            self.coups_possibles = coups_du_tour[0]
+            self.impossible_piece_la = [1]
+            self.impossible_zero_mangee = [2]
             print("Tour du joueur", self.joueur_courant.couleur)
             if len(self.coups_possibles) < 1:
                 self.passer_tour()
@@ -301,6 +309,8 @@ class Partie:
                 else:
                     self.deux_tours_passes = True
             else:
+                self.exceptions = ErreurPositionCoup(self.coups_possibles,
+                    self.impossible_piece_la, self.impossible_zero_mangee)
                 self.tour()
                 self.tour_precedent_passe = False
             if self.couleur_joueur_courant == "noir":
@@ -313,84 +323,84 @@ class Partie:
         print(self.planche)
         self.determiner_gagnant()
 
-        def sauvegarder(self, nom_fichier):
-            """
-            Sauvegarde une partie dans un fichier. Le fichier condiendra:
-            - Une ligne indiquant la couleur du joueur courant.
-            - Une ligne contenant True ou False, si le tour précédent a été passé.
-            - Une ligne contenant True ou False, si les deux derniers tours ont été
-              passés.
-            - Une ligne contenant le type du joueur blanc.
-            - Une ligne contenant le type du joueur noir.
-            - Le reste des lignes correspondant à la planche. Voir la méthode
-              convertir_en_chaine de la planche
-             pour le format.
+    def sauvegarder(self, nom_fichier):
+        """
+        Sauvegarde une partie dans un fichier. Le fichier condiendra:
+        - Une ligne indiquant la couleur du joueur courant.
+        - Une ligne contenant True ou False, si le tour précédent a été passé.
+        - Une ligne contenant True ou False, si les deux derniers tours ont été
+          passés.
+        - Une ligne contenant le type du joueur blanc.
+        - Une ligne contenant le type du joueur noir.
+        - Le reste des lignes correspondant à la planche. Voir la méthode
+          convertir_en_chaine de la planche
+         pour le format.
 
-            Args:
-                nom_fichier: Le nom du fichier où sauvegarder, un string.
+        Args:
+            nom_fichier: Le nom du fichier où sauvegarder, un string.
 
-            Returns:
-                Fichier .txt contenant les informations de la partie sauvegardée
-            """
+        Returns:
+            Fichier .txt contenant les informations de la partie sauvegardée
+        """
 
-            fichier = open(nom_fichier, "w")
-            fichier.write(self.couleur_joueur_courant + "\n" +
-                          str(self.tour_precedent_passe) + "\n" +
-                          str(self.deux_tours_passes) + "\n" +
-                          str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
-                          str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
-                          self.planche.convertir_en_chaine())
+        fichier = open(nom_fichier, "w")
+        fichier.write(self.couleur_joueur_courant + "\n" +
+                      str(self.tour_precedent_passe) + "\n" +
+                      str(self.deux_tours_passes) + "\n" +
+                      str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
+                      str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
+                      self.planche.convertir_en_chaine())
 
-            fichier.close()
+        fichier.close()
 
-        def charger(self, nom_fichier):
-            """
-            Charge une partie dans à partir d'un fichier. Le fichier a le même
-            format que la méthode de sauvegarde.
+    def charger(self, nom_fichier):
+        """
+        Charge une partie dans à partir d'un fichier. Le fichier a le même
+        format que la méthode de sauvegarde.
 
-            Args:
-                nom_fichier: Le nom du fichier à charger, un string.
+        Args:
+            nom_fichier: Le nom du fichier à charger, un string.
 
-            Returns:
-                La partie à charger
-            """
+        Returns:
+            La partie à charger
+        """
 
-            self.nom_fichier = nom_fichier
+        self.nom_fichier = nom_fichier
 
-            nom_fichier = input("Entrez le nom de la partie à charger : ")
-            nom_fichier = nom_fichier + ".txt"
-            f = open(nom_fichier, "r")
+        nom_fichier = input("Entrez le nom de la partie à charger : ")
+        nom_fichier = nom_fichier + ".txt"
+        f = open(nom_fichier, "r")
 
-            self.couleur_joueur_courant = f.readline().strip("\n")
+        self.couleur_joueur_courant = f.readline().strip("\n")
 
-            self.planche.cases.clear()
+        self.planche.cases.clear()
 
-            if f.readline() == "True":
-                self.tour_precedent_passe = True
-            else:
-                self.tour_precedent_passe = False
+        if f.readline() == "True":
+            self.tour_precedent_passe = True
+        else:
+            self.tour_precedent_passe = False
 
-            if f.readline() == "True":
-                self.deux_tours_passes = True
-            else:
-                self.deux_tours_passes = False
+        if f.readline() == "True":
+            self.deux_tours_passes = True
+        else:
+            self.deux_tours_passes = False
 
-            if f.readline() == "Ordinateur":
-                self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
-            else:
-                self.joueur_noir = self.creer_joueur("Humain", "noir")
+        if f.readline() == "Ordinateur":
+            self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
+        else:
+            self.joueur_noir = self.creer_joueur("Humain", "noir")
 
-            if f.readline() == "Ordinateur":
-                self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
-            else:
-                self.joueur_blanc = self.creer_joueur("Humain", "blanc")
+        if f.readline() == "Ordinateur":
+            self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
+        else:
+            self.joueur_blanc = self.creer_joueur("Humain", "blanc")
 
-            if self.couleur_joueur_courant == "noir":
-                self.joueur_courant = self.joueur_noir
-            else:
-                self.joueur_courant = self.joueur_blanc
+        if self.couleur_joueur_courant == "noir":
+            self.joueur_courant = self.joueur_noir
+        else:
+            self.joueur_courant = self.joueur_blanc
 
-            self.planche.charger_dune_chaine(f.read())
+        self.planche.charger_dune_chaine(f.read())
 
-            f.close()
+        f.close()
 

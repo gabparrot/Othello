@@ -16,11 +16,45 @@ par l’usager (avec un clic de souris) : si le coup demandé était invalide, a
 joué et l’interface attrapera l’exception et affichera un message d’avertissement correspon-
 dant."""
 
-class ErreurPositionCoup:
+
+class ErreurPositionCoup(object):
     """
     Classe définissant les coups invalides et qui comporte des méthodes afin
-    d'afficher à l'utilisateur un message correspondant.
+    d'afficher à l'utilisateur un message correspondant. Le GUI pourra ainsi
+    faire appel à ces listes pour valider le coup choisi par l'utilisateur
+    sans faire appel au code central du jeu.
     """
-    def __init__(self):
-        pass
-    #wtfisthisshit
+    def __init__(self, coups_possibles, piece_la, zero_mangees):
+        self.coups_possibles = coups_possibles
+        self.impossible_piece_la = piece_la
+        self.impossible_zero_mangee = zero_mangees
+
+    def verifier_validiter_tour(self, coup_demander):
+        """
+        Prend en paramètre le coup demandé par l'utilisateur sur l'interface
+        graphique et verifie s'il appartient à l'une des listes de coups
+        possibles ou impossibles. Retourne si oui ou non le coup est possible
+        et un message disant pourquoi il n'est pas possible. Si le coup
+        n'appartient à aucune des listes, on indique qu'il est impossible car
+        il ne respecte pas les bornes de la planche.
+
+        :param coup_demander: Un tuple vectoriel de la position demandée par le
+            joueur
+
+        :return: Un tuple contenant un booléen disant si le coup est possible
+            ou non, et un message à afficher à l'utilisateur si le coup n'est
+            pas possible
+        """
+
+        if coup_demander in self.coups_possibles:
+            return True, "ok"
+        elif coup_demander in self.impossible_piece_la:
+            return False, "Impossible, vous ne pouvez pas mettre une pièce " \
+                          "par dessus une autre! "
+        elif coup_demander in self.impossible_zero_mangee:
+            return False, "Coup invalide. Aucune pièce ennemie ne serait " \
+                          "mangée! "
+        else:
+            return False, "Une erreur s'est produite. La case sur laquelle " \
+                          "vous voulez jouer n'existe pas sur la planche de " \
+                          "jeu! "

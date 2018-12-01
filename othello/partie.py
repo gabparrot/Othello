@@ -2,8 +2,9 @@ from othello.planche import Planche, IADifficile, IALegendaire, IANormale
 from othello.joueur import JoueurOrdinateur, JoueurHumain
 from othello.exceptions import ErreurPositionCoup
 
+
 class Partie:
-    def __init__(self, difficulte, nom_fichier=None):
+    def __init__(self, difficulte, nb_joueur, nom_fichier=None):
         """
         Méthode d'initialisation d'une partie. On initialise 4 membres:
         - planche: contient la planche de la partie, celui-ci contenant le
@@ -23,14 +24,16 @@ class Partie:
         fait appel à self.initialiser_joueurs(), qui va demander à
         l'utilisateur quels sont les types de joueurs qu'il désire.
         """
+
+        self.difficulte = difficulte
         self.planche = Planche()
-        if difficulte == "Légendaire":
+        self.nb_joueurs = nb_joueur
+        if self.difficulte == "Légendaire":
             self.intelligenceartificielle = IALegendaire()
-        elif difficulte == "Difficile":
+        elif self.difficulte == "Difficile":
             self.intelligenceartificielle = IADifficile()
         else:
             self.intelligenceartificielle = IANormale()
-
 
         self.couleur_joueur_courant = "noir"
 
@@ -75,18 +78,26 @@ class Partie:
             JoueurOrdinateur s'il a entré
             'Ordinateur'.
         """
-        type_joueur = ""
-        types_joueurs = ("Humain", "Ordinateur")
 
-        while type_joueur not in types_joueurs:
-            type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
-                                " un Ordinateur? ".format(couleur)).title()
-            if type_joueur == "Ordi":
-                type_joueur = "Ordinateur"
-            if type_joueur not in types_joueurs:
-                print("Erreur, type invalide, veuillez réessayer.")
-            else:
-                return self.creer_joueur(type_joueur, couleur)
+        if couleur == "noir":
+            return self.creer_joueur("Humain", couleur)
+        elif self.nb_joueurs == 2:
+            return self.creer_joueur("Humain", couleur)
+        else:
+            return self.creer_joueur("Ordinateur", couleur)
+
+        # type_joueur = ""
+        # types_joueurs = ("Humain", "Ordinateur")
+        #
+        # while type_joueur not in types_joueurs:
+        #     type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
+        #                         " un Ordinateur? ".format(couleur)).title()
+        #     if type_joueur == "Ordi":
+        #         type_joueur = "Ordinateur"
+        #     if type_joueur not in types_joueurs:
+        #         print("Erreur, type invalide, veuillez réessayer.")
+        #     else:
+        #         return self.creer_joueur(type_joueur, couleur)
 
     def creer_joueur(self, type, couleur):
         """
@@ -207,9 +218,9 @@ class Partie:
             coup_choisi = self.joueur_courant.choisir_coup(
                     self.coups_possibles)
         else:
-            if difficulte == "Légendaire":
+            if self.difficulte == "Légendaire":
                 self.intelligenceartificielle = IALegendaire()
-            elif difficulte == "Difficile":
+            elif self.difficulte == "Difficile":
                 self.intelligenceartificielle = IADifficile()
             else:
                 self.intelligenceartificielle = IANormale()

@@ -1,9 +1,9 @@
-from othello.planche import Planche, IntelligenceArtificielle
+from othello.planche import Planche, IADifficile, IALegendaire, IANormale
 from othello.joueur import JoueurOrdinateur, JoueurHumain
 from othello.exceptions import ErreurPositionCoup
 
 class Partie:
-    def __init__(self, nom_fichier=None):
+    def __init__(self, difficulte, nom_fichier=None):
         """
         Méthode d'initialisation d'une partie. On initialise 4 membres:
         - planche: contient la planche de la partie, celui-ci contenant le
@@ -24,8 +24,13 @@ class Partie:
         l'utilisateur quels sont les types de joueurs qu'il désire.
         """
         self.planche = Planche()
+        if difficulte == "Légendaire":
+            self.intelligenceartificielle = IALegendaire()
+        elif difficulte == "Difficile":
+            self.intelligenceartificielle = IADifficile()
+        else:
+            self.intelligenceartificielle = IANormale()
 
-        self.intelligenceartificielle = IntelligenceArtificielle()
 
         self.couleur_joueur_courant = "noir"
 
@@ -202,7 +207,12 @@ class Partie:
             coup_choisi = self.joueur_courant.choisir_coup(
                     self.coups_possibles)
         else:
-            self.intelligenceartificielle = IntelligenceArtificielle()
+            if difficulte == "Légendaire":
+                self.intelligenceartificielle = IALegendaire()
+            elif difficulte == "Difficile":
+                self.intelligenceartificielle = IADifficile()
+            else:
+                self.intelligenceartificielle = IANormale()
             coups_ia = self.intelligenceartificielle.\
                 filtrer_meilleurs_coups(self.coups_possibles,
                                         self.couleur_joueur_courant)

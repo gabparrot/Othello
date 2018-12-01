@@ -1,5 +1,6 @@
 """
-Module principal du package othello. C'est ce module que nous allons exécuter pour démarrer votre jeu.
+Module principal du package othello. C'est ce module que nous allons exécuter
+pour démarrer votre jeu.
 """
 
 from interface.interface_othello import Application

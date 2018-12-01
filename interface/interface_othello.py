@@ -240,8 +240,8 @@ class Application(Tk):
     def nouvelle_partie():
         """ Démarre une nouvelle partie (Redémarre l'application) """
         # TODO marche pas probablement parce que c'est pas le main qu'il repart
-        python = sys.executable
-        execl(python, python, *sys.argv)
+        python = executable
+        execl(python, python, *argv)
 
 
 

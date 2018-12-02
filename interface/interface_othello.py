@@ -1,11 +1,13 @@
 from tkinter import *
 from tkinter import colorchooser
-from othello.exceptions import ErreurPositionCoup
 from othello.partie import Partie
-from sys import executable, argv
-from os import execl
+from time import sleep
 
-difficulte = "Normale"  # laisser le bug là m'tente pas d'enlever le global
+difficulte = "Normale"
+nb_cases = 8
+nb_joueurs = 1
+pasfini = True
+
 
 # ======= TODO STYLE ======= #
 # TODO 1- Faire barre d'outils en haut (Menubutton()?)
@@ -34,14 +36,17 @@ class Color:
 
     def choisir_couleur(self):
         clr = colorchooser.askcolor(title="Sélectionnez la couleur de votre choix")
-        self.color = clr[1]
+        if None not in clr:
+            self.color = clr[1]
+        else:
+            self.color = "black"
 
 
     def afficher_couleur(self):
         return str(self.color)
 
-couleur = Color()
 
+couleur = Color()
 
 
 class Bouton(Button):
@@ -49,8 +54,10 @@ class Bouton(Button):
     def __init__(self, boss, **kwargs):
 
         Button.__init__(self, boss, bg="dark grey", fg="black", bd=5,
-                        activebackground=couleur.afficher_couleur(), activeforeground="black",
+                        activebackground=couleur.afficher_couleur(),
+                        activeforeground="black",
                         font='Helvetica', **kwargs)
+
 
 class Glissoir(Scale):
     """Classe définissant le style des glissoirs gradués"""
@@ -64,41 +71,44 @@ class PlancheDeJeu(Canvas):
     carrées, ex largeur de 6, 8, 10, 12 carrées de large
     """
     def __init__(self, boss, nb_cases=8):
-        Canvas.__init__(self, boss, width=500, height=500)
+        Canvas.__init__(self, boss, width=500, height=500,)
         self.larg = 500 // nb_cases
-        self.nb_cases = nb_cases
-        self.dessiner_carres(self.larg)
-        self.centre_cases = self.trouver_centres(self.larg)
+        #self.centre_cases = self.trouver_centres(self.larg)
 
     def trouver_centres(self, larg):
         #TODO pas fini, fait juste 1 rangée
+        pass
+        global nb_cases
         centres = []
-        for carre in range(1, self.nb_cases+1):
+        for carre in range(1, nb_cases+1):
             centre_carre = larg * carre
             centres.append(centre_carre)
         return centres
 
-    def dessiner_carres(self, larg):
+    def dessiner_carres(self):
+        global nb_cases
+        cote = 500 // nb_cases
         x, y = 1, 1
-        for i in range(1, self.nb_cases + 1):
+        print(cote)
+        for i in range(1, nb_cases + 1):
             if i % 2 != 0:
-                for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + larg, y + larg,
+                for j in range(nb_cases//2):
+                    self.create_rectangle(x, y, x + cote, y + cote,
                                           fill=couleur.afficher_couleur())
-                    x += larg
-                    self.create_rectangle(x, y, x + larg, y + larg,
+                    x += cote
+                    self.create_rectangle(x, y, x + cote, y + cote,
                                           fill="white")
-                    x += larg
+                    x += cote
             else:
-                for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + larg, y + larg,
+                for j in range(nb_cases//2):
+                    self.create_rectangle(x, y, x + cote, y + cote,
                                           fill="white")
-                    x += larg
-                    self.create_rectangle(x, y, x + larg, y + larg,
+                    x += cote
+                    self.create_rectangle(x, y, x + cote, y + cote,
                                           fill=couleur.afficher_couleur())
-                    x += larg
+                    x += cote
             x = 1
-            y += larg
+            y += cote
 
 
 class Historique(Frame):
@@ -135,7 +145,7 @@ class FenJoueurs(Toplevel):
     """
     def __init__(self, boss, **kwargs):
         Toplevel.__init__(self, boss, **kwargs)  # toplevel est fenêtre popup
-        self.geometry("250x250+550+250")  # 300x300 donne dimension, 10x10 donne
+        self.geometry("250x250+550+250")  # 300x300 dimension+posX+posY
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
         Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=5, padx=10)
@@ -143,11 +153,15 @@ class FenJoueurs(Toplevel):
 
     def unjoueur(self):
         """ouvre une FenNiveauDif si 1 joueur choisi"""
+        global nb_joueurs
+        nb_joueurs = 1
         FenNiveauDif()
         self.destroy()
 
     def deuxjoueurs(self):
         """ouvre FenTypePartie si 2 joueurs"""
+        global nb_joueurs
+        nb_joueurs = 2
         FenTypePartie()
         self.destroy()
 
@@ -167,17 +181,20 @@ class FenNiveauDif(Toplevel):
         Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15, padx=10)
 
     def set_easy(self):
-        self.difficulte = "Normal"
+        global difficulte
+        difficulte = "Normal"
         FenTypePartie()
         self.destroy()
 
     def set_hard(self):
-        self.difficulte = "Difficile"
+        global difficulte
+        difficulte = "Difficile"
         FenTypePartie()
         self.destroy()
 
     def set_legend(self):
-        self.difficulte = "Légendaire"
+        global difficulte
+        difficulte = "Légendaire"
         FenTypePartie()
         self.destroy()
 
@@ -199,6 +216,8 @@ class FenTypePartie(Toplevel):
             pack(pady=5, padx=10)
 
     def partie_classique(self):
+        global pasfini
+        pasfini = False
         self.destroy()
 
     def partie_perso(self):
@@ -214,9 +233,20 @@ class FenPartiePerso(Toplevel):
     def __init__(self, **kwargs):
         Toplevel.__init__(self, **kwargs)
         self.geometry("250x250+550+250")
-        options = Frame()
-        options.pack(side=BOTTOM)
-        Glissoir(options, text="Choisir nombre de cases").pack(side=BOTTOM)
+        self.attributes('-topmost', 'true')
+        Label(self, text="Combien de cases?").pack(padx=20, pady=20, fill=X)
+        self.gliss = Glissoir(self, orient=HORIZONTAL, relief=SUNKEN, bd=2, from_=6,
+                 to_=12, tickinterval=2, resolution=2)
+        self.gliss.pack(padx=20, pady=20, fill=X)
+        Bouton(self, text="jouer", command=self.set_perso).\
+            pack(padx=20, pady=20, fill=X)
+
+    def set_perso(self):
+        """Envoie les paramètres choisis par l'utilisateur"""
+        global nb_cases, pasfini
+        nb_cases = self.gliss.get()
+        pasfini = False
+        self.destroy()
 
 
 # ====== Définition de la fenêtre maîtresse ====== #
@@ -226,26 +256,31 @@ class Brothello(Tk):
     def __init__(self):
         """Constructeur de la fenêtre principale"""
         super().__init__()
-
+        global difficulte, nb_cases, nb_joueurs
+        self.title("Brothello")
         couleur.choisir_couleur()
 
         fond = "#"
-        number = ['0','1','2','3','4','4','5','6','7','8','9']
-        for i in range(1,7):
-            if couleur.color[i] not in number :
+        number = ['0', '1', '2', '3', '4', '4', '5', '6', '7', '8', '9']
+        for i in range(1, 7):
+            if couleur.color[i] not in number:
                 fond += couleur.color[i]
             else:
                 fond += "9"
-        Brothello.config(self,bg=fond)
-        self.difficulte = "Normale"
+        Brothello.config(self, bg=fond)
+        self.go = Bouton(self, text="GO!", command=self.go)
+        self.go.grid(row=0, column=0, padx=5, pady=5, sticky=W+E)
+        FenJoueurs(self)
 
-        self.partie = Partie(self.difficulte, 2)
+    def go(self):
+        self.go.grid_remove()
+        self.partie = Partie(nb_joueurs, difficulte, nb_cases)
         self.damier = PlancheDeJeu(self)
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
-        self.title("Brothello")
         self.config(menu=TOP)
         self.geometry("800x600+550+250")
+        self.resizable(height=0, width=0)
         # TODO servira à afficher coups possibles ou si trop dur à jouer un
         # TODO coup possible au hasard à la place du joueur
         Bouton(self, text="Voir les coups possibles", command=self.conseil)\
@@ -254,20 +289,20 @@ class Brothello(Tk):
             .grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
         Bouton(self, text="Abandonner", command=self.abandon)\
             .grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
-        ScoreActuel(self).grid(row=0, column=2, sticky=W+E)
+        ScoreActuel(self).grid(row=0, column=2, sticky=W)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
-        FenJoueurs(self)
-
+        self.commencer_partie()
 
     def commencer_partie(self):
-        pass
+        global nb_cases
+        self.damier.dessiner_carres()
 
     def conseil(self):
         """ Dira à l'utilisateur les coups possibles """
         # TODO marche pas encore
-        #global difficulte
-        if self.difficulte == "Normal":
+        global difficulte
+        if difficulte == "Normal":
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
                 coups_possibles = "aucun coup possible"
@@ -282,9 +317,8 @@ class Brothello(Tk):
         # TODO plus belles pièces
         # TODO au centre des cases
         r = 25
-
         self.damier.create_oval(event.x-r, event.y-r, event.x+r, event.y+r,
-                         fill='black')
+                                fill='black')
 
     def abandon(self):
         self.histo.ajouter_texte("Le joueur {} abandonne la partie! ".format(
@@ -296,5 +330,3 @@ class Brothello(Tk):
         self.destroy()
         le_jeu = Brothello()
         le_jeu.mainloop()
-
-# ====== Exécution du programme principal ====== #

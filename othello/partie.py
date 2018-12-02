@@ -4,7 +4,7 @@ from othello.exceptions import ErreurPositionCoup
 
 
 class Partie:
-    def __init__(self, difficulte, nb_joueur, nom_fichier=None):
+    def __init__(self, nb_joueur, difficulte, nb_cases=8, nom_fichier=None):
         """
         Méthode d'initialisation d'une partie. On initialise 4 membres:
         - planche: contient la planche de la partie, celui-ci contenant le
@@ -26,7 +26,8 @@ class Partie:
         """
 
         self.difficulte = difficulte
-        self.planche = Planche()
+        self.nb_cases = nb_cases
+        self.planche = Planche(self.nb_cases)
         self.nb_joueurs = nb_joueur
         if self.difficulte == "Légendaire":
             self.intelligenceartificielle = IALegendaire()
@@ -85,19 +86,6 @@ class Partie:
             return self.creer_joueur("Humain", couleur)
         else:
             return self.creer_joueur("Ordinateur", couleur)
-
-        # type_joueur = ""
-        # types_joueurs = ("Humain", "Ordinateur")
-        #
-        # while type_joueur not in types_joueurs:
-        #     type_joueur = input("Est-ce que le joueur {} sera un Humain ou"
-        #                         " un Ordinateur? ".format(couleur)).title()
-        #     if type_joueur == "Ordi":
-        #         type_joueur = "Ordinateur"
-        #     if type_joueur not in types_joueurs:
-        #         print("Erreur, type invalide, veuillez réessayer.")
-        #     else:
-        #         return self.creer_joueur(type_joueur, couleur)
 
     def creer_joueur(self, type, couleur):
         """
@@ -316,13 +304,13 @@ class Partie:
         """
 
         while not self.partie_terminee():
-            print(self.planche)
+            #print(self.planche)
             coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
                     self.joueur_courant.couleur)
             self.coups_possibles = coups_du_tour[0]
             self.impossible_piece_la = [1]
             self.impossible_zero_mangee = [2]
-            print("Tour du joueur", self.joueur_courant.couleur)
+            #print("Tour du joueur", self.joueur_courant.couleur)
             if len(self.coups_possibles) < 1:
                 self.passer_tour()
                 if not self.tour_precedent_passe:
@@ -341,7 +329,7 @@ class Partie:
                 self.joueur_courant = self.joueur_noir
                 self.couleur_joueur_courant = "noir"
 
-        print(self.planche)
+        #print(self.planche)
         self.determiner_gagnant()
 
     def sauvegarder(self, nom_fichier):

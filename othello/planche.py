@@ -1,26 +1,22 @@
 from othello.piece import Piece
 import numpy as np
-from random import choice
+
 
 class Planche:
     """
     Classe représentant la planche d'un jeu d'Othello.
     """
-
-    def __init__(self):
+    def __init__(self, nb_cases=8):
         """
         Méthode spéciale initialisant une nouvelle planche.
         """
         # Dictionnaire de cases. La clé est une position (ligne, colonne),
         # et la valeur une instance de la classe Piece.
         self.cases = {}
-
+        # Nombre de cases de large du damier
+        self.nb_cases = nb_cases
         # Appel de la méthode qui initialise une planche par défaut.
         self.initialiser_planche_par_default()
-
-        # On joue au Othello 8x8
-        self.nb_cases = 8
-
         # Liste des coups pour la couleur courante
         self.coups_possibles = []
 
@@ -253,7 +249,6 @@ class Planche:
 
         while x in range(len(chaine) - 1):
             position = []
-
             position.append(int(chaine[x]))
             position.append(int(chaine[x + 1]))
             position = tuple(position)
@@ -265,11 +260,13 @@ class Planche:
         """
         Initialise une planche de base avec la position initiale des pièces.
         """
+        mid = self.nb_cases // 2
+
         self.cases.clear()
-        self.cases[(3, 3)] = Piece("blanc")
-        self.cases[(3, 4)] = Piece("noir")
-        self.cases[(4, 3)] = Piece("noir")
-        self.cases[(4, 4)] = Piece("blanc")
+        self.cases[mid-1, mid-1] = Piece("blanc")
+        self.cases[(mid-1, mid)] = Piece("noir")
+        self.cases[(mid, mid-1)] = Piece("noir")
+        self.cases[(mid, mid)] = Piece("blanc")
 
     def __repr__(self):
         """

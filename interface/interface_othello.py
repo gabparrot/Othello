@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import colorchooser
 from othello.exceptions import ErreurPositionCoup
 from othello.partie import Partie
 from sys import executable, argv
@@ -35,17 +36,20 @@ class Color:
         clr = colorchooser.askcolor(title="Sélectionnez la couleur de votre choix")
         self.color = clr[1]
 
+
     def afficher_couleur(self):
         return str(self.color)
 
 couleur = Color()
 
+
+
 class Bouton(Button):
     """Classe définissant le style des boutons utilisés dans le jeu"""
     def __init__(self, boss, **kwargs):
 
-        Button.__init__(self, boss, bg="dark grey", fg=couleur.afficher_couleur(), bd=5,
-                        activebackground="grey", activeforeground="black",
+        Button.__init__(self, boss, bg="dark grey", fg="black", bd=5,
+                        activebackground=couleur.afficher_couleur(), activeforeground="black",
                         font='Helvetica', **kwargs)
 
 class Glissoir(Scale):
@@ -60,7 +64,7 @@ class PlancheDeJeu(Canvas):
     carrées, ex largeur de 6, 8, 10, 12 carrées de large
     """
     def __init__(self, boss, nb_cases=8):
-        Canvas.__init__(self, boss, width=500, height=500, bg='ivory')
+        Canvas.__init__(self, boss, width=500, height=500)
         self.larg = 500 // nb_cases
         self.nb_cases = nb_cases
         self.dessiner_carres(self.larg)
@@ -222,11 +226,22 @@ class Brothello(Tk):
     def __init__(self):
         """Constructeur de la fenêtre principale"""
         super().__init__()
+
+        couleur.choisir_couleur()
+
+        fond = "#"
+        number = ['0','1','2','3','4','4','5','6','7','8','9']
+        for i in range(1,7):
+            if couleur.color[i] not in number :
+                fond += couleur.color[i]
+            else:
+                fond += "9"
+        Brothello.config(self,bg=fond)
         self.difficulte = "Normale"
 
         self.partie = Partie(self.difficulte, 2)
         self.damier = PlancheDeJeu(self)
-        self.damier.grid(row=1, column=0, rowspan=3, padx=5, pady=5)
+        self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
         self.title("Brothello")
         self.config(menu=TOP)
@@ -239,12 +254,11 @@ class Brothello(Tk):
             .grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
         Bouton(self, text="Abandonner", command=self.abandon)\
             .grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
-        Bouton(self, text="Changer couleur", command=couleur.choisir_couleur) \
-            .grid(row=1, column=0, padx=5, pady=5, sticky=W)
         ScoreActuel(self).grid(row=0, column=2, sticky=W+E)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
         FenJoueurs(self)
+
 
     def commencer_partie(self):
         pass
@@ -268,6 +282,7 @@ class Brothello(Tk):
         # TODO plus belles pièces
         # TODO au centre des cases
         r = 25
+
         self.damier.create_oval(event.x-r, event.y-r, event.x+r, event.y+r,
                          fill='black')
 

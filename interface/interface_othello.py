@@ -75,29 +75,30 @@ class PlancheDeJeu(Canvas):
     def __init__(self, boss):
         Canvas.__init__(self, boss, width=500, height=500)
         self.nb_cases = boss.nb_cases
+        self.largeur = boss.largeur
 
     def dessiner_carres(self):
-        cote = 500 // self.nb_cases
+        self.largeur = 500 // self.nb_cases
         x, y = 1, 1
         for i in range(1, self.nb_cases + 1):
             if i % 2 != 0:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + cote, y + cote,
+                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
                                           fill=couleur.afficher_couleur())
-                    x += cote
-                    self.create_rectangle(x, y, x + cote, y + cote,
+                    x += self.largeur
+                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
                                           fill="white")
-                    x += cote
+                    x += self.largeur
             else:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + cote, y + cote,
+                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
                                           fill="white")
-                    x += cote
-                    self.create_rectangle(x, y, x + cote, y + cote,
+                    x += self.largeur
+                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
                                           fill=couleur.afficher_couleur())
-                    x += cote
+                    x += self.largeur
             x = 1
-            y += cote
+            y += self.largeur
 
 
 class Historique(Frame):
@@ -296,6 +297,7 @@ class Brothello(Tk):
         self.difficulte = 'Normal'
         self.type_partie = 'perso'
         self.nb_joueurs = 1
+        self.largeur = 500//self.nb_cases
 
         # Popups choix options du jeu
         fen_joueur = FenJoueurs(self)
@@ -313,7 +315,7 @@ class Brothello(Tk):
             self.wait_window(fen_type)
             self.type_partie = fen_type.type_partie
         else:
-            fen_joueur = FenJoueurs(self)  # Si erreur nb_joueurs repose la question
+            fen_joueur = FenJoueurs(self)  # Si erreur nb_joueurs redemande
             self.wait_window(fen_joueur)
             self.nb_joueurs = fen_joueur.nb_joueurs
         if self.type_partie == 'classique':
@@ -323,10 +325,11 @@ class Brothello(Tk):
             self.wait_window(fen_perso)
             self.nb_cases = fen_perso.nb_cases
         else:
-            fen_perso = FenPartiePerso(self)  # Si erreur demande nb_cases au joueur
+            fen_perso = FenPartiePerso(self)  # Si erreur redemande nb_cases
             self.wait_window(fen_perso)
             self.nb_cases = fen_perso.nb_cases
         # Création de l'instance du jeu et du canevas
+        self.largeur = 500//self.nb_cases
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.damier = PlancheDeJeu(self)
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
@@ -337,6 +340,19 @@ class Brothello(Tk):
         bout_newgame.config(state=NORMAL)
         bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
+
+    def pointeur(self, event):
+        """ Dessine une pièce (gros rond laid) où on clique"""
+        # TODO plus belles pièces
+
+        # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
+        case_clic = (event.x//self.largeur, event.y//self.largeur)
+        print(case_clic, "Case choisie")  # print pour fins de tests
+        mid_x = event.x - event.x % self.largeur + self.largeur//2
+        mid_y = event.y - event.y % self.largeur + self.largeur//2
+        r = self.largeur//5*2
+        self.damier.create_oval(mid_x-r, mid_y-r, mid_x+r, mid_y+r,
+                                fill='black')
 
     def conseil(self):
         """ Dira à l'utilisateur les coups possibles """
@@ -351,21 +367,6 @@ class Brothello(Tk):
         else:
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
                                      " normale! Débrouillez-vous! ")
-
-    def pointeur(self, event):
-        """ Dessine une pièce (gros rond laid) où on clique"""
-        # TODO plus belles pièces
-        # TODO au centre des cases
-        largeur = 500 // self.nb_cases  # largeur case = largeur can / nb_cases
-
-        # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
-        case_clic = (event.x//largeur, event.y//largeur)
-        print(case_clic, "Case choisie")  # print pour fins de tests
-        mid_x = event.x - event.x % largeur + largeur//2
-        mid_y = event.y - event.y % largeur + largeur//2
-        r = largeur//5*2
-        self.damier.create_oval(mid_x-r, mid_y-r, mid_x+r, mid_y+r,
-                                fill='black')
 
     def abandon(self):
         self.histo.ajouter_texte("Le joueur {} abandonne la partie! ".format(

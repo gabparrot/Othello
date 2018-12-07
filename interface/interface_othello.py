@@ -22,9 +22,7 @@ pasfini = True
 # TODO 2- À chaque coup demandé, verifier avec self.partie.exceptions
 # TODO 3- Établir des conditions if qui disent à quelle case appartient le clic
 # TODO 4- Établir le centre de chaque case pour y mettre la pièce
-# TODO 5- Enlever bouton go et intégrer correctement les toplevel avec leur
-# TODO       master pour qu'elles pausent la mainloop
-# TODO 6- Gérer cas où joueur ferme le toplevel sans réponse
+# TODO 5- Gérer cas où joueur ferme le toplevel sans réponse
 
 # === Définition des objets esclaves et de leurs éléments de style === #
 
@@ -358,13 +356,16 @@ class Brothello(Tk):
         """ Dessine une pièce (gros rond laid) où on clique"""
         # TODO plus belles pièces
         # TODO au centre des cases
-        # r = 25
-        # self.damier.create_oval(event.x-r, event.y-r, event.x+r, event.y+r,
-        #                         fill='black')
-        # mettons event = (15, 15)
-        # larg = 22
-        # milieu = 11, 33, 55, 77, 99, etc
-        # si entre 1 et 22 en x, mettre piece sur 11
+        largeur = 500 // self.nb_cases  # largeur case = largeur can / nb_cases
+
+        # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
+        case_clic = (event.x//largeur, event.y//largeur)
+        print(case_clic, "Case choisie")  # print pour fins de tests
+        mid_x = event.x - event.x % largeur + largeur//2
+        mid_y = event.y - event.y % largeur + largeur//2
+        r = largeur//5*2
+        self.damier.create_oval(mid_x-r, mid_y-r, mid_x+r, mid_y+r,
+                                fill='black')
 
     def abandon(self):
         self.histo.ajouter_texte("Le joueur {} abandonne la partie! ".format(
@@ -376,3 +377,6 @@ class Brothello(Tk):
         self.destroy()
         le_jeu = Brothello()
         le_jeu.mainloop()
+
+
+

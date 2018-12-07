@@ -1,7 +1,7 @@
 from tkinter import *
-from tkinter import colorchooser
+from tkinter import colorchooser, messagebox
 from othello.partie import Partie
-from time import sleep
+#from time import sleep
 
 difficulte = "Normale"
 nb_cases = 8
@@ -20,7 +20,11 @@ pasfini = True
 # TODO 1- convertir la position demandée sur le GUI Format (A, 1) en format
 # TODO    (0, 0) avant de la valider ou de la jouer
 # TODO 2- À chaque coup demandé, verifier avec self.partie.exceptions
-
+# TODO 3- Établir des conditions if qui disent à quelle case appartient le clic
+# TODO 4- Établir le centre de chaque case pour y mettre la pièce
+# TODO 5- Enlever bouton go et intégrer correctement les toplevel avec leur
+# TODO       master pour qu'elles pausent la mainloop
+# TODO 6- Gérer cas où joueur ferme le toplevel sans réponse
 
 # === Définition des objets esclaves et de leurs éléments de style === #
 
@@ -70,29 +74,16 @@ class PlancheDeJeu(Canvas):
     le damier, n'accepte présentement que des nombres pair de largeur de
     carrées, ex largeur de 6, 8, 10, 12 carrées de large
     """
-    def __init__(self, boss, nb_cases=8):
-        Canvas.__init__(self, boss, width=500, height=500,)
-        self.larg = 500 // nb_cases
-        #self.centre_cases = self.trouver_centres(self.larg)
-
-    def trouver_centres(self, larg):
-        #TODO pas fini, fait juste 1 rangée
-        pass
-        global nb_cases
-        centres = []
-        for carre in range(1, nb_cases+1):
-            centre_carre = larg * carre
-            centres.append(centre_carre)
-        return centres
+    def __init__(self, boss):
+        Canvas.__init__(self, boss, width=500, height=500)
+        self.nb_cases = boss.nb_cases
 
     def dessiner_carres(self):
-        global nb_cases
-        cote = 500 // nb_cases
+        cote = 500 // self.nb_cases
         x, y = 1, 1
-        print(cote)
-        for i in range(1, nb_cases + 1):
+        for i in range(1, self.nb_cases + 1):
             if i % 2 != 0:
-                for j in range(nb_cases//2):
+                for j in range(self.nb_cases//2):
                     self.create_rectangle(x, y, x + cote, y + cote,
                                           fill=couleur.afficher_couleur())
                     x += cote
@@ -100,7 +91,7 @@ class PlancheDeJeu(Canvas):
                                           fill="white")
                     x += cote
             else:
-                for j in range(nb_cases//2):
+                for j in range(self.nb_cases//2):
                     self.create_rectangle(x, y, x + cote, y + cote,
                                           fill="white")
                     x += cote
@@ -143,26 +134,29 @@ class FenJoueurs(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir combien de joueurs
     humains participeront à la partie
     """
-    def __init__(self, boss, **kwargs):
-        Toplevel.__init__(self, boss, **kwargs)  # toplevel est fenêtre popup
+    def __init__(self, boss):
+        super().__init__(boss)
+        self.boss = boss
+        self.transient(boss)
+        self.grab_set()
+
         self.geometry("250x250+550+250")  # 300x300 dimension+posX+posY
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
         Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=5, padx=10)
         Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5, padx=10)
-
     def unjoueur(self):
         """ouvre une FenNiveauDif si 1 joueur choisi"""
-        global nb_joueurs
-        nb_joueurs = 1
-        FenNiveauDif()
+        self.nb_joueurs = 1
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
     def deuxjoueurs(self):
         """ouvre FenTypePartie si 2 joueurs"""
-        global nb_joueurs
-        nb_joueurs = 2
-        FenTypePartie()
+        self.nb_joueurs = 2
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
 
@@ -171,8 +165,12 @@ class FenNiveauDif(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir le niveau de
     difficulté des parties à 1 joueur.
     """
-    def __init__(self, **kwargs):
-        Toplevel.__init__(self, **kwargs)
+    def __init__(self, boss):
+        super().__init__(boss)
+        self.boss = boss
+        self.transient(boss)
+        self.grab_set()
+
         self.geometry("250x250+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
@@ -181,21 +179,21 @@ class FenNiveauDif(Toplevel):
         Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15, padx=10)
 
     def set_easy(self):
-        global difficulte
-        difficulte = "Normal"
-        FenTypePartie()
+        self.difficulte = "Normal"
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
     def set_hard(self):
-        global difficulte
-        difficulte = "Difficile"
-        FenTypePartie()
+        self.difficulte = "Difficile"
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
     def set_legend(self):
-        global difficulte
-        difficulte = "Légendaire"
-        FenTypePartie()
+        self.difficulte = "Légendaire"
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
 
@@ -204,9 +202,12 @@ class FenTypePartie(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir le type de partie
     soit classique ou personnalisée
     """
-    def __init__(self, **kwargs):
-        # TODO rien dedans bcuz fuckoff pour le moment
-        Toplevel.__init__(self, **kwargs)
+    def __init__(self, boss):
+        super().__init__(boss)
+        self.boss = boss
+        self.transient(boss)
+        self.grab_set()
+
         self.geometry("250x250+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
@@ -216,12 +217,15 @@ class FenTypePartie(Toplevel):
             pack(pady=5, padx=10)
 
     def partie_classique(self):
-        global pasfini
-        pasfini = False
+        self.type_partie = 'classique'
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
     def partie_perso(self):
-        FenPartiePerso()
+        self.type_partie = 'perso'
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
 
@@ -230,8 +234,12 @@ class FenPartiePerso(Toplevel):
     Fenêtre satellite contenant les options de personnalisations lorsque le
     joueur choisi de faire une partie personnalisée
     """
-    def __init__(self, **kwargs):
-        Toplevel.__init__(self, **kwargs)
+    def __init__(self, boss):
+        super().__init__(boss)
+        self.boss = boss
+        self.transient(boss)
+        self.grab_set()
+
         self.geometry("250x250+550+250")
         self.attributes('-topmost', 'true')
         Label(self, text="Combien de cases?").pack(padx=20, pady=20, fill=X)
@@ -243,9 +251,9 @@ class FenPartiePerso(Toplevel):
 
     def set_perso(self):
         """Envoie les paramètres choisis par l'utilisateur"""
-        global nb_cases, pasfini
-        nb_cases = self.gliss.get()
-        pasfini = False
+        self.nb_cases = self.gliss.get()
+        self.grab_release()
+        self.master.focus_set()
         self.destroy()
 
 
@@ -256,53 +264,87 @@ class Brothello(Tk):
     def __init__(self):
         """Constructeur de la fenêtre principale"""
         super().__init__()
-        global difficulte, nb_cases, nb_joueurs
-        self.title("Brothello")
-        couleur.choisir_couleur()
 
+        # Caractérisiques de la fenêtre principale
+        self.title("Brothello")
+        self.geometry("800x600+550+250")
+        self.resizable(height=0, width=0)
+        bout_conseil = Bouton(self, text="Voir les coups possibles",
+                              command=self.conseil, state=DISABLED)
+        bout_conseil.grid(row=0, column=0, padx=5, pady=5, sticky=W)
+        bout_newgame = Bouton(self, text="Nouvelle partie",
+                              command=self.nouvelle_partie,state=DISABLED)
+        bout_newgame.grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
+        bout_abandon = Bouton(self, text="Abandonner", command=self.abandon,
+               state=DISABLED)
+        bout_abandon.grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
+        ScoreActuel(self).grid(row=0, column=2, sticky=W)
+        self.histo = Historique(self, height=21)
+        self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
+
+        # Gestion couleur du board
+        couleur.choisir_couleur()
         fond = "#"
-        number = ['0', '1', '2', '3', '4', '4', '5', '6', '7', '8', '9']
+        number = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         for i in range(1, 7):
             if couleur.color[i] not in number:
                 fond += couleur.color[i]
             else:
                 fond += "9"
         Brothello.config(self, bg=fond)
-        self.go = Bouton(self, text="GO!", command=self.go)
-        self.go.grid(row=0, column=0, padx=5, pady=5, sticky=W+E)
-        FenJoueurs(self)
 
-    def go(self):
-        self.go.grid_remove()
-        self.partie = Partie(nb_joueurs, difficulte, nb_cases)
+        # Définition des caractéristiques de la partie par défaut
+        self.nb_cases = 8
+        self.difficulte = 'Normal'
+        self.type_partie = 'perso'
+        self.nb_joueurs = 1
+
+        # Popups choix options du jeu
+        fen_joueur = FenJoueurs(self)
+        self.wait_window(fen_joueur)
+        self.nb_joueurs = fen_joueur.nb_joueurs
+        if self.nb_joueurs == 1:
+            fen_diff = FenNiveauDif(self)
+            self.wait_window(fen_diff)
+            self.difficulte = fen_diff.difficulte
+            fen_type = FenTypePartie(self)
+            self.wait_window(fen_type)
+            self.type_partie = fen_type.type_partie
+        elif self.nb_joueurs == 2:
+            fen_type = FenTypePartie(self)
+            self.wait_window(fen_type)
+            self.type_partie = fen_type.type_partie
+        else:
+            fen_joueur = FenJoueurs(self)  # Si erreur nb_joueurs repose la question
+            self.wait_window(fen_joueur)
+            self.nb_joueurs = fen_joueur.nb_joueurs
+        if self.type_partie == 'classique':
+            self.nb_cases = 8
+        elif self.type_partie == 'perso':
+            fen_perso = FenPartiePerso(self)
+            self.wait_window(fen_perso)
+            self.nb_cases = fen_perso.nb_cases
+        else:
+            fen_perso = FenPartiePerso(self)  # Si erreur demande nb_cases au joueur
+            self.wait_window(fen_perso)
+            self.nb_cases = fen_perso.nb_cases
+        # Création de l'instance du jeu et du canevas
+        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.damier = PlancheDeJeu(self)
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
-        self.config(menu=TOP)
-        self.geometry("800x600+550+250")
-        self.resizable(height=0, width=0)
-        # TODO servira à afficher coups possibles ou si trop dur à jouer un
-        # TODO coup possible au hasard à la place du joueur
-        Bouton(self, text="Voir les coups possibles", command=self.conseil)\
-            .grid(row=0, column=0, padx=5, pady=5, sticky=W)
-        Bouton(self, text="Nouvelle partie", command=self.nouvelle_partie)\
-            .grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
-        Bouton(self, text="Abandonner", command=self.abandon)\
-            .grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
-        ScoreActuel(self).grid(row=0, column=2, sticky=W)
-        self.histo = Historique(self, height=21)
-        self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
-        self.commencer_partie()
-
-    def commencer_partie(self):
-        global nb_cases
         self.damier.dessiner_carres()
+
+        # Activation des éléments de l'interface
+        bout_newgame.config(state=NORMAL)
+        bout_abandon.config(state=NORMAL)
+        bout_conseil.config(state=NORMAL)
 
     def conseil(self):
         """ Dira à l'utilisateur les coups possibles """
         # TODO marche pas encore
-        global difficulte
-        if difficulte == "Normal":
+
+        if self.difficulte == "Normal":
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
                 coups_possibles = "aucun coup possible"
@@ -316,9 +358,13 @@ class Brothello(Tk):
         """ Dessine une pièce (gros rond laid) où on clique"""
         # TODO plus belles pièces
         # TODO au centre des cases
-        r = 25
-        self.damier.create_oval(event.x-r, event.y-r, event.x+r, event.y+r,
-                                fill='black')
+        # r = 25
+        # self.damier.create_oval(event.x-r, event.y-r, event.x+r, event.y+r,
+        #                         fill='black')
+        # mettons event = (15, 15)
+        # larg = 22
+        # milieu = 11, 33, 55, 77, 99, etc
+        # si entre 1 et 22 en x, mettre piece sur 11
 
     def abandon(self):
         self.histo.ajouter_texte("Le joueur {} abandonne la partie! ".format(

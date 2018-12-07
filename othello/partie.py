@@ -1,10 +1,9 @@
 from othello.planche import Planche, IADifficile, IALegendaire, IANormale
 from othello.joueur import JoueurOrdinateur, JoueurHumain
-from othello.exceptions import ErreurPositionCoup
 
 
 class Partie:
-    def __init__(self, nb_joueur, difficulte, nb_cases=8, nom_fichier=None):
+    def __init__(self, nb_joueurs, difficulte, nb_cases=8, nom_fichier=None):
         """
         Méthode d'initialisation d'une partie. On initialise 4 membres:
         - planche: contient la planche de la partie, celui-ci contenant le
@@ -28,13 +27,15 @@ class Partie:
         self.difficulte = difficulte
         self.nb_cases = nb_cases
         self.planche = Planche(self.nb_cases)
-        self.nb_joueurs = nb_joueur
-        if self.difficulte == "Légendaire":
-            self.intelligenceartificielle = IALegendaire()
-        elif self.difficulte == "Difficile":
-            self.intelligenceartificielle = IADifficile()
-        else:
-            self.intelligenceartificielle = IANormale()
+        self.nb_joueurs = nb_joueurs
+
+        if self.nb_joueurs == 1:
+            if self.difficulte == "Légendaire":
+                self.intelligenceartificielle = IALegendaire()
+            elif self.difficulte == "Difficile":
+                self.intelligenceartificielle = IADifficile()
+            else:
+                self.intelligenceartificielle = IANormale()
 
         self.couleur_joueur_courant = "noir"
 
@@ -43,12 +44,6 @@ class Partie:
         self.deux_tours_passes = False
 
         self.coups_possibles = []
-        self.impossible_piece_la = []
-        self.impossible_zero_mangee = []
-
-        self.exceptions = ErreurPositionCoup(self.coups_possibles,
-                                             self.impossible_piece_la,
-                                             self.impossible_zero_mangee)
 
         if nom_fichier is not None:
             self.charger(nom_fichier)
@@ -62,44 +57,27 @@ class Partie:
 
         Pour créer les objets joueur, faites appel à demander_type_joueur()
         """
-        self.joueur_noir = self.demander_type_joueur("noir")
-        self.joueur_blanc = self.demander_type_joueur("blanc")
+        self.joueur_noir = self.creer_joueur("Humain", "noir")
+        if self.nb_joueurs == 1:
+            self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
+        elif self.nb_joueurs == 2:
+            self.joueur_blanc = self.creer_joueur("Huamin", "blanc")
         self.joueur_courant = self.joueur_noir
 
-    def demander_type_joueur(self, couleur):
-        """
-        Demande à l'usager quel type de joueur ('Humain' ou 'Ordinateur') il
-        désire pour le joueur de la couleur.
-
-        Args:
-            couleur: La couleur pour laquelle on veut le type de joueur.
-
-        Returns:
-            Un objet Joueur, de type JoueurHumain si l'usager a entré 'Humain',
-            JoueurOrdinateur s'il a entré
-            'Ordinateur'.
-        """
-
-        if couleur == "noir":
-            return self.creer_joueur("Humain", couleur)
-        elif self.nb_joueurs == 2:
-            return self.creer_joueur("Humain", couleur)
-        else:
-            return self.creer_joueur("Ordinateur", couleur)
-
-    def creer_joueur(self, type, couleur):
+    @staticmethod
+    def creer_joueur(typejoueur: str, couleur: str):
         """
         Crée l'objet Joueur approprié, selon le type passé en paramètre.
 
         Args:
-            type: le type de joueur, "Ordinateur" ou "Humain"
+            typejoueur: le type de joueur, "Ordinateur" ou "Humain"
             couleur: la couleur du pion joué par le jouer, "blanc" ou "noir"
 
         Returns:
             Un objet JoueurHumain si le type est "Humain", JoueurOrdinateur
             sinon
         """
-        if type == "Ordinateur":
+        if typejoueur == "Ordinateur":
             joueur = JoueurOrdinateur(couleur)
         else:
             joueur = JoueurHumain(couleur)
@@ -143,7 +121,7 @@ class Partie:
         else:
             return True, "Coup accepté. "
 
-    def tour(self):
+    def tour(self, coup_clic: tuple):
         """
         Cette méthode simule le tour d'un joueur, et doit effectuer les actions
          suivantes:
@@ -161,35 +139,21 @@ class Partie:
             La simulation du tour d'un joueur
         """
         coup_fait = False
-        coup_demander = self.demander_coup()
+        coup_demander = self.demander_coup(coup_clic)
 
         # Tant que coup est invalide on affiche msg erreur et redemande
         while not coup_fait:
-            if not self.valider_position_coup(coup_demander)[0]:
-                print(self.valider_position_coup(coup_demander)[1])
                 if self.joueur_courant.obtenir_type_joueur() == "Humain":
-                    coup_demander = self.demander_coup()
+                    coup_demander = self.demander_coup(coup_clic)
+                    coup_fait = True
                 else:  # En cas d'erreur de l'IA
-                    if coup_demander == (-1, -1):
-                        print("Aucun coup possible pour le joueur {}. Il passe"
-                              " donc son tour. ")
-                    else:
-                        print("Erreur dans le coup demandé par l'ordinateur. "
-                              "Il passe donc son tour")
-                        coup_fait = True
-            else:
-                coup_fait = True
-
-        if self.joueur_courant.obtenir_type_joueur() == "Ordinateur":
-            print("L'ordinateur ({}) a joué sur le case {} et a mangé {} de "
-                  "vos pièces!".format(
-                self.couleur_joueur_courant, coup_demander,
-                len(self.planche.obtenir_positions_mangees(
-                    coup_demander, self.couleur_joueur_courant))))
+                    coup_demander = self.demander_coup((-1, -1))
+                    coup_fait = True
         self.planche.jouer_coup(coup_demander,
                                 self.couleur_joueur_courant)
+        return coup_demander
 
-    def demander_coup(self):
+    def demander_coup(self, coup_clic: tuple):
         """
         Demande au joueur courant le coup qu'il souhaite jouer. Si le joueur
         courant est un humain, on appelle directement
@@ -203,8 +167,7 @@ class Partie:
         """
 
         if self.joueur_courant.obtenir_type_joueur() == "Humain":
-            coup_choisi = self.joueur_courant.choisir_coup(
-                    self.coups_possibles)
+            coup_choisi = coup_clic
         else:
             if self.difficulte == "Légendaire":
                 self.intelligenceartificielle = IALegendaire()
@@ -268,12 +231,14 @@ class Partie:
             gagnant = None
 
         if gagnant:
-            print("La partie est terminée, le joueur {} l'emporte {} à {}"
-                  .format(gagnant.couleur, max(pieces_noires, pieces_blanches),
-                          min(pieces_noires, pieces_blanches)))
+            msg = "La partie est terminée, le joueur {} l'emporte {} à {}".\
+            format(gagnant.couleur, max(pieces_noires, pieces_blanches),
+            min(pieces_noires, pieces_blanches))
+            return msg
         else:
-            print("Partie nulle! Les deux joueurs terminent avec un score "
-                  "de {}".format(pieces_noires))  # noir ou blanc même chose
+            msg = "Partie nulle! Les deux joueurs terminent avec un score"
+            "de {}".format(pieces_noires)  # noir ou blanc même chose
+            return msg
 
     def jouer(self):
         """
@@ -303,34 +268,24 @@ class Partie:
            fonction à implémenter que vous pourriez tout simplement appeler.
         """
 
-        while not self.partie_terminee():
-            #print(self.planche)
-            coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
-                    self.joueur_courant.couleur)
-            self.coups_possibles = coups_du_tour[0]
-            self.impossible_piece_la = [1]
-            self.impossible_zero_mangee = [2]
-            #print("Tour du joueur", self.joueur_courant.couleur)
-            if len(self.coups_possibles) < 1:
-                self.passer_tour()
-                if not self.tour_precedent_passe:
-                    self.tour_precedent_passe = True
-                else:
-                    self.deux_tours_passes = True
-            else:
-                self.exceptions = ErreurPositionCoup(self.coups_possibles,
-                    self.impossible_piece_la, self.impossible_zero_mangee)
-                self.tour()
-                self.tour_precedent_passe = False
-            if self.couleur_joueur_courant == "noir":
-                self.joueur_courant = self.joueur_blanc
-                self.couleur_joueur_courant = "blanc"
-            else:
-                self.joueur_courant = self.joueur_noir
-                self.couleur_joueur_courant = "noir"
+        self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
+                self.joueur_courant.couleur)
+        self.coups_possibles = self.coups_du_tour[0]
 
-        #print(self.planche)
-        self.determiner_gagnant()
+        if len(self.coups_possibles) < 1:
+            self.passer_tour()
+            if not self.tour_precedent_passe:
+                self.tour_precedent_passe = True
+            else:
+                self.deux_tours_passes = True
+        else:
+            self.tour_precedent_passe = False
+        if self.couleur_joueur_courant == "noir":
+            self.joueur_courant = self.joueur_blanc
+            self.couleur_joueur_courant = "blanc"
+        else:
+            self.joueur_courant = self.joueur_noir
+            self.couleur_joueur_courant = "noir"
 
     def sauvegarder(self, nom_fichier):
         """

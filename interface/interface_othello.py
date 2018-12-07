@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import colorchooser, messagebox
 from othello.partie import Partie
-#from time import sleep
+from othello.exceptions import ErreurPositionCoup
+from random import choice
 
 difficulte = "Normale"
 nb_cases = 8
@@ -328,31 +329,116 @@ class Brothello(Tk):
             fen_perso = FenPartiePerso(self)  # Si erreur redemande nb_cases
             self.wait_window(fen_perso)
             self.nb_cases = fen_perso.nb_cases
-        # Création de l'instance du jeu et du canevas
+        print("après if else")
+        # Création du canevas
         self.largeur = 500//self.nb_cases
-        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.damier = PlancheDeJeu(self)
+        print("damier créé")
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
-        self.damier.dessiner_carres()
+        print("damien grid avnat partie")
+        # Création de l'instance du jeu et liste des coups possibles
+
+        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
+        print("partie cree")
+        self.partie.jouer()
+        print("partie jouer")
+        self.filtre_exceptions = ErreurPositionCoup(self.partie.coups_du_tour)
+        print("except")
+
+
 
         # Activation des éléments de l'interface
         bout_newgame.config(state=NORMAL)
         bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
 
-    def pointeur(self, event):
+    def initialiser_pieces(self):
+        """Dessine toutes les pièces présentes dans le dictionnaire de pièces
+        """
+        #todo sera possible d'utiliser ceci pour changer thème (couleur) en
+        #todo cours de partie (dessiner canevas puis redessiner pieces avec ca)
+        for piece in self.partie.planche.cases:
+            mid_x = piece.key[0] * self.largeur + self.largeur//2
+            mid_y = piece.key[1] * self.largeur + self.largeur//2
+            couleur_piece = piece.couleur
+            self.dessiner_piece(mid_x, mid_y, couleur_piece)
+
+    def tour_humain(self, case_clic: tuple):
+        """ joue le coup du clic humain """
+        coup_jouer = self.partie.tour(case_clic)
+        self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
+                                 f" a joué en {coup_jouer}")
+
+
+    def pointeur(self, event: EventType):
         """ Dessine une pièce (gros rond laid) où on clique"""
-        # TODO plus belles pièces
+
+        #self.clic_recu = choice(True, False)  # Termine attente clic
 
         # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
         case_clic = (event.x//self.largeur, event.y//self.largeur)
         print(case_clic, "Case choisie")  # print pour fins de tests
+        self.histo.ajouter_texte(f"Clic reçu en {case_clic}")
+
+        # établir milieu de la case
         mid_x = event.x - event.x % self.largeur + self.largeur//2
         mid_y = event.y - event.y % self.largeur + self.largeur//2
+
+        # Valider puis jouer le coup
+        if self.valider_coup(case_clic):
+            self.tour_humain(case_clic)
+            couleur_piece = self.partie.couleur_joueur_courant
+            self.dessiner_piece(mid_x, mid_y, couleur_piece)
+            self.partie.jouer()
+            if self.partie.partie_terminee():
+                self.histo.ajouter_texte(self.partie.determiner_gagnant())
+                txt_fin = self.partie.determiner_gagnant() + \
+                          '\nVoulez vous jouer une nouvelle partie?'
+                box_fin = messagebox.askyesno(title='Partie teminée!',
+                                              text=txt_fin)
+                if not box_fin:
+                    self.quit()
+                elif box_fin:
+                    self.nouvelle_partie()
+            self.histo.ajouter_texte("Tour du joueur {}".format(
+                self.partie.couleur_joueur_courant))
+            if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
+                self.tour_ordi()
+
+    def tour_ordi(self):
+        """ fait jouer l'ordi """
+
+        if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
+            coup_jouer = self.partie.tour((-1, -1))
+            self.histo.ajouter_texte(f"Ordinateur a joué en {coup_jouer}")
+
+    def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
+        """ trace la pièce dans le canevas"""
+        #todo docstring
+        #todo plus belle pièce
+        #todo pièce change avec couleur joueur courant
+
         r = self.largeur//5*2
         self.damier.create_oval(mid_x-r, mid_y-r, mid_x+r, mid_y+r,
-                                fill='black')
+                                fill=couleur_piece)
+
+
+    def valider_coup(self, position: tuple):
+        """vérifie si coup valide, affiche msg sinon"""
+        #todo docstring
+        #todo ne pas oublier mettre à jour erreurpositioncoup à chaque tour
+        try:
+            try_coup = self.filtre_exceptions.verifier_coup_valide(position)
+            if try_coup[0]:
+                return True
+            elif not try_coup[0]:
+                messagebox.Dialog(self, title='Coup demandé invalide',
+                                  text=try_coup[1])
+                return False
+        except:
+            messagebox.Dialog(self, title='Coup demandé invalide')
+            return False
 
     def conseil(self):
         """ Dira à l'utilisateur les coups possibles """
@@ -378,6 +464,5 @@ class Brothello(Tk):
         self.destroy()
         le_jeu = Brothello()
         le_jeu.mainloop()
-
 
 

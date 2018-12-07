@@ -28,6 +28,9 @@ class Planche:
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
 
+        print("dict", self.cases)
+        print("nb_cases", self.nb_cases)
+
     def get_piece(self, position):
         """
         Récupère une pièce dans la planche.

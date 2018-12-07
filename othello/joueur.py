@@ -71,30 +71,6 @@ class JoueurHumain(Joueur):
     def obtenir_type_joueur(self):
         return "Humain"
 
-    def choisir_coup(self, coups_possibles):
-        """
-        Demande successivement à l'usager à quelle ligne, puis à quelle
-        colonne il désire jouer.
-
-        Args:
-            coups_possibles: Le dictionnaire des coups possibles
-
-        Returns:
-            un couple (ligne, colonne) représentant la position du coup désiré.
-        """
-        try:
-            input_row = int(input("Sur quelles lignes (0 à 7) voulez vous "
-                                  "jouer votre coup? "))
-            input_col = int(input("Et sur quelle colonne? (0 à 7) "))
-            return input_row, input_col
-
-        except ValueError:
-            print("Position invalide.\n\n")
-            # Si usager fait entree invalide, on retourne tuple hors planche
-            # Ceci forcera le programme à redemander le coup au joueur.
-            return -1, -1
-
-
 class JoueurOrdinateur(Joueur):
     """
     Classe modélisant un joueur Ordinateur.

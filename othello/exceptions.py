@@ -24,12 +24,12 @@ class ErreurPositionCoup(object):
     faire appel à ces listes pour valider le coup choisi par l'utilisateur
     sans faire appel au code central du jeu.
     """
-    def __init__(self, coups_possibles, piece_la, zero_mangees):
-        self.coups_possibles = coups_possibles
-        self.impossible_piece_la = piece_la
-        self.impossible_zero_mangee = zero_mangees
+    def __init__(self, listes_coups):
+        self.coups_possibles = listes_coups[0]
+        self.impossible_piece_la = listes_coups[1]
+        self.impossible_zero_mangee = listes_coups[2]
 
-    def verifier_validiter_tour(self, coup_demander):
+    def verifier_coup_valide(self, coup_demander):
         """
         Prend en paramètre le coup demandé par l'utilisateur sur l'interface
         graphique et verifie s'il appartient à l'une des listes de coups

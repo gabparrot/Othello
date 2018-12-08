@@ -35,10 +35,10 @@ pasfini = True
 
 
 class Color:
-    color = "black"
+    color = "deepskyblue2"
 
     def choisir_couleur(self):
-        clr = colorchooser.askcolor(title="Sélectionnez la couleur de votre choix")
+        clr = colorchooser.askcolor(title="Modifier la couleur de la planche")
         if None not in clr:
             self.color = clr[1]
         else:
@@ -57,8 +57,8 @@ class Bouton(Button):
     def __init__(self, boss, **kwargs):
 
         Button.__init__(self, boss, bg="dark grey", fg="black", bd=5,
-                        activebackground=couleur.afficher_couleur(),
-                        activeforeground="black",
+                        activebackground="grey",
+                        activeforeground="white",
                         font='Helvetica', **kwargs)
 
 
@@ -121,7 +121,7 @@ class Historique(Frame):
 
 class ScoreActuel(Label):
     def __init__(self, boss):
-        Label.__init__(self, boss, font='Helvetica', text="score: ")
+        Label.__init__(self, boss, font='Helvetica', text="score: ", bg ="white")
 
     def changer_score(self, score_a_ecrire):
         self.labelText = ('1.0', score_a_ecrire)
@@ -267,7 +267,8 @@ class Brothello(Tk):
 
         # Caractérisiques de la fenêtre principale
         self.title("Brothello")
-        self.geometry("800x600+550+250")
+        Brothello.config(self, bg="white")
+        self.geometry("800x650+550+250")
         self.resizable(height=0, width=0)
         bout_conseil = Bouton(self, text="Voir les coups possibles",
                               command=self.conseil, state=DISABLED)
@@ -283,15 +284,8 @@ class Brothello(Tk):
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
 
         # Gestion couleur du board
-        couleur.choisir_couleur()
-        fond = "#"
-        number = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        for i in range(1, 7):
-            if couleur.color[i] not in number:
-                fond += couleur.color[i]
-            else:
-                fond += "9"
-        Brothello.config(self, bg=fond)
+        Bouton(self, text="Changer couleur", command = self.action_bouton_couleur) \
+            .grid(row=1, column=0, padx=5, pady=5, sticky=W)
 
         # Définition des caractéristiques de la partie par défaut
         self.nb_cases = 8
@@ -329,44 +323,61 @@ class Brothello(Tk):
             fen_perso = FenPartiePerso(self)  # Si erreur redemande nb_cases
             self.wait_window(fen_perso)
             self.nb_cases = fen_perso.nb_cases
-        print("après if else")
+
         # Création du canevas
-        self.largeur = 500//self.nb_cases
-        self.damier = PlancheDeJeu(self)
-        print("damier créé")
-        self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
-        self.damier.bind("<Button-1>", self.pointeur)
-        print("damien grid avnat partie")
+        self.initialiser_damier()
+
         # Création de l'instance du jeu et liste des coups possibles
-
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
-        print("partie cree")
         self.partie.jouer()
-        print("partie jouer")
+        self.placer_pieces()
         self.filtre_exceptions = ErreurPositionCoup(self.partie.coups_du_tour)
-        print("except")
-
-
 
         # Activation des éléments de l'interface
         bout_newgame.config(state=NORMAL)
         bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
 
-    def initialiser_pieces(self):
+    def action_bouton_couleur(self):
+
+        couleur.choisir_couleur()
+        self.initialiser_damier()
+        self.placer_pieces()
+
+
+    def initialiser_damier(self):
+        self.largeur = 500//self.nb_cases
+        self.damier = PlancheDeJeu(self)
+        self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
+        self.damier.bind("<Button-1>", self.pointeur)
+        self.damier.dessiner_carres()
+
+
+    def placer_pieces(self):
         """Dessine toutes les pièces présentes dans le dictionnaire de pièces
         """
-        #todo sera possible d'utiliser ceci pour changer thème (couleur) en
-        #todo cours de partie (dessiner canevas puis redessiner pieces avec ca)
+        # todo sera possible d'utiliser ceci pour changer thème (couleur) en
+        # todo cours de partie (dessiner canevas puis redessiner pieces avec ca)
+
+
         for piece in self.partie.planche.cases:
-            mid_x = piece.key[0] * self.largeur + self.largeur//2
-            mid_y = piece.key[1] * self.largeur + self.largeur//2
-            couleur_piece = piece.couleur
+            # Placer au centre de la case
+            mid_x = piece[0] * self.largeur + self.largeur // 2
+            mid_y = piece[1] * self.largeur + self.largeur // 2
+
+            couleur_piece = self.partie.planche.cases[piece].couleur
+            if couleur_piece == "blanc":
+                couleur_piece = "white"
+            elif couleur_piece == "noir":
+                couleur_piece = "black"
+
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
+
 
     def tour_humain(self, case_clic: tuple):
         """ joue le coup du clic humain """
         coup_jouer = self.partie.tour(case_clic)
+        self.placer_pieces()
         self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
                                  f" a joué en {coup_jouer}")
 
@@ -381,16 +392,12 @@ class Brothello(Tk):
         print(case_clic, "Case choisie")  # print pour fins de tests
         self.histo.ajouter_texte(f"Clic reçu en {case_clic}")
 
-        # établir milieu de la case
-        mid_x = event.x - event.x % self.largeur + self.largeur//2
-        mid_y = event.y - event.y % self.largeur + self.largeur//2
-
         # Valider puis jouer le coup
         if self.valider_coup(case_clic):
             self.tour_humain(case_clic)
-            couleur_piece = self.partie.couleur_joueur_courant
-            self.dessiner_piece(mid_x, mid_y, couleur_piece)
+            self.placer_pieces()
             self.partie.jouer()
+
             if self.partie.partie_terminee():
                 self.histo.ajouter_texte(self.partie.determiner_gagnant())
                 txt_fin = self.partie.determiner_gagnant() + \
@@ -401,10 +408,13 @@ class Brothello(Tk):
                     self.quit()
                 elif box_fin:
                     self.nouvelle_partie()
+
             self.histo.ajouter_texte("Tour du joueur {}".format(
                 self.partie.couleur_joueur_courant))
+
             if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
                 self.tour_ordi()
+                self.placer_pieces()
 
     def tour_ordi(self):
         """ fait jouer l'ordi """
@@ -422,7 +432,6 @@ class Brothello(Tk):
         r = self.largeur//5*2
         self.damier.create_oval(mid_x-r, mid_y-r, mid_x+r, mid_y+r,
                                 fill=couleur_piece)
-
 
     def valider_coup(self, position: tuple):
         """vérifie si coup valide, affiche msg sinon"""

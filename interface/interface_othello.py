@@ -352,7 +352,6 @@ class Brothello(Tk):
         # todo sera possible d'utiliser ceci pour changer thème (couleur) en
         # todo cours de partie (dessiner canevas puis redessiner pieces avec ca)
 
-
         for piece in self.partie.planche.cases:
             # Placer au centre de la case
             mid_x = piece[0] * self.largeur + self.largeur // 2
@@ -388,26 +387,35 @@ class Brothello(Tk):
         if self.valider_coup(case_clic):
             self.tour_humain(case_clic)
             self.placer_pieces()
-            sleep(2)
             self.partie.jouer()
 
             if self.partie.partie_terminee():
                 self.histo.ajouter_texte(self.partie.determiner_gagnant())
                 txt_fin = self.partie.determiner_gagnant() + \
                           '\nVoulez vous jouer une nouvelle partie?'
+                print(txt_fin)
                 box_fin = messagebox.showinfo('Partie teminée!', txt_fin)
-                if not box_fin:
-                    self.quit()
-                elif box_fin:
-                    self.nouvelle_partie()
+                # if not box_fin:
+                #     self.quit()
+                # elif box_fin:
+                #     self.nouvelle_partie()
 
             self.histo.ajouter_texte("Tour du joueur {}".format(
                 self.partie.couleur_joueur_courant))
 
             if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
+                print("tour ordi")
                 self.tour_ordi()
                 self.placer_pieces()
                 self.partie.jouer()
+                if self.partie.partie_terminee():
+                    self.histo.ajouter_texte(self.partie.determiner_gagnant())
+                    txt_fin = self.partie.determiner_gagnant() + \
+                              '\nVoulez vous jouer une nouvelle partie?'
+                    print(txt_fin)
+                    box_fin = messagebox.showinfo('Partie teminée!', txt_fin)
+                self.histo.ajouter_texte("Tour du joueur {}".format(
+                    self.partie.couleur_joueur_courant))
 
     def tour_ordi(self):
         """ fait jouer l'ordi """

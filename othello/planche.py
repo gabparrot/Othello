@@ -248,15 +248,24 @@ class Planche:
 
 
 class IANormale(Planche):
-    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
-        super(IANormale, self).__init__(nb_cases)
-        self.nb_cases = nb_cases
+    def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        super(Planche, self).__init__()
         self.cases = dict_pieces
+        self.nb_cases = nb_cases
         self.couleur = couleur_courant
-        self.initialiser_planche_par_default()
+        # Matrice de cases numpy
+        matrice_cases = np.ones((self.nb_cases, self.nb_cases), int)
+
+        # Liste des index de cases [(0,0), (0,1), etc]
+        self.liste_cases = []
+        for i in np.argwhere(matrice_cases == 1):
+            self.liste_cases.append(tuple(i))
         self.coups_du_tour = self.lister_coups_possibles_de_couleur(
             couleur_courant)
+        print("COUPS DU TOUR AI", self.coups_du_tour)
         self.coups_possibles = self.coups_du_tour[0]
+        print("COUPS POSSIBLES AI", self.coups_possibles, self.couleur,
+              self.nb_cases)
 
     def filtrer_meilleurs_coups(self):
         """Retourne le ou les coups mangeant le plus de pièces"""
@@ -290,14 +299,20 @@ class IANormale(Planche):
 
 
 class IADifficile(Planche):
-    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
-        super(IADifficile, self).__init__(nb_cases)
-        self.nb_cases = nb_cases
+    def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        super(Planche, self).__init__()
         self.cases = dict_pieces
+        self.nb_cases = nb_cases
         self.couleur = couleur_courant
-        self.initialiser_planche_par_default()
+        # Matrice de cases numpy
+        matrice_cases = np.ones((self.nb_cases, self.nb_cases), int)
+
+        # Liste des index de cases [(0,0), (0,1), etc]
+        self.liste_cases = []
+        for i in np.argwhere(matrice_cases == 1):
+            self.liste_cases.append(tuple(i))
         self.coups_du_tour = self.lister_coups_possibles_de_couleur(
-            self.couleur)
+            couleur_courant)
         self.coups_possibles = self.coups_du_tour[0]
 
     def filtrer_meilleurs_coups(self):
@@ -321,7 +336,6 @@ class IADifficile(Planche):
         """
 
         # à chaque priorité on append au lieu de return direct car AI grossira
-        coups_les_plus_forts = []
 
         # Priorité 1: si on peut jouer des coins, en retourner la liste
         if self.verifier_priorite_1(self.coups_possibles):
@@ -340,7 +354,6 @@ class IADifficile(Planche):
             coups_les_plus_forts = self.verifier_priorite_3(
                 self.coups_possibles)
             return coups_les_plus_forts
-
         return self.coups_possibles
 
     def verifier_priorite_1(self, coups_a_verifier):
@@ -356,17 +369,21 @@ class IADifficile(Planche):
 
         :return: le ou les coups aux coins, None sinon
         """
+        print("coups a verifier AI", coups_a_verifier)
         coins = [(0, 0), (0, self.nb_cases-1), (self.nb_cases-1, 0),
                  (self.nb_cases-1, self.nb_cases-1)]
         coups_coins = []
-
+        print("coins:", coins)
         for coup in coups_a_verifier:
             if coup in coins:
                 coups_coins.append(coup)
 
         if len(coups_coins) > 0:
+            print("return coin", coups_coins)
             return coups_coins
+
         else:
+            print("RETURN NONE")
             return None
 
     def verifier_priorite_2(self, coups_a_verifier):
@@ -386,6 +403,8 @@ class IADifficile(Planche):
                                        (self.nb_cases-3, self.nb_cases-1),
                                        (self.nb_cases-1, self.nb_cases-3)]
         coups_prio_2 = []
+        print("Cote coins a checker", coups_a_verifier, "cote coins coords",
+              deux_cases_du_coin_en_ligne)
 
         for coup in coups_a_verifier:
             if coup in deux_cases_du_coin_en_ligne:
@@ -394,6 +413,7 @@ class IADifficile(Planche):
         if len(coups_prio_2) > 0:
             return coups_prio_2
         else:
+            print("RETURN NONE COTE COIN")
             return None
 
     def verifier_priorite_3(self, coups_a_verifier):
@@ -410,14 +430,17 @@ class IADifficile(Planche):
                                        (self.nb_cases - 3, 2),
                                        (self.nb_cases - 3, self.nb_cases - 3)]
         coups_prio_3 = []
-
+        print("diago coins a checker", coups_a_verifier, "diago coins coords",
+              deux_cases_du_coin_en_diago)
         for coup in coups_a_verifier:
             if coup in deux_cases_du_coin_en_diago:
                 coups_prio_3.append(coup)
 
         if len(coups_prio_3) > 0:
+            print("RETURN DIAGO", coups_prio_3)
             return coups_prio_3
         else:
+            print("RETURN NONE DIAGO")
             return None
 
 
@@ -427,15 +450,23 @@ class IALegendaire(Planche):
     possédant des méthodes de tris pour déterminer les meilleurs coups
     possibles
     """
-    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
-        super(IALegendaire, self).__init__(nb_cases)
-        self.nb_cases = nb_cases
+    def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        super(Planche, self).__init__()
         self.cases = dict_pieces
+        self.nb_cases = nb_cases
         self.couleur = couleur_courant
-        self.initialiser_planche_par_default()
+        # Matrice de cases numpy
+        matrice_cases = np.ones((self.nb_cases, self.nb_cases), int)
+
+        # Liste des index de cases [(0,0), (0,1), etc]
+        self.liste_cases = []
+        for i in np.argwhere(matrice_cases == 1):
+            self.liste_cases.append(tuple(i))
         self.coups_du_tour = self.lister_coups_possibles_de_couleur(
-            self.couleur)
+            couleur_courant)
         self.coups_possibles = self.coups_du_tour[0]
+
+
 
     def filtrer_meilleurs_coups(self):
         """
@@ -457,29 +488,30 @@ class IALegendaire(Planche):
 
         :return: liste de tuples représentant le ou les meilleurs coups à jouer
         """
-        # TODO ajouter filtre nuire_ennemi() à chaque étape pour prendre le
-        # TODO coup qui nuit le plus à l'ennemi si plusieurs égaux
-
         # à chaque priorité on append au lieu de return direct car AI grossira
 
         # Priorité 1: si on peut jouer des coins, en retourner la liste
         if self.verifier_priorite_1(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_1(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_1(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 2: Si aucun en priorité 1, refaire avec 2, et ainsi de suite
         if self.verifier_priorite_2(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_2(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_2(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 3:
         if self.verifier_priorite_3(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_3(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_3(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 4:
         if self.verifier_priorite_4(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_4(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_4(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 5:

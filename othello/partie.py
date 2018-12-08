@@ -3,7 +3,8 @@ from othello.joueur import JoueurOrdinateur, JoueurHumain
 
 
 class Partie:
-    def __init__(self, nb_joueurs, difficulte, nb_cases=8, nom_fichier=None):
+    def __init__(self, nb_joueurs: int, difficulte: str, nb_cases: int,
+                 nom_fichier=None):
         """
         Méthode d'initialisation d'une partie. On initialise 4 membres:
         - planche: contient la planche de la partie, celui-ci contenant le
@@ -140,7 +141,7 @@ class Partie:
             coup_demander = coup_clic
             self.planche.jouer_coup(coup_demander,
                                     self.joueur_courant.couleur)
-        else:  # En cas d'erreur de l'IA
+        else:
             coup_demander = self.demander_coup((-1, -1))
             self.planche.jouer_coup(coup_demander,
                                     "blanc")
@@ -164,16 +165,16 @@ class Partie:
         else:
             if self.difficulte == "Légendaire":
                 self.intelligenceartificielle = IALegendaire(
-                    self.planche.cases, self.couleur_joueur_courant,
-                    self.nb_cases)
+                    self.planche.nb_cases, self.planche.cases,
+                    self.couleur_joueur_courant)
             elif self.difficulte == "Difficile":
                 self.intelligenceartificielle = IADifficile(
-                    self.planche.cases, self.couleur_joueur_courant,
-                    self.nb_cases)
+                    self.planche.nb_cases, self.planche.cases,
+                    self.couleur_joueur_courant)
             else:
                 self.intelligenceartificielle = IANormale(
-                    self.planche.cases, self.couleur_joueur_courant,
-                    self.nb_cases)
+                    self.planche.nb_cases, self.planche.cases,
+                    self.couleur_joueur_courant)
             coups_ia = self.intelligenceartificielle.\
                 filtrer_meilleurs_coups()
             coup_choisi = self.joueur_courant.choisir_coup(coups_ia)

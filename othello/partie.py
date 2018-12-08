@@ -26,16 +26,9 @@ class Partie:
 
         self.difficulte = difficulte
         self.nb_cases = nb_cases
+        print("init partie")
         self.planche = Planche(self.nb_cases)
         self.nb_joueurs = nb_joueurs
-
-        if self.nb_joueurs == 1:
-            if self.difficulte == "Légendaire":
-                self.intelligenceartificielle = IALegendaire()
-            elif self.difficulte == "Difficile":
-                self.intelligenceartificielle = IADifficile()
-            else:
-                self.intelligenceartificielle = IANormale()
 
         self.couleur_joueur_courant = "noir"
 
@@ -49,6 +42,10 @@ class Partie:
             self.charger(nom_fichier)
         else:
             self.initialiser_joueurs()
+
+        self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
+                self.joueur_courant.couleur)
+        self.coups_possibles = self.coups_du_tour[0]
 
     def initialiser_joueurs(self):
         """
@@ -138,19 +135,15 @@ class Partie:
         Returns:
             La simulation du tour d'un joueur
         """
-        coup_fait = False
-        coup_demander = self.demander_coup(coup_clic)
-
-        # Tant que coup est invalide on affiche msg erreur et redemande
-        while not coup_fait:
-                if self.joueur_courant.obtenir_type_joueur() == "Humain":
-                    coup_demander = self.demander_coup(coup_clic)
-                    coup_fait = True
-                else:  # En cas d'erreur de l'IA
-                    coup_demander = self.demander_coup((-1, -1))
-                    coup_fait = True
-        self.planche.jouer_coup(coup_demander,
-                                self.couleur_joueur_courant)
+        print("DANS TOUR", coup_clic)
+        if self.joueur_courant.obtenir_type_joueur() == "Humain":
+            coup_demander = coup_clic
+            self.planche.jouer_coup(coup_demander,
+                                    self.joueur_courant.couleur)
+        else:  # En cas d'erreur de l'IA
+            coup_demander = self.demander_coup((-1, -1))
+            self.planche.jouer_coup(coup_demander,
+                                    "blanc")
         return coup_demander
 
     def demander_coup(self, coup_clic: tuple):
@@ -170,14 +163,19 @@ class Partie:
             coup_choisi = coup_clic
         else:
             if self.difficulte == "Légendaire":
-                self.intelligenceartificielle = IALegendaire()
+                self.intelligenceartificielle = IALegendaire(
+                    self.planche.cases, self.couleur_joueur_courant,
+                    self.nb_cases)
             elif self.difficulte == "Difficile":
-                self.intelligenceartificielle = IADifficile()
+                self.intelligenceartificielle = IADifficile(
+                    self.planche.cases, self.couleur_joueur_courant,
+                    self.nb_cases)
             else:
-                self.intelligenceartificielle = IANormale()
+                self.intelligenceartificielle = IANormale(
+                    self.planche.cases, self.couleur_joueur_courant,
+                    self.nb_cases)
             coups_ia = self.intelligenceartificielle.\
-                filtrer_meilleurs_coups(self.coups_possibles,
-                                        self.couleur_joueur_courant)
+                filtrer_meilleurs_coups()
             coup_choisi = self.joueur_courant.choisir_coup(coups_ia)
         return coup_choisi
 
@@ -268,10 +266,6 @@ class Partie:
            fonction à implémenter que vous pourriez tout simplement appeler.
         """
 
-        self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
-                self.joueur_courant.couleur)
-        self.coups_possibles = self.coups_du_tour[0]
-
         if len(self.coups_possibles) < 1:
             self.passer_tour()
             if not self.tour_precedent_passe:
@@ -286,6 +280,12 @@ class Partie:
         else:
             self.joueur_courant = self.joueur_noir
             self.couleur_joueur_courant = "noir"
+        print("jouer() exec. joueur courant est maintenant",
+              self.joueur_courant.couleur, self.couleur_joueur_courant)
+
+        self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
+                self.joueur_courant.couleur)
+        self.coups_possibles = self.coups_du_tour[0]
 
     def sauvegarder(self, nom_fichier):
         """

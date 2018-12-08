@@ -6,7 +6,7 @@ class Planche:
     """
     Classe représentant la planche d'un jeu d'Othello.
     """
-    def __init__(self, nb_cases=8):
+    def __init__(self, nb_cases: int):
         """
         Méthode spéciale initialisant une nouvelle planche.
         """
@@ -27,9 +27,6 @@ class Planche:
         self.liste_cases = []
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
-
-        print("dict", self.cases)
-        print("nb_cases", self.nb_cases)
 
     def get_piece(self, position):
         """
@@ -125,24 +122,6 @@ class Planche:
                 return []
         return []
 
-    def coup_est_possible(self, position, couleur):
-        """
-        Détermine si un coup est possible. Un coup est possible si au moins une
-        pièce est mangée par celui-ci. ET s'il n'y a pas déjà une pièce
-        présente
-
-        Args:
-            position: La position du coup évalué
-            couleur: La couleur du coup évalué
-
-        Returns:
-            True, si le coup est valide, False sinon
-        """
-        if not self.get_piece(position) and position in \
-                self.lister_coups_possibles_de_couleur(couleur):
-            return True
-        return False
-
     def lister_coups_possibles_de_couleur(self, couleur):
         """
         Fonction retournant la liste des coups possibles d'une certaine
@@ -193,20 +172,16 @@ class Planche:
             "ok" si le déplacement a été effectué car il est valide,
             "erreur" autrement.
         """
-        try:
-            assert self.coup_est_possible(position, couleur)
-            assert position not in self.cases.keys()
-            self.cases[position] = Piece(couleur)
-            pieces_mangees = self.obtenir_positions_mangees(position, couleur)
-            if len(pieces_mangees) > 0:
-                for chaque_piece in pieces_mangees:
-                    self.cases[chaque_piece].echange_couleur()
-                return "ok"
-            else:
-                raise AssertionError
-
-        except AssertionError:
-            return "erreur"
+        print("position recu pour jouer coup", position, couleur)
+        pieces_mangees = self.obtenir_positions_mangees(position, couleur)
+        print("Pieces mangees pour ce coup", pieces_mangees)
+        self.cases[position] = Piece(couleur)
+        if len(pieces_mangees) > 0:
+            for chaque_piece in pieces_mangees:
+                self.cases[chaque_piece].echange_couleur()
+                print("changé couleur de", chaque_piece)
+        print("COUP JOUÉ SUR PLANCHE", position, couleur, "DICT",
+        self.cases)
 
     def convertir_en_chaine(self):
         """
@@ -271,40 +246,23 @@ class Planche:
         self.cases[(mid, mid-1)] = Piece("noir")
         self.cases[(mid, mid)] = Piece("blanc")
 
-    def __repr__(self):
-        """
-        Cette méthode spéciale permet de modifier le comportement d'une
-        instance de la classe Planche pour l'affichage. Faire un
-        print(une_planche) affichera la planche à l'écran.
-        """
-        s = "  +-0-+-1-+-2-+-3-+-4-+-5-+-6-+-7-+\n"
-
-        for i in range(0, self.nb_cases):
-            s += str(i)+" |   " if (i, 0) in self.cases else str(i) + " | "
-            for j in range(0, self.nb_cases):
-                if (i, j) in self.cases:
-                    s += (str(self.cases[(i, j)]) + "  |   ")
-                else:
-                    s += "         |   "
-            s += str(i)
-            if i != self.nb_cases - 1:
-                s += "\n  +---+---+---+---+---+---+---+---+\n"
-
-        s += "\n  +-0-+-1-+-2-+-3-+-4-+-5-+-6-+-7-+\n"
-
-        return s
-
 
 class IANormale(Planche):
-    def __init__(self):
-        super().__init__()
-        self.coups_possibles = []
+    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
+        super(IANormale, self).__init__(nb_cases)
+        self.nb_cases = nb_cases
+        self.cases = dict_pieces
+        self.couleur = couleur_courant
+        self.initialiser_planche_par_default()
+        self.coups_du_tour = self.lister_coups_possibles_de_couleur(
+            couleur_courant)
+        self.coups_possibles = self.coups_du_tour[0]
 
-    def filtrer_meilleurs_coups(self, coups_possibles, couleur):
+    def filtrer_meilleurs_coups(self):
         """Retourne le ou les coups mangeant le plus de pièces"""
-        return self.coup_mange_le_plus(coups_possibles, couleur)
+        return self.coup_mange_le_plus(self.coups_possibles)
 
-    def coup_mange_le_plus(self, coups_a_verifier, couleur):
+    def coup_mange_le_plus(self, coups_a_verifier):
         """
         Trouve le ou les coups qui mangent le plus de pièces ennemies et en
         retourne la liste.
@@ -319,7 +277,8 @@ class IANormale(Planche):
         max_pieces_mangees = 0
 
         for coup in coups_a_verifier:
-            position_mangees = Planche.obtenir_positions_mangees(self,coup, couleur)
+            position_mangees = self.obtenir_positions_mangees(coup,
+                                                              self.couleur)
             if len(position_mangees) > max_pieces_mangees:
                 coups_qui_mangent_le_plus = []
                 coups_qui_mangent_le_plus.append(coup)
@@ -331,11 +290,17 @@ class IANormale(Planche):
 
 
 class IADifficile(Planche):
-    def __init__(self):
-        super().__init__()
-        self.coups_possibles = []
+    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
+        super(IADifficile, self).__init__(nb_cases)
+        self.nb_cases = nb_cases
+        self.cases = dict_pieces
+        self.couleur = couleur_courant
+        self.initialiser_planche_par_default()
+        self.coups_du_tour = self.lister_coups_possibles_de_couleur(
+            self.couleur)
+        self.coups_possibles = self.coups_du_tour[0]
 
-    def filtrer_meilleurs_coups(self, coups_possibles, couleur):
+    def filtrer_meilleurs_coups(self):
         """
         Prend la liste des coups possibles et retourne une liste contenant le
         ou les meilleurs coups dans une liste de tuple positionnels selon la
@@ -357,21 +322,23 @@ class IADifficile(Planche):
 
         # à chaque priorité on append au lieu de return direct car AI grossira
         coups_les_plus_forts = []
-        self.coups_possibles = coups_possibles
 
         # Priorité 1: si on peut jouer des coins, en retourner la liste
         if self.verifier_priorite_1(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_1(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_1(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 2: Si aucun en priorité 1, refaire avec 2, et ainsi de suite
         if self.verifier_priorite_2(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_2(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_2(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         # Priorité 3:
         if self.verifier_priorite_3(self.coups_possibles):
-            coups_les_plus_forts = self.verifier_priorite_3(self.coups_possibles)
+            coups_les_plus_forts = self.verifier_priorite_3(
+                self.coups_possibles)
             return coups_les_plus_forts
 
         return self.coups_possibles
@@ -454,18 +421,23 @@ class IADifficile(Planche):
             return None
 
 
-
 class IALegendaire(Planche):
     """
     Classe représentant l'intelligence artificielle de l'ordinateur et
     possédant des méthodes de tris pour déterminer les meilleurs coups
     possibles
     """
-    def __init__(self):
-        super().__init__()
-        self.coups_possibles = []
+    def __init__(self, dict_pieces: dict, couleur_courant: str, nb_cases: int):
+        super(IALegendaire, self).__init__(nb_cases)
+        self.nb_cases = nb_cases
+        self.cases = dict_pieces
+        self.couleur = couleur_courant
+        self.initialiser_planche_par_default()
+        self.coups_du_tour = self.lister_coups_possibles_de_couleur(
+            self.couleur)
+        self.coups_possibles = self.coups_du_tour[0]
 
-    def filtrer_meilleurs_coups(self, coups_possibles, couleur):
+    def filtrer_meilleurs_coups(self):
         """
         Prend la liste des coups possibles et retourne une liste contenant le
         ou les meilleurs coups dans une liste de tuple positionnels selon la
@@ -489,8 +461,6 @@ class IALegendaire(Planche):
         # TODO coup qui nuit le plus à l'ennemi si plusieurs égaux
 
         # à chaque priorité on append au lieu de return direct car AI grossira
-        coups_les_plus_forts = []
-        self.coups_possibles = coups_possibles
 
         # Priorité 1: si on peut jouer des coins, en retourner la liste
         if self.verifier_priorite_1(self.coups_possibles):
@@ -513,7 +483,7 @@ class IALegendaire(Planche):
             return coups_les_plus_forts
 
         # Priorité 5:
-        coups_les_plus_forts = self.verifier_priorite_5(self.coups_possibles, couleur)
+        coups_les_plus_forts = self.verifier_priorite_5(self.coups_possibles)
 
         return coups_les_plus_forts
 
@@ -627,7 +597,7 @@ class IALegendaire(Planche):
         else:
             return None
 
-    def verifier_priorite_5(self, coups_a_verifier, couleur):
+    def verifier_priorite_5(self, coups_a_verifier):
         """
         Trouve le ou les coups qui mangent le plus de pièces ennemies et en
         retourne la liste.
@@ -642,7 +612,8 @@ class IALegendaire(Planche):
         max_pieces_mangees = 0
 
         for coup in coups_a_verifier:
-            position_mangees = Planche.obtenir_positions_mangees(self,coup, couleur)
+            position_mangees = self.obtenir_positions_mangees(coup,
+                                                              self.couleur)
             if len(position_mangees) > max_pieces_mangees:
                 coups_qui_mangent_le_plus = []
                 coups_qui_mangent_le_plus.append(coup)

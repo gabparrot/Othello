@@ -71,6 +71,7 @@ class JoueurHumain(Joueur):
     def obtenir_type_joueur(self):
         return "Humain"
 
+
 class JoueurOrdinateur(Joueur):
     """
     Classe modélisant un joueur Ordinateur.

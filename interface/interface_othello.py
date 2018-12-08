@@ -2,12 +2,8 @@ from tkinter import *
 from tkinter import colorchooser, messagebox
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
-from random import choice
+from time import sleep
 
-difficulte = "Normale"
-nb_cases = 8
-nb_joueurs = 1
-pasfini = True
 
 
 # ======= TODO STYLE ======= #
@@ -284,7 +280,8 @@ class Brothello(Tk):
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
 
         # Gestion couleur du board
-        Bouton(self, text="Changer couleur", command = self.action_bouton_couleur) \
+        Bouton(self, text="Changer couleur",
+               command=self.action_bouton_couleur) \
             .grid(row=1, column=0, padx=5, pady=5, sticky=W)
 
         # Définition des caractéristiques de la partie par défaut
@@ -329,7 +326,6 @@ class Brothello(Tk):
 
         # Création de l'instance du jeu et liste des coups possibles
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
-        self.partie.jouer()
         self.placer_pieces()
         self.filtre_exceptions = ErreurPositionCoup(self.partie.coups_du_tour)
 
@@ -339,11 +335,9 @@ class Brothello(Tk):
         bout_conseil.config(state=NORMAL)
 
     def action_bouton_couleur(self):
-
         couleur.choisir_couleur()
         self.initialiser_damier()
         self.placer_pieces()
-
 
     def initialiser_damier(self):
         self.largeur = 500//self.nb_cases
@@ -351,7 +345,6 @@ class Brothello(Tk):
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
         self.damier.dessiner_carres()
-
 
     def placer_pieces(self):
         """Dessine toutes les pièces présentes dans le dictionnaire de pièces
@@ -373,14 +366,12 @@ class Brothello(Tk):
 
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
 
-
     def tour_humain(self, case_clic: tuple):
         """ joue le coup du clic humain """
         coup_jouer = self.partie.tour(case_clic)
         self.placer_pieces()
         self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
                                  f" a joué en {coup_jouer}")
-
 
     def pointeur(self, event: EventType):
         """ Dessine une pièce (gros rond laid) où on clique"""
@@ -390,20 +381,21 @@ class Brothello(Tk):
         # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
         case_clic = (event.x//self.largeur, event.y//self.largeur)
         print(case_clic, "Case choisie")  # print pour fins de tests
+        print("DICT GUI", self.partie.planche.cases)
         self.histo.ajouter_texte(f"Clic reçu en {case_clic}")
 
         # Valider puis jouer le coup
         if self.valider_coup(case_clic):
             self.tour_humain(case_clic)
             self.placer_pieces()
+            sleep(2)
             self.partie.jouer()
 
             if self.partie.partie_terminee():
                 self.histo.ajouter_texte(self.partie.determiner_gagnant())
                 txt_fin = self.partie.determiner_gagnant() + \
                           '\nVoulez vous jouer une nouvelle partie?'
-                box_fin = messagebox.askyesno(title='Partie teminée!',
-                                              text=txt_fin)
+                box_fin = messagebox.showinfo('Partie teminée!', txt_fin)
                 if not box_fin:
                     self.quit()
                 elif box_fin:
@@ -415,6 +407,7 @@ class Brothello(Tk):
             if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
                 self.tour_ordi()
                 self.placer_pieces()
+                self.partie.jouer()
 
     def tour_ordi(self):
         """ fait jouer l'ordi """
@@ -437,16 +430,20 @@ class Brothello(Tk):
         """vérifie si coup valide, affiche msg sinon"""
         #todo docstring
         #todo ne pas oublier mettre à jour erreurpositioncoup à chaque tour
+        self.filtre_exceptions = ErreurPositionCoup(
+            self.partie.coups_du_tour)
         try:
             try_coup = self.filtre_exceptions.verifier_coup_valide(position)
             if try_coup[0]:
+                print("COUP VALIDE")
                 return True
             elif not try_coup[0]:
-                messagebox.Dialog(self, title='Coup demandé invalide',
-                                  text=try_coup[1])
+                msg = messagebox.showinfo("Coup invalide", try_coup[1])
+                print("COUP INVALIDE")
                 return False
         except:
-            messagebox.Dialog(self, title='Coup demandé invalide')
+            msg = messagebox.showinfo("Coup invalide", "Une erreur s'est"
+                                      " produite. Veuillez réessayer. ")
             return False
 
     def conseil(self):

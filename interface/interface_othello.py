@@ -8,26 +8,14 @@ from time import sleep
 
 # ======= TODO STYLE ======= #
 # TODO 1- Faire barre d'outils en haut (Menubutton()?)
-# TODO 2- Faire en sorte que clic dessine pièce MILIEU de la case
 # TODO 3- Faire plus belle pièce
-# TODO
 
 #
 # ======= TODO FONCTIONS ======= #
 # TODO 1- convertir la position demandée sur le GUI Format (A, 1) en format
 # TODO    (0, 0) avant de la valider ou de la jouer
-# TODO 2- À chaque coup demandé, verifier avec self.partie.exceptions
-# TODO 3- Établir des conditions if qui disent à quelle case appartient le clic
-# TODO 4- Établir le centre de chaque case pour y mettre la pièce
-# TODO 5- Gérer cas où joueur ferme le toplevel sans réponse
 
 # === Définition des objets esclaves et de leurs éléments de style === #
-
-# class BarreDoutils(MenuButton):
-#     """Barre d'outils contenant les options de sauvegarde, chargement,
-#     etc"""
-#     def __init__(self, boss, **kwargs):
-#         Menubutton.__init__(self, boss, **kwargs)
 
 
 class Color:
@@ -388,7 +376,9 @@ class Brothello(Tk):
             self.tour_humain(case_clic)
             self.placer_pieces()
             self.partie.jouer()
-
+            self.damier.update_idletasks()
+            self.histo.update_idletasks()
+            sleep(2)
             if self.partie.partie_terminee():
                 self.histo.ajouter_texte(self.partie.determiner_gagnant())
                 txt_fin = self.partie.determiner_gagnant() + \

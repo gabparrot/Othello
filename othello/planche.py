@@ -6,10 +6,12 @@ class Planche:
     """
     Classe représentant la planche d'un jeu d'Othello.
     """
+
     def __init__(self, nb_cases: int):
         """
         Méthode spéciale initialisant une nouvelle planche.
         """
+
         # Dictionnaire de cases. La clé est une position (ligne, colonne),
         # et la valeur une instance de la classe Piece.
         self.cases = {}
@@ -39,6 +41,7 @@ class Planche:
         Returns:
             La pièce à cette position s'il y en a une, None autrement.
         """
+
         if position in self.cases:
             return self.cases[position]
         else:
@@ -54,6 +57,7 @@ class Planche:
         Returns:
             True si la position est valide, False autrement.
         """
+
         if position in self.liste_cases:
             return True
         else:
@@ -72,6 +76,7 @@ class Planche:
             une liste contenant toutes les positions qui seraient mangées par
             le coup.
         """
+
         pieces_mangees = []
         directions = {"Nord": (0, 1), "Sud": (0, -1), "Est": (1, 0), "Ouest":
                       (-1, 0), "Nord-Est": (1, 1), "Nord-Ouest": (-1, 1),
@@ -124,18 +129,17 @@ class Planche:
 
     def lister_coups_possibles_de_couleur(self, couleur):
         """
-        Fonction retournant la liste des coups possibles d'une certaine
-        couleur. Un coup est considéré possible si au moins une pièce est
-        mangée quand la couleur "couleur" joue à une certaine position, ne
-        l'oubliez pas (et si cette case est vide)
-
+        Fonction établissant, pour chaque case, si le joueur courant peut
+        jouer une pièce ou non, et sinon, si c'est parce qu'il y a déjà une
+        pièce présente ou alors si c'est parce qu'aucune pièce ne serait mangée
         Args:
             couleur: La couleur ("blanc", "noir") des pièces dont on considère
-            le déplacement, un string.
+                le déplacement, un string.
 
-        Returns:
-            Une liste de positions de coups possibles pour la couleur
-            "couleur".
+        Returns: tuple: tuple contenant la liste, pour le joueur courant, des
+                coups possibles, la liste des coups impossibles car une pièce
+                est présente, et la liste coups impossibles car aucune pièce
+                ne serait mangée
         """
 
         self.coups_possibles = []
@@ -160,18 +164,14 @@ class Planche:
         """
         Joue une pièce de la couleur "couleur" à la position "position".
 
-        - Ajouter la pièce aux pièces de la planche.
-        - Faire les changements de couleur pour les pièces mangées par le coup.
-        - Retourner un message indiquant "ok" ou "erreur".
+        - Ajoute la pièce aux pièces de la planche.
+        - Fait les changements de couleur pour les pièces mangées par le coup.
 
         Args:
             position: La position du coup.
             couleur: La couleur du coup.
-
-        Returns:
-            "ok" si le déplacement a été effectué car il est valide,
-            "erreur" autrement.
         """
+
         pieces_mangees = self.obtenir_positions_mangees(position, couleur)
         self.cases[position] = Piece(couleur)
         if len(pieces_mangees) > 0:
@@ -208,9 +208,6 @@ class Planche:
 
         Args:
             chaine: La chaîne de caractères, un string.
-
-        Returns:
-            Remplit la planche selon les informations données dans une chaîne.
         """
 
         chaine = chaine.replace("\n", ",")
@@ -221,10 +218,7 @@ class Planche:
         self.cases.clear()
 
         while x in range(len(chaine) - 1):
-            position = []
-            position.append(int(chaine[x]))
-            position.append(int(chaine[x + 1]))
-            position = tuple(position)
+            position = (int(chaine[x]), int(chaine[x + 1]))
             self.cases[position] = Piece(chaine[x + 2])
 
             x += 3
@@ -243,7 +237,15 @@ class Planche:
 
 
 class IANormale(Planche):
+    """
+    Classe représentant l'intelligence artificielle de l'ordinateur et
+    possédant des méthodes de tris pour déterminer les meilleurs coups
+    possibles, de niveau de difficulté légendaire
+    """
+
     def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        """Constructeur de IANormale, hérite de Planche """
+
         super(Planche, self).__init__()
         self.cases = dict_pieces
         self.nb_cases = nb_cases
@@ -270,10 +272,9 @@ class IANormale(Planche):
 
         :param coups_a_verifier: liste des coups à vérifier
 
-        :param couleur: couleur du joueur courant
-
         :return: liste du ou des coups mangeant le plus de pièces
         """
+
         coups_qui_mangent_le_plus = []
         max_pieces_mangees = 0
 
@@ -281,7 +282,6 @@ class IANormale(Planche):
             position_mangees = self.obtenir_positions_mangees(coup,
                                                               self.couleur)
             if len(position_mangees) > max_pieces_mangees:
-                coups_qui_mangent_le_plus = []
                 coups_qui_mangent_le_plus.append(coup)
                 max_pieces_mangees = len(position_mangees)
             elif len(position_mangees) == max_pieces_mangees:
@@ -291,7 +291,15 @@ class IANormale(Planche):
 
 
 class IADifficile(Planche):
+    """
+    Classe représentant l'intelligence artificielle de l'ordinateur et
+    possédant des méthodes de tris pour déterminer les meilleurs coups
+    possibles, de niveau de difficulté légendaire
+    """
+
     def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        """ Constructeur de IADiffcile, hérite de Planche """
+
         super(Planche, self).__init__()
         self.cases = dict_pieces
         self.nb_cases = nb_cases
@@ -319,10 +327,6 @@ class IADifficile(Planche):
 
         Nous retournons une liste contenant le meilleur coup s'il n'y en a
         qu'un, ou la liste de tous les meilleurs coups égaux
-
-        :param coups_possibles: liste des coups possibles pour le joueur
-                                ordinateur courant.
-        :param couleur: couleur du joueur courant
 
         :return: liste de tuples représentant le ou les meilleurs coups à jouer
         """
@@ -361,6 +365,7 @@ class IADifficile(Planche):
 
         :return: le ou les coups aux coins, None sinon
         """
+
         coins = [(0, 0), (0, self.nb_cases-1), (self.nb_cases-1, 0),
                  (self.nb_cases-1, self.nb_cases-1)]
         coups_coins = []
@@ -384,6 +389,7 @@ class IADifficile(Planche):
 
         :return: liste des coups correspondants, None si aucun
         """
+
         deux_cases_du_coin_en_ligne = [(0, 2), (2, 0), (0, self.nb_cases-3),
                                        (2, self.nb_cases-1),
                                        (self.nb_cases-3, 0),
@@ -429,9 +435,12 @@ class IALegendaire(Planche):
     """
     Classe représentant l'intelligence artificielle de l'ordinateur et
     possédant des méthodes de tris pour déterminer les meilleurs coups
-    possibles
+    possibles, de niveau de difficulté légendaire
     """
+
     def __init__(self, nb_cases: int, dict_pieces: dict, couleur_courant: str):
+        """ Constructeur de IALegendaire, hérite de Planche """
+
         super(Planche, self).__init__()
         self.cases = dict_pieces
         self.nb_cases = nb_cases
@@ -447,8 +456,6 @@ class IALegendaire(Planche):
             couleur_courant)
         self.coups_possibles = self.coups_du_tour[0]
 
-
-
     def filtrer_meilleurs_coups(self):
         """
         Prend la liste des coups possibles et retourne une liste contenant le
@@ -462,10 +469,6 @@ class IALegendaire(Planche):
         5- Les coups qui mangent le plus de pièces;
         Nous retournons une liste contenant le meilleur coup s'il n'y en a
         qu'un, ou la liste de tous les meilleurs coups égaux
-
-        :param coups_possibles: liste des coups possibles pour le joueur
-                                ordinateur courant.
-        :param couleur: couleur du joueur courant
 
         :return: liste de tuples représentant le ou les meilleurs coups à jouer
         """
@@ -514,6 +517,7 @@ class IALegendaire(Planche):
 
         :return: le ou les coups aux coins, None sinon
         """
+
         coins = [(0, 0), (0, self.nb_cases-1), (self.nb_cases-1, 0),
                  (self.nb_cases-1, self.nb_cases-1)]
         coups_coins = []
@@ -537,6 +541,7 @@ class IALegendaire(Planche):
 
         :return: liste des coups correspondants, None si aucun
         """
+
         deux_cases_du_coin_en_ligne = [(0, 2), (2, 0), (0, self.nb_cases-3),
                                        (2, self.nb_cases-1),
                                        (self.nb_cases-3, 0),
@@ -564,6 +569,7 @@ class IALegendaire(Planche):
 
         :return: liste des coups correspondants, None si aucun
         """
+
         deux_cases_du_coin_en_diago = [(2, 2), (2, self.nb_cases - 3),
                                        (self.nb_cases - 3, 2),
                                        (self.nb_cases - 3, self.nb_cases - 3)]
@@ -588,6 +594,7 @@ class IALegendaire(Planche):
 
         :return: liste des coups correspondants, None si aucun
         """
+
         cases_bordures = []
 
         for i in range(self.nb_cases):
@@ -618,10 +625,9 @@ class IALegendaire(Planche):
 
         :param coups_a_verifier: liste des coups à vérifier
 
-        :param couleur: couleur du joueur courant
-
         :return: liste du ou des coups mangeant le plus de pièces
         """
+
         coups_qui_mangent_le_plus = []
         max_pieces_mangees = 0
 
@@ -629,7 +635,6 @@ class IALegendaire(Planche):
             position_mangees = self.obtenir_positions_mangees(coup,
                                                               self.couleur)
             if len(position_mangees) > max_pieces_mangees:
-                coups_qui_mangent_le_plus = []
                 coups_qui_mangent_le_plus.append(coup)
                 max_pieces_mangees = len(position_mangees)
             elif len(position_mangees) == max_pieces_mangees:

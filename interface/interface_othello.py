@@ -16,17 +16,26 @@ from time import sleep
 
 # === Définition des objets esclaves et de leurs éléments de style === #
 class Color:
+    """
+    Classe définissant la couleur utilisée dans le damier
+    """
+
     color = "deepskyblue2"
 
     def choisir_couleur(self):
+        """ Permet de changer la couleur avec un sélecteur de couleur """
+
         clr = colorchooser.askcolor(title="Modifier la couleur de la planche")
         if None not in clr:
             self.color = clr[1]
         else:
             self.color = "black"
 
-
     def afficher_couleur(self):
+        """
+        :return self.color: Retourne la couleur portée par l'attribut
+            self.color
+        """
         return str(self.color)
 
 
@@ -34,8 +43,10 @@ couleur = Color()
 
 
 class Bouton(Button):
-    """Classe définissant le style des boutons utilisés dans le jeu"""
+    """ Classe définissant le style des boutons utilisés dans le jeu """
+
     def __init__(self, boss, **kwargs):
+        """ Constructeur des boutons"""
 
         Button.__init__(self, boss, bg="dark grey", fg="black", bd=5,
                         activebackground="grey",
@@ -44,8 +55,10 @@ class Bouton(Button):
 
 
 class Glissoir(Scale):
-    """Classe définissant le style des glissoirs gradués"""
+    """ Classe définissant le style des glissoirs gradués """
+
     def __init__(self, boss, **kwargs):
+        """ Constructeur des glissoirs """
         Scale.__init__(self, boss, **kwargs)
 
 
@@ -54,29 +67,36 @@ class PlancheDeJeu(Canvas):
     le damier, n'accepte présentement que des nombres pair de largeur de
     carrées, ex largeur de 6, 8, 10, 12 carrées de large
     """
+
     def __init__(self, boss):
+        """ Constructeur du canevas avec la planche de jeu """
+
         Canvas.__init__(self, boss, width=500, height=500)
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
 
     def dessiner_carres(self):
+        """ Dessine le damier en fonction des couleurs et du nombre de cases"""
+
         self.largeur = 500 // self.nb_cases
         x, y = 1, 1
         for i in range(1, self.nb_cases + 1):
             if i % 2 != 0:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
+                    self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur,
                                           fill=couleur.afficher_couleur())
                     x += self.largeur
-                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
-                                          fill="white")
+                    self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur, fill="white")
                     x += self.largeur
             else:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
-                                          fill="white")
+                    self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur, fill="white")
                     x += self.largeur
-                    self.create_rectangle(x, y, x + self.largeur, y + self.largeur,
+                    self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur,
                                           fill=couleur.afficher_couleur())
                     x += self.largeur
             x = 1
@@ -84,8 +104,11 @@ class PlancheDeJeu(Canvas):
 
 
 class Historique(Frame):
-    """Défini la zone de texte avec l'historique des coups joués"""
+    """ Défini la zone de texte avec l'historique des coups joués """
+
     def __init__(self, root, width=25, height=25):
+        """ Constructeur de l'historique de texte """
+
         Frame.__init__(self, root, bd=2, bg='white',
                        width=width, height=height, relief=SUNKEN)
         self.text = Text(self, font='Helvetica', bg='white', bd=1, width=width,
@@ -96,13 +119,19 @@ class Historique(Frame):
         scroll.pack(side=RIGHT, expand=YES, fill=BOTH, padx=2, pady=2)
 
     def ajouter_texte(self, action_a_ecrire):
-        """Écrit le message demandé dans la zone historique de coup"""
+        """
+        Écrit le message demandé dans la zone historique de coup et ramène la
+        barre de défilement à la fin de l'historique
+        """
+
         self.text.insert(END, action_a_ecrire + "\n")
+        self.text.see("end")
 
 
 class ScoreActuel(Label):
     def __init__(self, boss):
-        Label.__init__(self, boss, font='Helvetica', text="score: ", bg ="white")
+        Label.__init__(self, boss, font='Helvetica', text="score: ",
+                       bg="white")
 
     def changer_score(self, score_a_ecrire):
         self.labelText = ('1.0', score_a_ecrire)
@@ -115,7 +144,9 @@ class FenJoueurs(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir combien de joueurs
     humains participeront à la partie
     """
+
     def __init__(self, boss):
+        """ Constructeur de FenJoueurs """
         super().__init__(boss)
         self.boss = boss
         self.transient(boss)
@@ -124,17 +155,22 @@ class FenJoueurs(Toplevel):
         self.geometry("250x250+550+250")  # 300x300 dimension+posX+posY
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
-        Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=5, padx=10)
-        Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5, padx=10)
+        Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=5,
+                                                                  padx=10)
+        Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5,
+                                                                      padx=10)
+
     def unjoueur(self):
-        """ouvre une FenNiveauDif si 1 joueur choisi"""
+        """ Donne la valeur 1 à self.nb_joueurs et ferme la fenêtre """
+
         self.nb_joueurs = 1
         self.grab_release()
         self.master.focus_set()
         self.destroy()
 
     def deuxjoueurs(self):
-        """ouvre FenTypePartie si 2 joueurs"""
+        """ Donne la valeur 2 à self.nb_joueurs et ferme la fenêtre """
+
         self.nb_joueurs = 2
         self.grab_release()
         self.master.focus_set()
@@ -146,7 +182,10 @@ class FenNiveauDif(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir le niveau de
     difficulté des parties à 1 joueur.
     """
+
     def __init__(self, boss):
+        """ Constructeur de FenNiveauDif """
+
         super().__init__(boss)
         self.boss = boss
         self.transient(boss)
@@ -155,23 +194,36 @@ class FenNiveauDif(Toplevel):
         self.geometry("250x250+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
-        Bouton(self, text="Normal", command=self.set_easy).pack(pady=15, padx=10)
-        Bouton(self, text="Difficile", command=self.set_hard).pack(pady=15, padx=10)
-        Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15, padx=10)
+        Bouton(self, text="Normal", command=self.set_easy).pack(pady=15,
+                                                                padx=10)
+        Bouton(self, text="Difficile", command=self.set_hard).pack(pady=15,
+                                                                   padx=10)
+        Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15,
+                                                                      padx=10)
 
     def set_easy(self):
+        """ Donne la valeur 'Normal' à self.difficulte et ferme la fenêtre """
+
         self.difficulte = "Normal"
         self.grab_release()
         self.master.focus_set()
         self.destroy()
 
     def set_hard(self):
+        """
+        Donne la valeur 'Difficile' à self.difficulte et ferme la fenêtre
+        """
+
         self.difficulte = "Difficile"
         self.grab_release()
         self.master.focus_set()
         self.destroy()
 
     def set_legend(self):
+        """
+        Donne la valeur 'Légendaire' à self.difficulte et ferme la fenêtre
+        """
+
         self.difficulte = "Légendaire"
         self.grab_release()
         self.master.focus_set()
@@ -183,7 +235,10 @@ class FenTypePartie(Toplevel):
     Fenêtre satellite contenant les boutons pour choisir le type de partie
     soit classique ou personnalisée
     """
+
     def __init__(self, boss):
+        """ Constructeur de FenTypePartie """
+
         super().__init__(boss)
         self.boss = boss
         self.transient(boss)
@@ -198,12 +253,20 @@ class FenTypePartie(Toplevel):
             pack(pady=5, padx=10)
 
     def partie_classique(self):
+        """
+        Donne la valeur 'classique' à self.type_partie et ferme la fenêtre
+        """
+
         self.type_partie = 'classique'
         self.grab_release()
         self.master.focus_set()
         self.destroy()
 
     def partie_perso(self):
+        """
+        Donne la valeur 'perso' à self.type_partie et ferme la fenêtre
+        """
+
         self.type_partie = 'perso'
         self.grab_release()
         self.master.focus_set()
@@ -215,7 +278,10 @@ class FenPartiePerso(Toplevel):
     Fenêtre satellite contenant les options de personnalisations lorsque le
     joueur choisi de faire une partie personnalisée
     """
+
     def __init__(self, boss):
+        """ Constructeur de FenPartiePerso """
+
         super().__init__(boss)
         self.boss = boss
         self.transient(boss)
@@ -224,26 +290,31 @@ class FenPartiePerso(Toplevel):
         self.geometry("250x250+550+250")
         self.attributes('-topmost', 'true')
         Label(self, text="Combien de cases?").pack(padx=20, pady=20, fill=X)
-        self.gliss = Glissoir(self, orient=HORIZONTAL, relief=SUNKEN, bd=2, from_=6,
-                 to_=12, tickinterval=2, resolution=2)
+        self.gliss = Glissoir(self, orient=HORIZONTAL, relief=SUNKEN, bd=2,
+                              from_=6, to_=12, tickinterval=2, resolution=2)
         self.gliss.pack(padx=20, pady=20, fill=X)
         Bouton(self, text="jouer", command=self.set_perso).\
             pack(padx=20, pady=20, fill=X)
 
     def set_perso(self):
-        """Envoie les paramètres choisis par l'utilisateur"""
+        """
+        Envoie les paramètres choisis par l'utilisateur et ferme la fenêtre
+        """
+
         self.nb_cases = self.gliss.get()
         self.grab_release()
         self.master.focus_set()
         self.destroy()
 
-
 # ====== Définition de la fenêtre maîtresse ====== #
+
 
 class Brothello(Tk):
     """Classe de la fenêtre principale du jeu"""
+
     def __init__(self):
         """Constructeur de la fenêtre principale"""
+
         super().__init__()
 
         # Caractérisiques de la fenêtre principale
@@ -255,10 +326,10 @@ class Brothello(Tk):
                               command=self.conseil, state=DISABLED)
         bout_conseil.grid(row=0, column=0, padx=5, pady=5, sticky=W)
         bout_newgame = Bouton(self, text="Nouvelle partie",
-                              command=self.nouvelle_partie,state=DISABLED)
+                              command=self.nouvelle_partie, state=DISABLED)
         bout_newgame.grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
         bout_abandon = Bouton(self, text="Abandonner", command=self.abandon,
-               state=DISABLED)
+                              state=DISABLED)
         bout_abandon.grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
         ScoreActuel(self).grid(row=0, column=2, sticky=W)
         self.histo = Historique(self, height=21)
@@ -314,7 +385,7 @@ class Brothello(Tk):
                 self.wait_window(fen_perso)
                 self.nb_cases = fen_perso.nb_cases
             else:
-                fen_perso = FenPartiePerso(self)  # Si erreur redemande nb_cases
+                fen_perso = FenPartiePerso(self)  # Si erreur redemande
                 self.wait_window(fen_perso)
                 self.nb_cases = fen_perso.nb_cases
 
@@ -342,42 +413,31 @@ class Brothello(Tk):
         bout_conseil.config(state=NORMAL)
 
     def action_bouton_couleur(self):
+        """
+        Permet de changer de couleur avec le selecteur de couleur, puis
+        redessine le damier et les pieces en fonction de cette couleur
+        """
+
         couleur.choisir_couleur()
         self.initialiser_damier()
         self.placer_pieces()
 
     def initialiser_damier(self):
+        """
+        Crée le cavevas de la planche de jeu
+        """
+
         self.largeur = 500//self.nb_cases
         self.damier = PlancheDeJeu(self)
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
         self.damier.dessiner_carres()
 
-    # def placer_pieces(self):
-    #     """Dessine toutes les pièces présentes dans le dictionnaire de pièces
-    #     """
-    #     # todo sera possible d'utiliser ceci pour changer thème (couleur) en
-    #     # todo cours de partie (dessiner canevas puis redessiner pieces avec ca)
-    #
-    #     for piece in self.partie.planche.cases:
-    #         # Placer au centre de la case
-    #         mid_x = piece[0] * self.largeur + self.largeur // 2
-    #         mid_y = piece[1] * self.largeur + self.largeur // 2
-    #
-    #         couleur_piece = self.partie.planche.cases[piece].couleur
-    #         if couleur_piece == "blanc":
-    #             couleur_piece = "white"
-    #         elif couleur_piece == "noir":
-    #             couleur_piece = "black"
-    #
-    #         self.dessiner_piece(mid_x, mid_y, couleur_piece)
-
-
     def placer_pieces(self):
         """Dessine les pieces nouvelles ou modifies"""
+
         for piece in self.partie.planche.cases:
             if piece not in self.anciennes_pieces:
-                print(piece, "CHANGÉ DANS ANCIENNE")
                 # Placer au centre de la case
                 mid_x = piece[0] * self.largeur + self.largeur // 2
                 mid_y = piece[1] * self.largeur + self.largeur // 2
@@ -389,7 +449,6 @@ class Brothello(Tk):
                     couleur_piece = "black"
                 self.anciennes_pieces[piece] = self.partie.planche.cases[
                     piece].couleur
-                print("ajouté", self.anciennes_pieces[piece])
                 self.dessiner_piece(mid_x, mid_y, couleur_piece)
                 self.damier.update_idletasks()
                 sleep(0.5)
@@ -397,9 +456,8 @@ class Brothello(Tk):
         for piece in self.partie.planche.cases:
             if piece in self.anciennes_pieces:
                 if self.partie.planche.cases[piece].couleur != \
-                    self.anciennes_pieces[piece]:
+                        self.anciennes_pieces[piece]:
                     # Placer au centre de la case
-                    print("piece mangee a dessiner avec pause", piece)
                     mid_x = piece[0] * self.largeur + self.largeur // 2
                     mid_y = piece[1] * self.largeur + self.largeur // 2
 
@@ -408,7 +466,8 @@ class Brothello(Tk):
                         couleur_piece = "white"
                     elif couleur_piece == "noir":
                         couleur_piece = "black"
-                    self.anciennes_pieces[piece] = self.partie.planche.cases[piece].couleur
+                    self.anciennes_pieces[piece] = \
+                        self.partie.planche.cases[piece].couleur
                     self.dessiner_piece(mid_x, mid_y, couleur_piece)
                     self.damier.update_idletasks()
                     sleep(0.5)
@@ -425,24 +484,31 @@ class Brothello(Tk):
                 couleur_piece = "black"
 
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
-        print(self.anciennes_pieces)
 
     def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
-        """ trace la pièce dans le canevas"""
+        """ Trace la pièce dans le canevas"""
+
         r = self.largeur // 5 * 2
         self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
                                 fill=couleur_piece)
 
     def tour_humain(self, case_clic: tuple):
-        """ joue le coup du clic humain """
+        """ Joue le coup du clic humain """
+
         coup_jouer = self.partie.tour(case_clic)
         self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
                                  f" a joué en {coup_jouer}")
 
     def pointeur(self, event: EventType):
-        """ Dessine une pièce (gros rond laid) où on clique"""
+        """
+        Établie dans quelle case le joueur a cliqué, joue son coup ou lui dit
+        si ce n'est pas possible et pourquoi. Envoie l'informations à Partie
+        pour modifier les données. Effectue le changement de joueurs. Si ce
+        joueur est un ordinateur, lui fait aussi joueur son tour avant
+        d'attendre un nouveau clic
 
-        #self.clic_recu = choice(True, False)  # Termine attente clic
+        :param event: Un clic sur le canevas de la planche de jeu
+        """
 
         # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
         case_clic = (event.x//self.largeur, event.y//self.largeur)
@@ -459,7 +525,7 @@ class Brothello(Tk):
             if self.partie.partie_terminee():
                 self.histo.ajouter_texte(self.partie.determiner_gagnant())
                 txt_fin = self.partie.determiner_gagnant() + \
-                          '\nVoulez vous jouer une nouvelle partie?'
+                    '\nVoulez vous jouer une nouvelle partie?'
                 box_fin = messagebox.showinfo('Partie teminée!', txt_fin)
                 if not box_fin:
                     self.destroy()
@@ -469,14 +535,15 @@ class Brothello(Tk):
             self.histo.ajouter_texte("Tour du joueur {}".format(
                 self.partie.couleur_joueur_courant))
 
-            if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
+            if self.partie.joueur_courant.obtenir_type_joueur() == \
+                    'Ordinateur':
                 self.tour_ordi()
                 self.partie.jouer()
                 self.placer_pieces()
                 if self.partie.partie_terminee():
                     self.histo.ajouter_texte(self.partie.determiner_gagnant())
                     txt_fin = self.partie.determiner_gagnant() + \
-                              '\nVoulez vous jouer une nouvelle partie?'
+                        '\nVoulez vous jouer une nouvelle partie?'
                     box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
                     if box_fin:
                         self.nouvelle_partie()
@@ -486,33 +553,31 @@ class Brothello(Tk):
                     self.partie.couleur_joueur_courant))
 
     def tour_ordi(self):
-        """ fait jouer l'ordi """
+        """ Fait jouer l'ordinateur """
 
         if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
             coup_jouer = self.partie.tour((-1, -1))
             self.histo.ajouter_texte(f"Ordinateur a joué en {coup_jouer}")
 
     def valider_coup(self, position: tuple):
-        """vérifie si coup valide, affiche msg sinon"""
+        """ Vérifie si coup valide, affiche msg sinon """
 
         self.filtre_exceptions = ErreurPositionCoup(
             self.partie.coups_du_tour)
         try:
             try_coup = self.filtre_exceptions.verifier_coup_valide(position)
             if try_coup[0]:
-                print("COUP VALIDE")
                 return True
             elif not try_coup[0]:
                 messagebox.showinfo("Coup invalide", try_coup[1])
-                print("COUP INVALIDE")
                 return False
-        except:
+        except(AttributeError, ValueError, TypeError):
             messagebox.showinfo("Coup invalide", "Une erreur s'est"
-                                      " produite. Veuillez réessayer. ")
+                                " produite. Veuillez réessayer. ")
             return False
 
     def conseil(self):
-        """ Dira à l'utilisateur les coups possibles """
+        """ Affiche à l'utilisateur les coups possibles """
 
         if self.difficulte == "Normal":
             coups_possibles = self.partie.coups_possibles
@@ -525,11 +590,17 @@ class Brothello(Tk):
                                      " normale! Débrouillez-vous! ")
 
     def abandon(self):
+        """
+        Concède la victoire à l'ennemi et demande si le joueur souhaite jouer
+        une autre partie
+        """
+
         self.histo.ajouter_texte("Le joueur {} abandonne la partie! ".format(
             self.partie.couleur_joueur_courant))
         self.histo.ajouter_texte(self.partie.determiner_gagnant())
-        txt_fin = (f"Joueur {self.partie.couleur_joueur_courant} abandonne la partie!"
-                  '\nVoulez vous jouer une nouvelle partie?')
+        txt_fin = (f"Joueur {self.partie.couleur_joueur_courant} "
+                   f"abandonne la partie! \nVoulez vous jouer une nouvelle "
+                   f"partie?")
         box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
         if not box_fin:
             self.destroy()
@@ -538,10 +609,17 @@ class Brothello(Tk):
 
     def nouvelle_partie(self):
         """ Démarre une nouvelle partie (Redémarre l'application) """
+
         self.destroy()
         le_jeu = Brothello()
         le_jeu.mainloop()
 
 
 class ErreurChoix(Exception):
+    """
+    Classe d'erreur servant à attraper des données invalides lors des choix de
+    l'utilisateur au début de la partie. Ou si celui-ci ferme les fenêtres
+    TopLevel sans répondre
+    """
+
     pass

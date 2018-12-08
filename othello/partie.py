@@ -3,6 +3,11 @@ from othello.joueur import JoueurOrdinateur, JoueurHumain
 
 
 class Partie:
+    """
+     Définition de la classe Partie qui englobe la planche, l'IA, les pièces,
+     les joueurs et détermine les coups possibles
+    """
+
     def __init__(self, nb_joueurs: int, difficulte: str, nb_cases: int,
                  nom_fichier=None):
         """
@@ -17,6 +22,8 @@ class Partie:
            devra se terminer.
         - coups_possibles : une liste de tous les coups possibles en fonction
           de l'état actuel de la planche, initialement vide.
+        - intelligenceartificielle: classe contenant les méthodes d'analyse de
+          partie de l'IA
 
         On initialise ensuite les joueurs selon la paramètre nom_fichier. Si
         l'utilisateur a précisé un nom_fichier, on fait appel à la méthode
@@ -27,7 +34,6 @@ class Partie:
 
         self.difficulte = difficulte
         self.nb_cases = nb_cases
-        print("init partie")
         self.planche = Planche(self.nb_cases)
         self.nb_joueurs = nb_joueurs
 
@@ -55,6 +61,7 @@ class Partie:
 
         Pour créer les objets joueur, faites appel à demander_type_joueur()
         """
+
         self.joueur_noir = self.creer_joueur("Humain", "noir")
         if self.nb_joueurs == 1:
             self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
@@ -82,61 +89,20 @@ class Partie:
 
         return joueur
 
-    def valider_position_coup(self, position_coup):
-        """
-        Vérifie la validité de la position désirée pour le coup. On retourne un
-        message d'erreur approprié pour chacune des trois situations suivantes:
-
-        1) Le coup tenté ne représente pas une position valide de la planche de
-           jeu.
-
-        2) Une pièce se trouve déjà à la position souhaitée.
-
-        3) Le coup ne fait pas partie de la liste des coups valides.
-
-        Args:
-            position_coup: La position du coup à valider.
-
-        Returns:
-            Un couple où le premier élément représente la validité de la
-            position (True ou False), et le
-            deuxième élément est un éventuel message d'erreur.
-        """
-
-        if position_coup == "erreur":
-            return (False, "Une erreur s'est produite, assurez vous d'entre un"
-                           " chiffre entre 0 et 7 et qu'une pièce soit mangée." 
-                           " Veuillez recommencez. ")
-        if not self.planche.position_valide(position_coup):
-            return (False, "Position ne respecte pas les bornes de la planche."
-                    " Veuillez recommencer. ")
-        elif position_coup not in self.coups_possibles:
-            if self.planche.get_piece(position_coup):
-                return (False, "Coup impossible. Il y a déjà une pièce à cette"
-                               " position. Veuillez recommencer. ")
-            return (False, "Coup impossible car aucune pièce ne serait "
-                           "mangée! Veuillez recommencer. ")
-        else:
-            return True, "Coup accepté. "
-
     def tour(self, coup_clic: tuple):
         """
-        Cette méthode simule le tour d'un joueur, et doit effectuer les actions
+        Cette méthode simule le tour d'un joueur, et effectue les actions
          suivantes:
-        - Demander la position du coup au joueur courant. Tant que la position
-          n'est pas validée, on continue de demander. Si la position est
-          invalide, on affiche le message d'erreur correspondant. Pour demander
-          la position, faites appel à la fonction choisir_coup de l'attribut
-          self.joueur_courant, à laquelle vous devez passer la liste de coups
-          possibles. Pour valider le coup retourné, pensez à la méthode de
-          validation de coup que vous avez déjà à implémenter.
-        - Jouer le coup sur la planche de jeu, avec la bonne couleur.
-        - Si le résultat du coup est "erreur", afficher un message d'erreur.
+        - Si le joueur courant est un Ordinateur, lui demande le coup qu'il
+          veut effecteur avec demander_coup()
+        - S'il s'agit d'un joueur humain, utilise le paramètre coup_clic pour
+          effectuer son coup sur la planche
+        - Joue le coup sur la planche de jeu, avec la bonne couleur.
 
-        Returns:
-            La simulation du tour d'un joueur
+        :param coup_clic: tuple de la position cliquée par le joueur sur le GUI
+
+        :returns: La position jouée par le joueur
         """
-        print("DANS TOUR", coup_clic)
         if self.joueur_courant.obtenir_type_joueur() == "Humain":
             coup_demander = coup_clic
             self.planche.jouer_coup(coup_demander,
@@ -156,7 +122,7 @@ class Partie:
         self.intelligenceartificielle.filtrer_meilleurs_coups() avant de faire
         choisir coup.
 
-        Returne: coup_demander: un couple positionnel sous forme de tuple
+        :returns coup_choisi: un couple positionnel sous forme de tuple
             représentant le coup demandé par le joueur.
         """
 
@@ -180,26 +146,15 @@ class Partie:
             coup_choisi = self.joueur_courant.choisir_coup(coups_ia)
         return coup_choisi
 
-    def passer_tour(self):
-        """
-        Affiche un message indiquant que le joueur de la couleur courante ne
-        peut jouer avec l'état actuel de la
-        planche et qu'il doit donc passer son tour.
-        """
-        if self.joueur_courant.obtenir_type_joueur() == "Humain":
-            print("Aucun coup possible, joueur {} passe son tour".format(
-                    self.couleur_joueur_courant))
-        else:
-            print("Erreur dans le coup demandé par l'ordinateur")
-            print("Le joueur ordinateur {} passe son tour".format(
-                self.couleur_joueur_courant))
-
     def partie_terminee(self):
         """
         Détermine si la partie est terminée, Une partie est terminée si toutes
         les cases de la planche sont remplies ou si deux tours consécutifs ont
-        été passés (pensez à l'attribut self.deux_tours_passes).
+        été passés.
+
+        :returns: True si terminée, False sinon
         """
+
         if self.deux_tours_passes:
             return True
         elif len(self.planche.cases) == self.planche.nb_cases ** 2:
@@ -211,7 +166,11 @@ class Partie:
         """
         Détermine le gagnant de la partie. Le gagnant est simplement la couleur
         pour laquelle il y a le plus de pions sur la planche de jeu.
+
+        :returns msg: Message contenant les informations sur le gagnant, ou de
+            partie nulle
         """
+
         pieces_noires = 0
         pieces_blanches = 0
 
@@ -231,8 +190,8 @@ class Partie:
 
         if gagnant:
             msg = "La partie est terminée, le joueur {} l'emporte {} à {}".\
-            format(gagnant.couleur, max(pieces_noires, pieces_blanches),
-            min(pieces_noires, pieces_blanches))
+                format(gagnant.couleur, max(pieces_noires, pieces_blanches),
+                       min(pieces_noires, pieces_blanches))
             return msg
         else:
             msg = "Partie nulle! Les deux joueurs terminent avec un score"
@@ -241,34 +200,15 @@ class Partie:
 
     def jouer(self):
         """
-        Démarre une partie. Tant que la partie n'est pas terminée, on fait les
-        choses suivantes :
+        Effectue les opérations de fin de tour:
 
-        1) On affiche la planche de jeu ainsi qu'un message indiquant à quelle
-           couleur c'est le tour de jouer. Pour afficher une planche, faites
-           appel à print(self.planche)
+        - Effectue le changement de joueur. Modifie à la fois les attributs
+            self.joueur_courant et self.couleur_joueur_courant.
 
-        2) On détermine les coups possibles pour le joueur actuel. Pensez à
-          utiliser une fonction que vous avez à
-           implémenter pour Planche, et à entreposer les coups possibles dans
-           un attribut approprié de la partie.
-
-        3) Faire appel à tour() ou à passer_tour(), en fonction du nombre de
-            coups disponibles pour le joueur actuel.
-           Mettez aussi à jour les attributs self.tour_precedent_passe et
-           self.deux_tours_passes.
-
-        4) Effectuer le changement de joueur. Modifiez à la fois les attributs
-            self.joueur_courant et
-           self.couleur_joueur_courant.
-
-        5) Lorsque la partie est terminée, afficher un message mentionnant le
-            résultat de la partie. Vous avez une
-           fonction à implémenter que vous pourriez tout simplement appeler.
+        - Détermine les coups possibles pour le joueur actuel.
         """
 
         if len(self.coups_possibles) < 1:
-            self.passer_tour()
             if not self.tour_precedent_passe:
                 self.tour_precedent_passe = True
             else:
@@ -281,8 +221,6 @@ class Partie:
         else:
             self.joueur_courant = self.joueur_noir
             self.couleur_joueur_courant = "noir"
-        print("jouer() exec. joueur courant est maintenant",
-              self.joueur_courant.couleur, self.couleur_joueur_courant)
 
         self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
                 self.joueur_courant.couleur)
@@ -368,4 +306,3 @@ class Partie:
         self.planche.charger_dune_chaine(f.read())
 
         f.close()
-

@@ -385,17 +385,21 @@ class Brothello(Tk):
         bout_conseil = Bouton(self, text="Voir les coups possibles",
                               command=self.conseil, state=DISABLED)
         bout_conseil.grid(row=0, column=0, padx=5, pady=5, sticky=W)
-        bout_newgame = Bouton(self, text="Nouvelle partie",
-                              command=self.nouvelle_partie, state=DISABLED)
-        bout_newgame.grid(row=1, column=2, padx=5, pady=5, sticky=W+E)
-        bout_abandon = Bouton(self, text="Abandonner", command=self.abandon,
-                              state=DISABLED)
-        bout_abandon.grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
         self.score = ScoreActuel(self)
         self.score.grid(row=0, column=2, sticky=W)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
 
+        # Menu
+        self.mainmenu = Menu(self)
+        first_menu = Menu(self.mainmenu)
+        first_menu.add_command(label="Nouvelle partie", command=self.nouvelle_partie)
+        first_menu.add_command(label="Abandonner", command=self.abandon)
+        second_menu = Menu(self.mainmenu)
+        second_menu.add_command(label="Comment jouer", command=self.aide)
+        self.mainmenu.add_cascade(label="Fichier", menu=first_menu)
+        self.mainmenu.add_cascade(label="Aide", menu=second_menu)
+        Brothello.config(self, menu=self.mainmenu)
 
         # Gestion couleur du board
         Bouton(self, text="Changer couleur",
@@ -470,8 +474,6 @@ class Brothello(Tk):
         self.placer_pieces()
 
         # Activation des éléments de l'interface
-        bout_newgame.config(state=NORMAL)
-        bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
 
     def action_bouton_couleur(self):
@@ -708,6 +710,16 @@ class Brothello(Tk):
         le_jeu = Brothello()
         le_jeu.mainloop()
 
+    def aide(self):
+        messagebox.showinfo(title="Comment jouer", message="A son tour de jeu, le joueur doit poser un pion de "
+                                                           "sa couleur sur une case vide de l’othellier, adjacente"
+                                                           " à un pion adverse. Il doit également, en posant son pion,"
+                                                           " encadrer un ou plusieurs pions adverses entre le pion"
+                                                           " qu’il pose et un pion à sa couleur, déjà placé sur"
+                                                           " l’othellier. Il retourne alors de sa couleur le ou les"
+                                                           " pions qu’il vient d’encadrer. Les pions ne sont ni retirés"
+                                                           " de l’othellier, ni déplacés d’une case à l’autre."
+                                                           "\n\nSource: http://www.ffothello.org/othello/regles-du-jeu/")
 
 class ErreurChoix(Exception):
     """

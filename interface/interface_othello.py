@@ -1,9 +1,9 @@
 from tkinter import *
-from tkinter import colorchooser, messagebox
+from tkinter import colorchooser, messagebox, StringVar
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
 from time import sleep
-
+from winsound import *
 
 
 # ======= TODO STYLE ======= #
@@ -16,6 +16,8 @@ from time import sleep
 
 
 # === Définition des objets esclaves et de leurs éléments de style === #
+
+
 class Color:
     """
     Classe définissant la couleur utilisée dans le damier
@@ -36,7 +38,7 @@ class Color:
             r = rgb[0]
             g = rgb[1]
             b = rgb[2]
-            if r < 80 and g < 80 and b < 80:
+            if r < 125 and g < 127 and b < 127:
                 r = int(r * 2)
                 g = int(g * 2)
                 b = int(b * 2)
@@ -97,7 +99,7 @@ class PlancheDeJeu(Canvas):
         """ Constructeur du canevas avec la planche de jeu """
 
         Canvas.__init__(self, boss, width=500, height=500, highlightthickness=0
-                        , relief=SUNKEN)
+                        , relief=SUNKEN, borderwidth=0)
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
 
@@ -179,9 +181,9 @@ class Historique(Frame):
 
 
 class ScoreActuel(Label):
-    def __init__(self, boss):
+    def __init__(self, boss, **kwargs):
         Label.__init__(self, boss, font='Helvetica', text="score: ",
-                       bg="white")
+                       **kwargs)
 
     def changer_score(self, score_a_ecrire):
         self.labelText = ('1.0', score_a_ecrire)
@@ -368,11 +370,18 @@ class Brothello(Tk):
         super().__init__()
 
         # Caractérisiques de la fenêtre principale
-
         self.title("Brothello")
-        #Brothello.config(self, bg="white")
         self.geometry("800x650+550+250")
         self.resizable(height=0, width=0)
+        self.fond = PhotoImage(file='bois.gif')
+        self.fond_label = Label(self, image=self.fond)
+        self.fond_label.image = self.fond_label
+        self.fond_label.place(x=0, y=0, width=800, height=650)
+
+        # Effets sonores
+        self.plop = lambda: PlaySound('plop.wav', SND_FILENAME | SND_ASYNC)
+        self.blip = lambda: PlaySound('blip.wav', SND_FILENAME | SND_ASYNC)
+        # Widgets esclaves
         bout_conseil = Bouton(self, text="Voir les coups possibles",
                               command=self.conseil, state=DISABLED)
         bout_conseil.grid(row=0, column=0, padx=5, pady=5, sticky=W)
@@ -382,7 +391,8 @@ class Brothello(Tk):
         bout_abandon = Bouton(self, text="Abandonner", command=self.abandon,
                               state=DISABLED)
         bout_abandon.grid(row=2, column=2, padx=5, pady=5, sticky=W+E)
-        ScoreActuel(self).grid(row=0, column=2, sticky=W)
+        self.score = ScoreActuel(self)
+        self.score.grid(row=0, column=2, sticky=W)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
 
@@ -399,7 +409,7 @@ class Brothello(Tk):
         self.nb_joueurs = 1
         self.largeur = 500//self.nb_cases
 
-        # Popups choix options du jeu
+        # # Popups choix options du jeu
         try:
             fen_joueur = FenJoueurs(self)
             self.wait_window(fen_joueur)
@@ -451,9 +461,9 @@ class Brothello(Tk):
                 self.destroy()
 
         # Création du canevas
-        self.fond()
         self.initialiser_damier()
         self.anciennes_pieces = {}
+
 
         # Création de l'instance du jeu et liste des coups possibles
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
@@ -463,13 +473,6 @@ class Brothello(Tk):
         bout_newgame.config(state=NORMAL)
         bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
-
-    def fond(self):
-        self.can1 = Canvas(self, width = 800, height = 650)
-        self.photo = PhotoImage(file="bois.gif")
-        self.can1.create_image(400, 325, image=self.photo)
-        self.can1.grid(row=0, column=0, padx=5, pady=5, sticky=NSEW)
-
 
     def action_bouton_couleur(self):
         """
@@ -510,6 +513,7 @@ class Brothello(Tk):
                     piece].couleur
                 self.dessiner_piece(mid_x, mid_y, couleur_piece)
                 self.damier.update_idletasks()
+                self.plop()
                 sleep(0.35)
 
         for piece in self.partie.planche.cases:
@@ -529,6 +533,7 @@ class Brothello(Tk):
                         self.partie.planche.cases[piece].couleur
                     self.dessiner_piece(mid_x, mid_y, couleur_piece)
                     self.damier.update_idletasks()
+                    self.blip()
                     sleep(0.35)
 
         for piece in self.partie.planche.cases:
@@ -551,6 +556,8 @@ class Brothello(Tk):
         self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
                                 fill=couleur_piece, outline='black')
 
+
+
     def tour_humain(self, case_clic: tuple):
         """ Joue le coup du clic humain """
 
@@ -568,7 +575,6 @@ class Brothello(Tk):
         pour modifier les données. Effectue le changement de joueurs. Si ce
         joueur est un ordinateur, lui fait aussi joueur son tour avant
         d'attendre un nouveau clic
-
         :param event: Un clic sur le canevas de la planche de jeu
         """
 
@@ -666,12 +672,9 @@ class Brothello(Tk):
             self.damier.dessiner_carres()
             self.placer_pieces()
             """
-
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
-
     def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
          Trace la pièce dans le canevas
-
         r = self.largeur // 5 * 2
         self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
                                 fill=couleur_piece)
@@ -679,7 +682,6 @@ class Brothello(Tk):
         else:
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
                                      " normale! Débrouillez-vous! ")
-
 
     def abandon(self):
         """
@@ -713,5 +715,5 @@ class ErreurChoix(Exception):
     l'utilisateur au début de la partie. Ou si celui-ci ferme les fenêtres
     TopLevel sans répondre
     """
-
     pass
+

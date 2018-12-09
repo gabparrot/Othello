@@ -405,7 +405,6 @@ class Brothello(Tk):
         # Création de l'instance du jeu et liste des coups possibles
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.placer_pieces()
-        self.filtre_exceptions = ErreurPositionCoup(self.partie.coups_du_tour)
 
         # Activation des éléments de l'interface
         bout_newgame.config(state=NORMAL)
@@ -419,7 +418,7 @@ class Brothello(Tk):
         """
 
         couleur.choisir_couleur()
-        self.initialiser_damier()
+        self.damier.dessiner_carres()
         self.placer_pieces()
 
     def initialiser_damier(self):
@@ -451,7 +450,7 @@ class Brothello(Tk):
                     piece].couleur
                 self.dessiner_piece(mid_x, mid_y, couleur_piece)
                 self.damier.update_idletasks()
-                sleep(0.5)
+                sleep(0.35)
 
         for piece in self.partie.planche.cases:
             if piece in self.anciennes_pieces:
@@ -470,7 +469,7 @@ class Brothello(Tk):
                         self.partie.planche.cases[piece].couleur
                     self.dessiner_piece(mid_x, mid_y, couleur_piece)
                     self.damier.update_idletasks()
-                    sleep(0.5)
+                    sleep(0.35)
 
         for piece in self.partie.planche.cases:
             # Placer au centre de la case
@@ -561,19 +560,22 @@ class Brothello(Tk):
 
     def valider_coup(self, position: tuple):
         """ Vérifie si coup valide, affiche msg sinon """
-
-        self.filtre_exceptions = ErreurPositionCoup(
-            self.partie.coups_du_tour)
+        msg=""
         try:
-            try_coup = self.filtre_exceptions.verifier_coup_valide(position)
-            if try_coup[0]:
-                return True
-            elif not try_coup[0]:
-                messagebox.showinfo("Coup invalide", try_coup[1])
-                return False
-        except(AttributeError, ValueError, TypeError):
-            messagebox.showinfo("Coup invalide", "Une erreur s'est"
-                                " produite. Veuillez réessayer. ")
+            if position in self.partie.coups_du_tour[1]:
+                msg = "Impossible, vous ne pouvez pas mettre une pièce par" \
+                      " dessus une autre! "
+                raise ErreurPositionCoup
+            if position in self.partie.coups_du_tour[2]:
+                msg = "Coup invalide. Aucune pièce ennemie ne serait mangée! "
+                raise ErreurPositionCoup
+            if position not in self.partie.coups_du_tour[0]:
+                msg = "Une erreur inconnue s'est produite avec le coup " \
+                      "demandé. Veuillez réessayer."
+                raise ErreurPositionCoup
+            return True
+        except ErreurPositionCoup:
+            messagebox.showinfo("Coup invalide", msg)
             return False
 
     def conseil(self):
@@ -582,12 +584,31 @@ class Brothello(Tk):
         if self.difficulte == "Normal":
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
-                coups_possibles = "aucun coup possible"
-            self.histo.ajouter_texte("Les coups possibles sont:{}".format(
-                coups_possibles))
+                self.histo.ajouter_texte("Aucun coup possible!")
+            for coup in coups_possibles:
+                mid_x = coup[0] * self.largeur + self.largeur // 2
+                mid_y = coup[1] * self.largeur + self.largeur // 2
+                couleur_piece = 'light grey'
+                self.dessiner_piece(mid_x, mid_y, couleur_piece)
+                self.damier.update_idletasks()
+                sleep(0.35)
+            self.damier.dessiner_carres()
+            self.placer_pieces()
+            """
+
+            self.dessiner_piece(mid_x, mid_y, couleur_piece)
+
+    def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
+         Trace la pièce dans le canevas
+
+        r = self.largeur // 5 * 2
+        self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
+                                fill=couleur_piece)
+                                """
         else:
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
                                      " normale! Débrouillez-vous! ")
+
 
     def abandon(self):
         """

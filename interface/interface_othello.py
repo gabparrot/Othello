@@ -5,6 +5,7 @@ from othello.exceptions import ErreurPositionCoup
 from time import sleep
 
 
+
 # ======= TODO STYLE ======= #
 # TODO 1- Faire barre d'outils en haut (Menubutton()?)
 # TODO 3- Faire plus belle pièce
@@ -367,8 +368,9 @@ class Brothello(Tk):
         super().__init__()
 
         # Caractérisiques de la fenêtre principale
+
         self.title("Brothello")
-        Brothello.config(self, bg="white")
+        #Brothello.config(self, bg="white")
         self.geometry("800x650+550+250")
         self.resizable(height=0, width=0)
         bout_conseil = Bouton(self, text="Voir les coups possibles",
@@ -383,6 +385,7 @@ class Brothello(Tk):
         ScoreActuel(self).grid(row=0, column=2, sticky=W)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
+
 
         # Gestion couleur du board
         Bouton(self, text="Changer couleur",
@@ -448,6 +451,7 @@ class Brothello(Tk):
                 self.destroy()
 
         # Création du canevas
+        self.fond()
         self.initialiser_damier()
         self.anciennes_pieces = {}
 
@@ -459,6 +463,13 @@ class Brothello(Tk):
         bout_newgame.config(state=NORMAL)
         bout_abandon.config(state=NORMAL)
         bout_conseil.config(state=NORMAL)
+
+    def fond(self):
+        self.can1 = Canvas(self, width = 800, height = 650)
+        self.photo = PhotoImage(file="bois.gif")
+        self.can1.create_image(400, 325, image=self.photo)
+        self.can1.grid(row=0, column=0, padx=5, pady=5, sticky=NSEW)
+
 
     def action_bouton_couleur(self):
         """

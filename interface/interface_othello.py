@@ -20,23 +20,47 @@ class Color:
     Classe définissant la couleur utilisée dans le damier
     """
 
-    color = "deepskyblue2"
+    color = "deepskyblue2"  # RGB(0,178,238)
+
+    color2 = "#%02x%02x%02x" % (0, 178//2, 238//2)
 
     def choisir_couleur(self):
         """ Permet de changer la couleur avec un sélecteur de couleur """
 
         clr = colorchooser.askcolor(title="Modifier la couleur de la planche")
-        if None not in clr:
-            self.color = clr[1]
+        if None not in clr and clr[1] not in ["#000000", "#FFFFFF", "#D3D3D3"]:
+            self.color = clr[1]  # color hexadecimale
+            rgb = clr[0]  # color redgreenblue
+            # Faire 2e couleur un peu plus pale que 1ere
+            r = rgb[0]
+            g = rgb[1]
+            b = rgb[2]
+            if r < 80 and g < 80 and b < 80:
+                r = int(r * 2)
+                g = int(g * 2)
+                b = int(b * 2)
+            else:
+                if r > 0:
+                    r = int(r//2)
+                if g > 0:
+                    g = int(g//2)
+                if b > 0:
+                    b = int(b//2)
+            rgb = (int(r), int(g), int(b))
+            self.color2 = "#%02x%02x%02x" % rgb
+            print(self.color2)
+            if self.color2 in ["#000000", "#FFFFFF", "#D3D3D3"]:
+                self.color2 = self.color
         else:
-            self.color = "black"
+            self.color = "deepskyblue2"
+            self.color2 = "#%02x%02x%02x" % (0, 178//3*2, 238//3*2)
 
     def afficher_couleur(self):
         """
         :return self.color: Retourne la couleur portée par l'attribut
             self.color
         """
-        return str(self.color)
+        return str(self.color), str(self.color2)
 
 
 couleur = Color()
@@ -71,7 +95,8 @@ class PlancheDeJeu(Canvas):
     def __init__(self, boss):
         """ Constructeur du canevas avec la planche de jeu """
 
-        Canvas.__init__(self, boss, width=500, height=500)
+        Canvas.__init__(self, boss, width=500, height=500, highlightthickness=0
+                        , relief=SUNKEN)
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
 
@@ -81,26 +106,50 @@ class PlancheDeJeu(Canvas):
         self.largeur = 500 // self.nb_cases
         x, y = 1, 1
         for i in range(1, self.nb_cases + 1):
+            liste_carres = []
+            lettres_rangs = (chr(i + 64), chr(i + 65))
+            print(lettres_rangs)
             if i % 2 != 0:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + self.largeur, y +
+                    num_col = (str(j*2+1), str(j*2+2))
+                    carre = self.create_rectangle(x, y, x + self.largeur, y +
                                           self.largeur,
-                                          fill=couleur.afficher_couleur())
+                                          fill=couleur.afficher_couleur()[0],
+                                          outline='black',
+                                          tag=lettres_rangs[0] + num_col[0])
+                    liste_carres.append(carre)
                     x += self.largeur
-                    self.create_rectangle(x, y, x + self.largeur, y +
-                                          self.largeur, fill="white")
+                    carre = self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur,
+                                          fill=couleur.afficher_couleur()[1],
+                                          outline='black',
+                                          tag=lettres_rangs[0] + num_col[1])
+                    liste_carres.append(carre)
                     x += self.largeur
             else:
                 for j in range(self.nb_cases//2):
-                    self.create_rectangle(x, y, x + self.largeur, y +
-                                          self.largeur, fill="white")
-                    x += self.largeur
-                    self.create_rectangle(x, y, x + self.largeur, y +
+                    num_col = (str(j * 2 + 1), str(j * 2 + 2))
+                    carre = self.create_rectangle(x, y, x + self.largeur, y +
                                           self.largeur,
-                                          fill=couleur.afficher_couleur())
+                                          fill=couleur.afficher_couleur()[1],
+                                          outline='black',
+                                          tag=lettres_rangs[0] + num_col[0])
+                    liste_carres.append(carre)
+                    x += self.largeur
+                    carre = self.create_rectangle(x, y, x + self.largeur, y +
+                                          self.largeur,
+                                          fill=couleur.afficher_couleur()[0],
+                                          outline='black',
+                                          tag=lettres_rangs[0] + num_col[1])
+                    liste_carres.append(carre)
                     x += self.largeur
             x = 1
             y += self.largeur
+            for carre in liste_carres:
+                coords = self.coords(carre)
+                txt = str(self.gettags(carre)[0])
+                self.create_text(coords[0]+2, coords[1]+1, text=txt,
+                                 font='Roboto 7 bold', anchor=NW)
 
 
 class Historique(Frame):
@@ -489,12 +538,15 @@ class Brothello(Tk):
 
         r = self.largeur // 5 * 2
         self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
-                                fill=couleur_piece)
+                                fill=couleur_piece, outline='black')
 
     def tour_humain(self, case_clic: tuple):
         """ Joue le coup du clic humain """
 
-        coup_jouer = self.partie.tour(case_clic)
+        self.partie.tour(case_clic)
+        ligne_jouee = chr(case_clic[0] + 64)
+        col_jouee = str(case_clic[1] + 1)
+        coup_jouer = ligne_jouee + col_jouee
         self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
                                  f" a joué en {coup_jouer}")
 
@@ -511,7 +563,10 @@ class Brothello(Tk):
 
         # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
         case_clic = (event.x//self.largeur, event.y//self.largeur)
-        self.histo.ajouter_texte(f"Clic reçu en {case_clic}")
+        ligne_jouee = chr(case_clic[0] + 64)
+        col_jouee = str(case_clic[1] + 1)
+        coup_jouer = ligne_jouee + col_jouee
+        self.histo.ajouter_texte(f"Clic reçu en {coup_jouer}")
 
         # Valider puis jouer le coup
         if self.valider_coup(case_clic):
@@ -555,8 +610,13 @@ class Brothello(Tk):
         """ Fait jouer l'ordinateur """
 
         if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
-            coup_jouer = self.partie.tour((-1, -1))
-            self.histo.ajouter_texte(f"Ordinateur a joué en {coup_jouer}")
+            coup_ordi = self.partie.tour((-1, -1))
+            ligne_jouee = chr(coup_ordi[0] + 64)
+            col_jouee = str(coup_ordi[1] + 1)
+            coup_jouer = ligne_jouee + col_jouee
+            self.histo.ajouter_texte(
+                f"Joueur {self.partie.joueur_courant.couleur}"
+                f" a joué en {coup_jouer}")
 
     def valider_coup(self, position: tuple):
         """ Vérifie si coup valide, affiche msg sinon """

@@ -103,6 +103,6 @@ class JoueurOrdinateur(Joueur):
         """
 
         if len(coups_possibles) == 0:
-            return -1, -1
+            return None
         else:
             return choice(coups_possibles)

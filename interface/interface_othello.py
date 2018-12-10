@@ -23,9 +23,9 @@ class Color:
     Classe définissant la couleur utilisée dans le damier
     """
 
-    color = "deepskyblue2"  # RGB(0,178,238)
+    color = "red3"
 
-    color2 = "#%02x%02x%02x" % (0, 178//2, 238//2)
+    color2 = "#%02x%02x%02x" % (120, 0//2, 0//2)
 
 
     def choisir_couleur(self):

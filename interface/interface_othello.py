@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import colorchooser, messagebox, font
+from tkinter import colorchooser, messagebox, ttk
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
 from time import sleep
@@ -71,7 +71,7 @@ class Color:
 couleur = Color()
 
 
-class Bouton(Button):
+class Bouton(ttk.Button):
     """ Classe définissant le style des boutons utilisés dans le jeu """
 
     def __init__(self, boss, **kwargs):
@@ -101,7 +101,7 @@ class PlancheDeJeu(Canvas):
         """ Constructeur du canevas avec la planche de jeu """
 
         Canvas.__init__(self, boss, width=500, height=500, highlightthickness=0
-                        , relief=SUNKEN, borderwidth=0)
+                        , relief=SUNKEN, borderwidth=0, bg = "black")
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
 
@@ -164,7 +164,7 @@ class Historique(Frame):
     def __init__(self, root, width=25, height=25):
         """ Constructeur de l'historique de texte """
 
-        Frame.__init__(self, root, bd=2, bg='white',
+        Frame.__init__(self, root, bd=2, bg='black',
                        width=width, height=height, relief=SUNKEN)
         self.text = Text(self, font='Helvetica', bg='white', bd=1, width=width,
                          height=height)
@@ -386,7 +386,7 @@ class Brothello(Tk):
 
         # Caractérisiques de la fenêtre principale
         self.title("Brothello")
-        self.geometry("800x650+550+250")
+        self.geometry("800x625+550+250")
         self.resizable(height=0, width=0)
         self.fond = PhotoImage(file='bois.gif')
         self.fond_label = Label(self, image=self.fond)

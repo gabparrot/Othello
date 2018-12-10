@@ -1,10 +1,10 @@
 from tkinter import *
-from tkinter import colorchooser, messagebox, filedialog
+from tkinter import colorchooser, messagebox, filedialog, ttk
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
 from time import sleep
 from winsound import *
-
+import sys
 
 # ======= TODO STYLE ======= #
 # TODO 1- Faire barre d'outils en haut (Menubutton()?)
@@ -26,7 +26,6 @@ class Color:
     color = "#400000"
 
     color2 = "#800000"
-
 
     def choisir_couleur(self):
         """ Permet de changer la couleur avec un sélecteur de couleur """
@@ -56,9 +55,8 @@ class Color:
             if self.color2 in ["#000000", "#FFFFFF", "#D3D3D3"]:
                 self.color2 = self.color
         else:
-            self.color = "deepskyblue2"
-            self.color2 = "#%02x%02x%02x" % (0, 178//3*2, 238//3*2)
-
+            self.color = "#400000"
+            self.color2 = "#800000"
 
     def afficher_couleur(self):
         """
@@ -88,7 +86,7 @@ class Glissoir(Scale):
 
     def __init__(self, boss, **kwargs):
         """ Constructeur des glissoirs """
-        Scale.__init__(self, boss, **kwargs)
+        Scale.__init__(self, boss, bg='#e2ceb1', bd=2, relief=SOLID, **kwargs)
 
 
 class PlancheDeJeu(Canvas):
@@ -100,11 +98,11 @@ class PlancheDeJeu(Canvas):
     def __init__(self, boss):
         """ Constructeur du canevas avec la planche de jeu """
 
-        Canvas.__init__(self, boss, width=500, height=500, highlightthickness=0
-                        , relief=SUNKEN, borderwidth=0, bg = "black")
+        Canvas.__init__(self, boss, width=500, height=500,
+                        highlightthickness=0, relief=SUNKEN, borderwidth=0,
+                        bg="black")
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
-
 
     def dessiner_carres(self):
         """ Dessine le damier en fonction des couleurs et du nombre de cases"""
@@ -154,8 +152,29 @@ class PlancheDeJeu(Canvas):
             for carre in liste_carres:
                 coords = self.coords(carre)
                 txt = str(self.gettags(carre)[0])
-                self.create_text(coords[0]+2, coords[1]+1, text=txt,
-                                 font='Roboto 7 bold', anchor=NW)
+                if self.nb_cases == 6:
+                    self.create_text(coords[0] + 2, coords[1] + 1, text=txt,
+                                     fill='#e2ceb1',
+                                     font='RobotoMono 8 bold', anchor=NW)
+                elif self.nb_cases == 8:
+                    self.create_text(coords[0] + 2, coords[1] + 1, text=txt,
+                                     fill='#e2ceb1',
+                                     font='RobotoMono 7 bold', anchor=NW)
+                elif self.nb_cases == 10:
+                    lettre = txt[0]
+                    chiffre = txt[1]
+                    self.create_text(coords[0]+2, coords[1]+1, text=lettre, fill='#e2ceb1',
+                                    font='RobotoMono 7 bold', anchor=NW)
+                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-10, fill='#e2ceb1',
+                                     text=chiffre,font='RobotoMono 7 bold', anchor=NW)
+
+                else:  # 12x12
+                    lettre = txt[0]
+                    chiffre = txt[1]
+                    self.create_text(coords[0]+1, coords[1], text=lettre, fill='#e2ceb1',
+                                    font='RobotoMono 7 bold', anchor=NW)
+                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-11, text=chiffre, fill='#e2ceb1',
+                                    font='RobotoMono 7 bold', anchor=NW)
 
 
 class Historique(Frame):
@@ -166,13 +185,12 @@ class Historique(Frame):
 
         Frame.__init__(self, root, bd=2, bg='black',
                        width=width, height=height, relief=SUNKEN)
-        self.text = Text(self, font='Helvetica', bg='white', bd=1, width=width,
-                         height=height)
+        self.text = Text(self, font='Helvetica', bg='#e2ceb1', bd=1,
+                         width=width, height=height)
         scroll = Scrollbar(self, bd=1, command=self.text.yview)
         self.text.configure(yscrollcommand=scroll.set)
         self.text.pack(side=LEFT, expand=YES, fill=BOTH, padx=2, pady=2)
         scroll.pack(side=RIGHT, expand=YES, fill=BOTH, padx=2, pady=2)
-
 
     def ajouter_texte(self, action_a_ecrire):
         """
@@ -210,7 +228,6 @@ class FenJoueurs(Toplevel):
         Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5,
                                                                       padx=10)
 
-
     def unjoueur(self):
         """ Donne la valeur 1 à self.nb_joueurs et ferme la fenêtre """
 
@@ -218,7 +235,6 @@ class FenJoueurs(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
-
 
     def deuxjoueurs(self):
         """ Donne la valeur 2 à self.nb_joueurs et ferme la fenêtre """
@@ -256,7 +272,6 @@ class FenNiveauDif(Toplevel):
         Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15,
                                                                       padx=10)
 
-
     def set_easy(self):
         """ Donne la valeur 'Normal' à self.difficulte et ferme la fenêtre """
 
@@ -264,7 +279,6 @@ class FenNiveauDif(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
-
 
     def set_hard(self):
         """
@@ -275,7 +289,6 @@ class FenNiveauDif(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
-
 
     def set_legend(self):
         """
@@ -313,7 +326,6 @@ class FenTypePartie(Toplevel):
         Bouton(self, text="Partie Personalisée", command=self.partie_perso).\
             pack(pady=5, padx=10)
 
-
     def partie_classique(self):
         """
         Donne la valeur 'classique' à self.type_partie et ferme la fenêtre
@@ -323,7 +335,6 @@ class FenTypePartie(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
-
 
     def partie_perso(self):
         """
@@ -355,13 +366,13 @@ class FenPartiePerso(Toplevel):
         self.minifond = PhotoImage(file='bois.gif')
         self.minifond_label = Label(self, image=self.minifond)
         self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
-        Label(self, text="Combien de cases?").pack(padx=20, pady=20, fill=X)
-        self.gliss = Glissoir(self, orient=HORIZONTAL, relief=SUNKEN, bd=2,
+        Label(self, text="Combien de cases?", bg='#e2ceb1', bd=2,
+              relief=SOLID).pack(padx=20, pady=20, fill=X)
+        self.gliss = Glissoir(self, orient=HORIZONTAL,
                               from_=6, to_=12, tickinterval=2, resolution=2)
         self.gliss.pack(padx=20, pady=20, fill=X)
         Bouton(self, text="jouer", command=self.set_perso).\
             pack(padx=20, pady=20, fill=X)
-
 
     def set_perso(self):
         """
@@ -391,11 +402,10 @@ class Brothello(Tk):
         self.fond = PhotoImage(file='bois.gif')
         self.fond_label = Label(self, image=self.fond)
         self.fond_label.image = self.fond_label
-        self.fond_label.place(x=0, y=0, width=800, height=650)
+        self.fond_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Effets sonores
-        self.plop = lambda: PlaySound('plop.wav', SND_FILENAME | SND_ASYNC)
-        self.blip = lambda: PlaySound('blip.wav', SND_FILENAME | SND_ASYNC)
+
 
         # Widgets esclaves
         bout_conseil = Bouton(self, text="Voir les coups possibles",
@@ -406,12 +416,16 @@ class Brothello(Tk):
 
         # Menu
         self.mainmenu = Menu(self)
-        first_menu = Menu(self.mainmenu,tearoff=0)
-        first_menu.add_command(label="Nouvelle partie", command=self.nouvelle_partie)
-        first_menu.add_command(label="Ouvrir", command=self.charger)
-        first_menu.add_command(label="Enregistrer sous", command=self.sauvegarder)
-        first_menu.add_command(label="Abandonner la partie", command=self.abandon)
-        second_menu = Menu(self.mainmenu,tearoff=0)
+        first_menu = Menu(self.mainmenu, tearoff=0)
+        first_menu.add_command(
+            label="Nouvelle partie", command=self.nouvelle_partie)
+        first_menu.add_command(
+            label="Ouvrir", command=self.charger)
+        first_menu.add_command(
+            label="Enregistrer sous", command=self.sauvegarder)
+        first_menu.add_command(
+            label="Abandonner la partie", command=self.abandon)
+        second_menu = Menu(self.mainmenu, tearoff=0)
         second_menu.add_command(label="Comment jouer", command=self.aide)
         self.mainmenu.add_cascade(label="Fichier", menu=first_menu)
         self.mainmenu.add_cascade(label="Aide", menu=second_menu)
@@ -484,7 +498,6 @@ class Brothello(Tk):
         self.initialiser_damier()
         self.anciennes_pieces = {}
 
-
         # Création de l'instance du jeu et liste des coups possibles
         self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.placer_pieces()
@@ -492,14 +505,81 @@ class Brothello(Tk):
         # Activation des éléments de l'interface
         bout_conseil.config(state=NORMAL)
 
+    # ====== Définition des effets sonores ====== #
+    @staticmethod
+    def plop():
+        try:
+            PlaySound('plop.wav', SND_FILENAME | SND_ASYNC )
+
+        except RuntimeError:
+            print("RUNTIME ERROR SON ÉVITÉE")
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_PURGE )
+
+    @staticmethod
+    def blip():
+        try:
+            PlaySound('blip.wav', SND_FILENAME | SND_ASYNC )
+
+        except RuntimeError:
+            print("RUNTIME ERROR SON ÉVITÉE")
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+
+
+    @staticmethod
+    def woohoo():
+        try:
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_ASYNC | SND_NOSTOP)
+
+        except RuntimeError:
+            print("RUNTIME ERROR SON ÉVITÉE")
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+
+    @staticmethod
+    def gameover():
+        try:
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_ASYNC | SND_NOSTOP)
+
+        except RuntimeError:
+            print("RUNTIME ERROR SON ÉVITÉE")
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+
     def charger(self):
-        self.filename = filedialog.askopenfilename(title="Ouvrir le fichier", filetypes=[(".txt", "*.txt")])
+        self.filename = filedialog.askopenfilename(title="Ouvrir le fichier",
+                                                   filetypes=[(".txt",
+                                                               "*.txt")])
 
         f = open(self.filename, "r")
 
         self.partie.couleur_joueur_courant = f.readline().strip("\n")
 
         self.partie.planche.cases.clear()
+        self.anciennes_pieces.clear()
+        self.partie.nb_cases = 8
+        self.partie.difficulte = 'Normal'
+        self.partie.nb_joueurs = 2
+        self.nb_cases = 8
+        self.difficulte = 'Normal'
+        self.type_partie = 'classique'
+        self.nb_joueurs = 2
+        self.largeur = 500//self.nb_cases
+        self.initialiser_damier()
+        self.damier.update_idletasks()
 
         if f.readline() == "True":
             self.partie.tour_precedent_passe = True
@@ -512,14 +592,18 @@ class Brothello(Tk):
             self.partie.deux_tours_passes = False
 
         if f.readline() == "Ordinateur":
-            self.partie.joueur_noir = self.partie.creer_joueur("Ordinateur", "noir")
+            self.partie.joueur_noir = self.partie.creer_joueur("Ordinateur",
+                                                               "noir")
         else:
-            self.partie.joueur_noir = self.partie.creer_joueur("Humain", "noir")
+            self.partie.joueur_noir = self.partie.creer_joueur("Humain",
+                                                               "noir")
 
         if f.readline() == "Ordinateur":
-            self.partie.joueur_blanc = self.partie.creer_joueur("Ordinateur", "blanc")
+            self.partie.joueur_blanc = self.partie.creer_joueur("Ordinateur",
+                                                                "blanc")
         else:
-            self.partie.joueur_blanc = self.partie.creer_joueur("Humain", "blanc")
+            self.partie.joueur_blanc = self.partie.creer_joueur("Humain",
+                                                                "blanc")
 
         if self.partie.couleur_joueur_courant == "noir":
             self.partie.joueur_courant = self.partie.joueur_noir
@@ -529,25 +613,34 @@ class Brothello(Tk):
         self.partie.planche.charger_dune_chaine(f.read())
 
         f.close()
-        self.damier.dessiner_carres()
-        self.placer_pieces()
 
+        self.placer_pieces()
+        txt = "Tour du joueur {}".format(
+            self.partie.couleur_joueur_courant)
+        self.histo.ajouter_texte(txt)
+        messagebox.showinfo(" Partie chargée ", txt)
+        self.changer_score()
+        self.partie.determiner_coups_du_tour()
+        self.verifier_fin()
+        self.verif_passer_tour()
 
     def sauvegarder(self):
 
-        self.ma_partie = filedialog.asksaveasfile(title="Sauvegarder",mode='w', defaultextension=".txt")
+        self.ma_partie = filedialog.asksaveasfile(
+            title="Sauvegarder", mode='w', defaultextension=".txt")
 
         print(self.ma_partie)
         fichier = self.ma_partie
         fichier.write(self.partie.couleur_joueur_courant + "\n" +
                       str(self.partie.tour_precedent_passe) + "\n" +
                       str(self.partie.deux_tours_passes) + "\n" +
-                      str(self.partie.joueur_blanc.obtenir_type_joueur()) + "\n" +
-                      str(self.partie.joueur_noir.obtenir_type_joueur()) + "\n" +
+                      str(self.partie.joueur_blanc.obtenir_type_joueur()) +
+                      "\n" +
+                      str(self.partie.joueur_noir.obtenir_type_joueur()) +
+                      "\n" +
                       self.partie.planche.convertir_en_chaine())
 
         fichier.close()
-
 
     def action_bouton_couleur(self):
         """
@@ -559,7 +652,6 @@ class Brothello(Tk):
         self.damier.dessiner_carres()
         self.placer_pieces()
 
-
     def initialiser_damier(self):
         """
         Crée le cavevas de la planche de jeu.
@@ -570,7 +662,6 @@ class Brothello(Tk):
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
         self.damier.dessiner_carres()
-
 
     def changer_score(self):
         """
@@ -587,10 +678,10 @@ class Brothello(Tk):
                 elif self.partie.planche.get_piece(case).couleur == "noir":
                     self.pieces_noires += 1
 
-        self.score = "Score : \nJoueur noir : {} \nJoueur blanc : {}".format(self.pieces_noires, self.pieces_blanches)
+        self.score = "Score : \nJoueur noir : {} \nJoueur blanc : {}".\
+            format(self.pieces_noires, self.pieces_blanches)
 
         self.histo.ajouter_texte("\n" + self.score + "\n")
-
 
     def placer_pieces(self):
         """Dessine les pieces nouvelles ou modifies"""
@@ -646,15 +737,12 @@ class Brothello(Tk):
 
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
 
-
     def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
         """ Trace la pièce dans le canevas"""
 
         r = self.largeur // 5 * 2
         self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
                                 fill=couleur_piece, outline='black')
-
-
 
     def tour_humain(self, case_clic: tuple):
         """ Joue le coup du clic humain """
@@ -667,14 +755,14 @@ class Brothello(Tk):
                                  f" a joué en {coup_jouer}")
         self.changer_score()
 
-
     def pointeur(self, event: EventType):
         """
-        Établie dans quelle case le joueur a cliqué, joue son coup ou lui dit
+        Établit dans quelle case le joueur a cliqué, joue son coup ou lui dit
         si ce n'est pas possible et pourquoi. Envoie l'informations à Partie
         pour modifier les données. Effectue le changement de joueurs. Si ce
         joueur est un ordinateur, lui fait aussi joueur son tour avant
         d'attendre un nouveau clic
+
         :param event: Un clic sur le canevas de la planche de jeu
         """
 
@@ -683,46 +771,90 @@ class Brothello(Tk):
         ligne_jouee = chr(case_clic[1] + 65)
         col_jouee = str(case_clic[0] + 1)
         coup_jouer = ligne_jouee + col_jouee
-        self.histo.ajouter_texte(f"Clic reçu en {coup_jouer}")
+        self.histo.ajouter_texte(f"Coup demandé en {coup_jouer}")
 
         # Valider puis jouer le coup
         if self.valider_coup(case_clic):
             self.tour_humain(case_clic)
-            self.partie.jouer()
             self.placer_pieces()
             self.damier.update_idletasks()
             self.histo.update_idletasks()
-            sleep(1)
-            if self.partie.partie_terminee():
-                self.histo.ajouter_texte(self.partie.determiner_gagnant())
-                txt_fin = self.partie.determiner_gagnant() + \
-                    '\nVoulez vous jouer une nouvelle partie?'
-                box_fin = messagebox.showinfo('Partie teminée!', txt_fin)
+            sleep(0.5)
+            self.changer_joueur()
+            if self.partie.joueur_courant.obtenir_type_joueur() == \
+                    'Ordinateur':
+                self.tour_ordi()
+                self.placer_pieces()
+                sleep(0.2)
+                self.changer_joueur()
+        else:
+            self.histo.ajouter_texte(f"Coup en {coup_jouer} refusé")
+
+    def changer_joueur(self):
+        """
+        Fait appelle à partie.changement_joueur() pour changer les variables
+        dans le jeu, met à jour l'historique, et vérifie si le joueur courant
+        doit passer son tour avec .
+        """
+
+        self.partie.changement_joueur()
+        self.histo.ajouter_texte("Tour du joueur {}".format(
+            self.partie.couleur_joueur_courant))
+        self.verif_passer_tour()
+
+    def verif_passer_tour(self):
+        """ vérifie si le joueur courant
+        doit passer son tour. La cas échéant, un message est affiché et la
+        fonction s'appelle elle-même pour rechanger de joueur. """
+
+        if self.partie.verifier_tour_a_passer():
+            if self.partie.joueur_courant.obtenir_type_joueur() == 'Humain':
+                txt = "Aucun coup possible! Vous passez votre tour!"
+                messagebox.showinfo('Aucun coup possible', txt)
+                self.histo.ajouter_texte(txt)
+            else:
+                txt = "L'ordinateur n'a aucun couppossible. Il passe donc son" \
+                      " tour!"
+                messagebox.showinfo('Aucun coup possible', txt)
+                self.histo.ajouter_texte(txt)
+            self.verifier_fin()
+            self.changer_joueur()
+
+    def verifier_fin(self):
+        """
+        Appelle partie.partie_terminee() pour verifier si les conditions de fin
+        de partie sont remplies. Le cas échéant, un message et un son
+        sont affichés en fonction du vainqueur, et on demande si le joueur
+        souhaite jouer une nouvelle partie.
+        """
+
+        if self.partie.partie_terminee():
+            victoire = self.partie.determiner_gagnant()
+            if victoire[0]:
+                sleep(0.2)
+                self.update_idletasks()
+                self.woohoo()
+                self.histo.ajouter_texte(victoire[1])
+                txt_fin = victoire[1] + \
+                          '\nVoulez vous jouer une nouvelle partie?'
+                box_fin = messagebox.askyesno('Partie teminée!',
+                                              txt_fin)
                 if not box_fin:
                     self.destroy()
                 elif box_fin:
                     self.nouvelle_partie()
-
-            self.histo.ajouter_texte("Tour du joueur {}".format(
-                self.partie.couleur_joueur_courant))
-
-            if self.partie.joueur_courant.obtenir_type_joueur() == \
-                    'Ordinateur':
-                self.tour_ordi()
-                self.partie.jouer()
-                self.placer_pieces()
-                if self.partie.partie_terminee():
-                    self.histo.ajouter_texte(self.partie.determiner_gagnant())
-                    txt_fin = self.partie.determiner_gagnant() + \
-                        '\nVoulez vous jouer une nouvelle partie?'
-                    box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
-                    if box_fin:
-                        self.nouvelle_partie()
-                    else:
-                        self.destroy()
-                self.histo.ajouter_texte("Tour du joueur {}".format(
-                    self.partie.couleur_joueur_courant))
-
+            elif not victoire[0]:
+                sleep(0.2)
+                self.update_idletasks()
+                self.gameover()
+                self.histo.ajouter_texte(victoire[1])
+                txt_fin = victoire[1] + \
+                          '\nVoulez vous jouer une nouvelle partie?'
+                box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
+                if not box_fin:
+                    self.destroy()
+                elif box_fin:
+                    self.nouvelle_partie()
 
     def tour_ordi(self):
         """ Fait jouer l'ordinateur """
@@ -737,10 +869,9 @@ class Brothello(Tk):
                 f" a joué en {coup_jouer}")
             self.changer_score()
 
-
     def valider_coup(self, position: tuple):
         """ Vérifie si coup valide, affiche msg sinon """
-        msg=""
+        msg = ""
         try:
             if position in self.partie.coups_du_tour[1]:
                 msg = "Impossible, vous ne pouvez pas mettre une pièce par" \
@@ -758,11 +889,10 @@ class Brothello(Tk):
             messagebox.showinfo("Coup invalide", msg)
             return False
 
-
     def conseil(self):
         """ Affiche à l'utilisateur les coups possibles """
 
-        if self.difficulte == "Normal":
+        if self.difficulte in ["Facile", "Normal"]:
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
                 self.histo.ajouter_texte("Aucun coup possible!")
@@ -785,8 +915,7 @@ class Brothello(Tk):
                                 """
         else:
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
-                                     " normale! Débrouillez-vous! ")
-
+                                     " Facile ou normale! Débrouillez-vous! ")
 
     def abandon(self):
         """
@@ -806,7 +935,6 @@ class Brothello(Tk):
         elif box_fin:
             self.nouvelle_partie()
 
-
     def nouvelle_partie(self):
         """ Démarre une nouvelle partie (Redémarre l'application) """
 
@@ -814,17 +942,17 @@ class Brothello(Tk):
         le_jeu = Brothello()
         le_jeu.mainloop()
 
-
-    def aide(self):
+    @staticmethod
+    def aide():
         aidemsg = ("A son tour de jeu, le joueur doit poser un pion de "
-                   "sa couleur sur une case vide de l’othellier, adjacente"
-                    " à un pion adverse. Il doit également, en posant son pion,"
-                    " encadrer un ou plusieurs pions adverses entre le pion"
-                    " qu’il pose et un pion à sa couleur, déjà placé sur"
-                    " l’othellier. Il retourne alors de sa couleur le ou les"
-                    " pions qu’il vient d’encadrer. Les pions ne sont ni retirés"
-                    " de l’othellier, ni déplacés d’une case à l’autre."
-                     "\n\nSource: http://www.ffothello.org/othello/regles-du-jeu/")
+                   "sa couleur sur une case vide de l’othellier, adjacente "
+                   "à un pion adverse. Il doit également, en posant son pion,"
+                   " encadrer un ou plusieurs pions adverses entre le pion"
+                   " qu’il pose et un pion à sa couleur, déjà placé sur"
+                   " l’othellier. Il retourne alors de sa couleur le ou les "
+                   "pions qu’il vient d’encadrer. Les pions ne sont ni retirés"
+                   " de l’othellier, ni déplacés d’une case à l’autre.\n\n"
+                   "Source: http://www.ffothello.org/othello/regles-du-jeu/")
         messagebox.showinfo(title="Comment jouer", message=aidemsg)
 
 
@@ -835,4 +963,3 @@ class ErreurChoix(Exception):
     TopLevel sans répondre
     """
     pass
-

@@ -45,9 +45,7 @@ class Partie:
 
         self.coups_possibles = []
 
-        if nom_fichier is not None:
-            self.charger(nom_fichier)
-        else:
+        if nom_fichier is None:
             self.initialiser_joueurs()
 
         self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
@@ -82,6 +80,7 @@ class Partie:
             Un objet JoueurHumain si le type est "Humain", JoueurOrdinateur
             sinon
         """
+
         if typejoueur == "Ordinateur":
             joueur = JoueurOrdinateur(couleur)
         else:
@@ -103,6 +102,7 @@ class Partie:
 
         :returns: La position jouée par le joueur
         """
+
         if self.joueur_courant.obtenir_type_joueur() == "Humain":
             coup_demander = coup_clic
             self.planche.jouer_coup(coup_demander,
@@ -110,7 +110,7 @@ class Partie:
         else:
             coup_demander = self.demander_coup((-1, -1))
             self.planche.jouer_coup(coup_demander,
-                                    "blanc")
+                                    "blanc")  # Ordi jamais noir
         return coup_demander
 
     def demander_coup(self, coup_clic: tuple):
@@ -137,10 +137,12 @@ class Partie:
                 self.intelligenceartificielle = IADifficile(
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)
-            else:
+            elif self.difficulte == "Normal":
                 self.intelligenceartificielle = IANormale(
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)
+            else:  # Facile = random
+                return self.coups_possibles
             coups_ia = self.intelligenceartificielle.\
                 filtrer_meilleurs_coups()
             coup_choisi = self.joueur_courant.choisir_coup(coups_ia)
@@ -167,13 +169,17 @@ class Partie:
         Détermine le gagnant de la partie. Le gagnant est simplement la couleur
         pour laquelle il y a le plus de pions sur la planche de jeu.
 
-        :returns msg: Message contenant les informations sur le gagnant, ou de
-            partie nulle
+        :returns tuple: Tuple d'un bool et d'un str
+                    bool: indique (True) si humain a gagné ou non (False)
+                    str: Message contenant les informations sur le gagnant,
+                             ou de partie nulle
         """
 
         pieces_noires = 0
         pieces_blanches = 0
+        msg = None
 
+        # Compte les pièces de chaque couleur
         for case in self.planche.liste_cases:
             if self.planche.get_piece(case):
                 if self.planche.get_piece(case).couleur == "blanc":
@@ -188,17 +194,23 @@ class Partie:
         else:
             gagnant = None
 
-        if gagnant:
-            msg = "La partie est terminée, le joueur {} l'emporte {} à {}".\
-                format(gagnant.couleur, max(pieces_noires, pieces_blanches),
-                       min(pieces_noires, pieces_blanches))
-            return msg
+        if gagnant:  # si humain gagne
+            if gagnant.obtenir_type_joueur() == 'Humain':
+                msg = "Félicitation! Vous avez gagné! Le joueur {} l'emporte "\
+                      "{} à {}".\
+                    format(gagnant.couleur, max(pieces_noires, pieces_blanches),
+                           min(pieces_noires, pieces_blanches))
+                return True, msg
+            else:  # si ordi gagne
+                msg = "Bien essayé! L'ordinateur l'emporte {} à {}".format(
+                    pieces_blanches, pieces_noires)
+                return False, msg
         else:
             msg = "Partie nulle! Les deux joueurs terminent avec un score"
             "de {}".format(pieces_noires)  # noir ou blanc même chose
-            return msg
+            return False, msg
 
-    def jouer(self):
+    def changement_joueur(self):
         """
         Effectue les opérations de fin de tour:
 
@@ -208,20 +220,35 @@ class Partie:
         - Détermine les coups possibles pour le joueur actuel.
         """
 
-        if len(self.coups_possibles) < 1:
-            if not self.tour_precedent_passe:
-                self.tour_precedent_passe = True
-            else:
-                self.deux_tours_passes = True
-        else:
-            self.tour_precedent_passe = False
         if self.couleur_joueur_courant == "noir":
             self.joueur_courant = self.joueur_blanc
             self.couleur_joueur_courant = "blanc"
         else:
             self.joueur_courant = self.joueur_noir
             self.couleur_joueur_courant = "noir"
+        self.determiner_coups_du_tour()
+
+    def determiner_coups_du_tour(self):
+        """ Met à jour la liste des cousp possibles pour ce tour """
 
         self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
                 self.joueur_courant.couleur)
         self.coups_possibles = self.coups_du_tour[0]
+
+    def verifier_tour_a_passer(self):
+        """
+        Vérifie si le joueur qui commence son tour doit le passer car il n'a
+        aucun coup possible à jouer. Change les variables en conséquence
+
+        :return bool: True si passe son tour, False sinon
+        """
+
+        if len(self.coups_possibles) < 1:
+            if not self.tour_precedent_passe:
+                self.tour_precedent_passe = True
+            else:
+                self.deux_tours_passes = True
+            return True
+        else:
+            self.tour_precedent_passe = False
+            return False

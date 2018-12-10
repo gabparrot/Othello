@@ -142,7 +142,9 @@ class Partie:
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)
             else:  # Facile = random
-                return self.coups_possibles
+                coup_choisi = self.joueur_courant.choisir_coup(
+                    self.coups_possibles)
+                return coup_choisi
             coups_ia = self.intelligenceartificielle.\
                 filtrer_meilleurs_coups()
             coup_choisi = self.joueur_courant.choisir_coup(coups_ia)

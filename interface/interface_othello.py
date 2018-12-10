@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import colorchooser, messagebox, StringVar
+from tkinter import colorchooser, messagebox, font
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
 from time import sleep
@@ -26,6 +26,7 @@ class Color:
     color = "deepskyblue2"  # RGB(0,178,238)
 
     color2 = "#%02x%02x%02x" % (0, 178//2, 238//2)
+
 
     def choisir_couleur(self):
         """ Permet de changer la couleur avec un sélecteur de couleur """
@@ -57,6 +58,7 @@ class Color:
         else:
             self.color = "deepskyblue2"
             self.color2 = "#%02x%02x%02x" % (0, 178//3*2, 238//3*2)
+
 
     def afficher_couleur(self):
         """
@@ -102,6 +104,7 @@ class PlancheDeJeu(Canvas):
                         , relief=SUNKEN, borderwidth=0)
         self.nb_cases = boss.nb_cases
         self.largeur = boss.largeur
+
 
     def dessiner_carres(self):
         """ Dessine le damier en fonction des couleurs et du nombre de cases"""
@@ -170,6 +173,7 @@ class Historique(Frame):
         self.text.pack(side=LEFT, expand=YES, fill=BOTH, padx=2, pady=2)
         scroll.pack(side=RIGHT, expand=YES, fill=BOTH, padx=2, pady=2)
 
+
     def ajouter_texte(self, action_a_ecrire):
         """
         Écrit le message demandé dans la zone historique de coup et ramène la
@@ -178,15 +182,6 @@ class Historique(Frame):
 
         self.text.insert(END, action_a_ecrire + "\n")
         self.text.see("end")
-
-
-class ScoreActuel(Label):
-    def __init__(self, boss, **kwargs):
-        Label.__init__(self, boss, font='Helvetica', text="score: ",
-                       **kwargs)
-
-    def changer_score(self, score_a_ecrire):
-        self.labelText = ('1.0', score_a_ecrire)
 
 
 # ====== Définition des fenêtres popup ====== #
@@ -207,10 +202,14 @@ class FenJoueurs(Toplevel):
         self.geometry("250x250+550+250")  # 300x300 dimension+posX+posY
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
+        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond_label = Label(self, image=self.minifond)
+        self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=5,
                                                                   padx=10)
         Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5,
                                                                       padx=10)
+
 
     def unjoueur(self):
         """ Donne la valeur 1 à self.nb_joueurs et ferme la fenêtre """
@@ -219,6 +218,7 @@ class FenJoueurs(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
+
 
     def deuxjoueurs(self):
         """ Donne la valeur 2 à self.nb_joueurs et ferme la fenêtre """
@@ -246,12 +246,16 @@ class FenNiveauDif(Toplevel):
         self.geometry("250x250+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
+        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond_label = Label(self, image=self.minifond)
+        self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         Bouton(self, text="Normal", command=self.set_easy).pack(pady=15,
                                                                 padx=10)
         Bouton(self, text="Difficile", command=self.set_hard).pack(pady=15,
                                                                    padx=10)
         Bouton(self, text="Légendaire", command=self.set_legend).pack(pady=15,
                                                                       padx=10)
+
 
     def set_easy(self):
         """ Donne la valeur 'Normal' à self.difficulte et ferme la fenêtre """
@@ -260,6 +264,7 @@ class FenNiveauDif(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
+
 
     def set_hard(self):
         """
@@ -270,6 +275,7 @@ class FenNiveauDif(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
+
 
     def set_legend(self):
         """
@@ -299,10 +305,14 @@ class FenTypePartie(Toplevel):
         self.geometry("250x250+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
+        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond_label = Label(self, image=self.minifond)
+        self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         Bouton(self, text="Partie Classique", command=self.partie_classique).\
             pack(pady=5, padx=10)
         Bouton(self, text="Partie Personalisée", command=self.partie_perso).\
             pack(pady=5, padx=10)
+
 
     def partie_classique(self):
         """
@@ -313,6 +323,7 @@ class FenTypePartie(Toplevel):
         self.grab_release()
         self.master.focus_set()
         self.destroy()
+
 
     def partie_perso(self):
         """
@@ -341,12 +352,16 @@ class FenPartiePerso(Toplevel):
 
         self.geometry("250x250+550+250")
         self.attributes('-topmost', 'true')
+        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond_label = Label(self, image=self.minifond)
+        self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         Label(self, text="Combien de cases?").pack(padx=20, pady=20, fill=X)
         self.gliss = Glissoir(self, orient=HORIZONTAL, relief=SUNKEN, bd=2,
                               from_=6, to_=12, tickinterval=2, resolution=2)
         self.gliss.pack(padx=20, pady=20, fill=X)
         Bouton(self, text="jouer", command=self.set_perso).\
             pack(padx=20, pady=20, fill=X)
+
 
     def set_perso(self):
         """
@@ -381,13 +396,12 @@ class Brothello(Tk):
         # Effets sonores
         self.plop = lambda: PlaySound('plop.wav', SND_FILENAME | SND_ASYNC)
         self.blip = lambda: PlaySound('blip.wav', SND_FILENAME | SND_ASYNC)
+
         # Widgets esclaves
         bout_conseil = Bouton(self, text="Voir les coups possibles",
                               command=self.conseil, state=DISABLED)
         bout_conseil.grid(row=0, column=0, padx=5, pady=5, sticky=W)
-        self.score = ScoreActuel(self)
-        self.score.grid(row=0, column=2, sticky=W)
-        self.histo = Historique(self, height=21)
+        self.histo = Historique(self, height=27)
         self.histo.grid(row=3, column=2, padx=10, pady=5, sticky=W+E)
 
         # Menu
@@ -476,6 +490,7 @@ class Brothello(Tk):
         # Activation des éléments de l'interface
         bout_conseil.config(state=NORMAL)
 
+
     def action_bouton_couleur(self):
         """
         Permet de changer de couleur avec le selecteur de couleur, puis
@@ -486,9 +501,10 @@ class Brothello(Tk):
         self.damier.dessiner_carres()
         self.placer_pieces()
 
+
     def initialiser_damier(self):
         """
-        Crée le cavevas de la planche de jeu
+        Crée le cavevas de la planche de jeu.
         """
 
         self.largeur = 500//self.nb_cases
@@ -496,6 +512,27 @@ class Brothello(Tk):
         self.damier.grid(row=2, column=0, rowspan=3, padx=5, pady=5)
         self.damier.bind("<Button-1>", self.pointeur)
         self.damier.dessiner_carres()
+
+
+    def changer_score(self):
+        """
+        Calcul le score à chaque tour.
+        """
+
+        self.pieces_noires = 0
+        self.pieces_blanches = 0
+
+        for case in self.partie.planche.liste_cases:
+            if self.partie.planche.get_piece(case):
+                if self.partie.planche.get_piece(case).couleur == "blanc":
+                    self.pieces_blanches += 1
+                elif self.partie.planche.get_piece(case).couleur == "noir":
+                    self.pieces_noires += 1
+
+        self.score = "Score : \nJoueur noir : {} \nJoueur blanc : {}".format(self.pieces_noires, self.pieces_blanches)
+
+        self.histo.ajouter_texte("\n" + self.score + "\n")
+
 
     def placer_pieces(self):
         """Dessine les pieces nouvelles ou modifies"""
@@ -551,6 +588,7 @@ class Brothello(Tk):
 
             self.dessiner_piece(mid_x, mid_y, couleur_piece)
 
+
     def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
         """ Trace la pièce dans le canevas"""
 
@@ -564,11 +602,13 @@ class Brothello(Tk):
         """ Joue le coup du clic humain """
 
         self.partie.tour(case_clic)
-        ligne_jouee = chr(case_clic[0] + 64)
-        col_jouee = str(case_clic[1] + 1)
+        ligne_jouee = chr(case_clic[1] + 65)
+        col_jouee = str(case_clic[0] + 1)
         coup_jouer = ligne_jouee + col_jouee
         self.histo.ajouter_texte(f"Joueur {self.partie.joueur_courant.couleur}"
                                  f" a joué en {coup_jouer}")
+        self.changer_score()
+
 
     def pointeur(self, event: EventType):
         """
@@ -582,8 +622,8 @@ class Brothello(Tk):
 
         # coordonnées (x, y) de la case en range (0, nb_cases) ex (0, 4)
         case_clic = (event.x//self.largeur, event.y//self.largeur)
-        ligne_jouee = chr(case_clic[0] + 64)
-        col_jouee = str(case_clic[1] + 1)
+        ligne_jouee = chr(case_clic[1] + 65)
+        col_jouee = str(case_clic[0] + 1)
         coup_jouer = ligne_jouee + col_jouee
         self.histo.ajouter_texte(f"Clic reçu en {coup_jouer}")
 
@@ -625,17 +665,20 @@ class Brothello(Tk):
                 self.histo.ajouter_texte("Tour du joueur {}".format(
                     self.partie.couleur_joueur_courant))
 
+
     def tour_ordi(self):
         """ Fait jouer l'ordinateur """
 
         if self.partie.joueur_courant.obtenir_type_joueur() == 'Ordinateur':
             coup_ordi = self.partie.tour((-1, -1))
-            ligne_jouee = chr(coup_ordi[0] + 64)
-            col_jouee = str(coup_ordi[1] + 1)
+            ligne_jouee = chr(coup_ordi[1] + 65)
+            col_jouee = str(coup_ordi[0] + 1)
             coup_jouer = ligne_jouee + col_jouee
             self.histo.ajouter_texte(
                 f"Joueur {self.partie.joueur_courant.couleur}"
                 f" a joué en {coup_jouer}")
+            self.changer_score()
+
 
     def valider_coup(self, position: tuple):
         """ Vérifie si coup valide, affiche msg sinon """
@@ -656,6 +699,7 @@ class Brothello(Tk):
         except ErreurPositionCoup:
             messagebox.showinfo("Coup invalide", msg)
             return False
+
 
     def conseil(self):
         """ Affiche à l'utilisateur les coups possibles """
@@ -685,6 +729,7 @@ class Brothello(Tk):
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
                                      " normale! Débrouillez-vous! ")
 
+
     def abandon(self):
         """
         Concède la victoire à l'ennemi et demande si le joueur souhaite jouer
@@ -703,6 +748,7 @@ class Brothello(Tk):
         elif box_fin:
             self.nouvelle_partie()
 
+
     def nouvelle_partie(self):
         """ Démarre une nouvelle partie (Redémarre l'application) """
 
@@ -710,16 +756,19 @@ class Brothello(Tk):
         le_jeu = Brothello()
         le_jeu.mainloop()
 
+
     def aide(self):
-        messagebox.showinfo(title="Comment jouer", message="A son tour de jeu, le joueur doit poser un pion de "
-                                                           "sa couleur sur une case vide de l’othellier, adjacente"
-                                                           " à un pion adverse. Il doit également, en posant son pion,"
-                                                           " encadrer un ou plusieurs pions adverses entre le pion"
-                                                           " qu’il pose et un pion à sa couleur, déjà placé sur"
-                                                           " l’othellier. Il retourne alors de sa couleur le ou les"
-                                                           " pions qu’il vient d’encadrer. Les pions ne sont ni retirés"
-                                                           " de l’othellier, ni déplacés d’une case à l’autre."
-                                                           "\n\nSource: http://www.ffothello.org/othello/regles-du-jeu/")
+        aidemsg = ("A son tour de jeu, le joueur doit poser un pion de "
+                   "sa couleur sur une case vide de l’othellier, adjacente"
+                    " à un pion adverse. Il doit également, en posant son pion,"
+                    " encadrer un ou plusieurs pions adverses entre le pion"
+                    " qu’il pose et un pion à sa couleur, déjà placé sur"
+                    " l’othellier. Il retourne alors de sa couleur le ou les"
+                    " pions qu’il vient d’encadrer. Les pions ne sont ni retirés"
+                    " de l’othellier, ni déplacés d’une case à l’autre."
+                     "\n\nSource: http://www.ffothello.org/othello/regles-du-jeu/")
+        messagebox.showinfo(title="Comment jouer", message=aidemsg)
+
 
 class ErreurChoix(Exception):
     """

@@ -109,9 +109,8 @@ class Partie:
                                     self.joueur_courant.couleur)
         else:
             coup_demander = self.demander_coup((-1, -1))
-            if coup_demander:
-                self.planche.jouer_coup(coup_demander,
-                                        "blanc")
+            self.planche.jouer_coup(coup_demander,
+                                    "blanc")
         return coup_demander
 
     def demander_coup(self, coup_clic: tuple):
@@ -155,10 +154,10 @@ class Partie:
 
         :returns: True si terminée, False sinon
         """
-        print(len(self.planche.cases))
+
         if self.deux_tours_passes:
             return True
-        elif len(self.planche.cases) == self.nb_cases * self.nb_cases:
+        elif len(self.planche.cases) == self.planche.nb_cases ** 2:
             return True
         else:
             return False
@@ -167,7 +166,7 @@ class Partie:
         """
         Détermine le gagnant de la partie. Le gagnant est simplement la couleur
         pour laquelle il y a le plus de pions sur la planche de jeu.
-        :returns bool: dis si joueur humain a gagné la partie
+
         :returns msg: Message contenant les informations sur le gagnant, ou de
             partie nulle
         """
@@ -190,21 +189,14 @@ class Partie:
             gagnant = None
 
         if gagnant:
-            if gagnant.obtenir_type_joueur() == 'Humain':
-                msg = "Félicitations! Le joueur {} l'emporte {} à {}".\
-                    format(gagnant.couleur, max(pieces_noires, pieces_blanches),
-                           min(pieces_noires, pieces_blanches))
-                return (True, msg)
-            else:
-                msg = "Bien essayé! Le joueur {} l'emporte {} à {}". \
-                    format(gagnant.couleur,
-                           max(pieces_noires, pieces_blanches),
-                           min(pieces_noires, pieces_blanches))
-                return (False, msg)
+            msg = "La partie est terminée, le joueur {} l'emporte {} à {}".\
+                format(gagnant.couleur, max(pieces_noires, pieces_blanches),
+                       min(pieces_noires, pieces_blanches))
+            return msg
         else:
             msg = "Partie nulle! Les deux joueurs terminent avec un score"
-            " de {}".format(pieces_noires)  # noir ou blanc même chose
-            return (False, msg)
+            "de {}".format(pieces_noires)  # noir ou blanc même chose
+            return msg
 
     def jouer(self):
         """
@@ -216,6 +208,13 @@ class Partie:
         - Détermine les coups possibles pour le joueur actuel.
         """
 
+        if len(self.coups_possibles) < 1:
+            if not self.tour_precedent_passe:
+                self.tour_precedent_passe = True
+            else:
+                self.deux_tours_passes = True
+        else:
+            self.tour_precedent_passe = False
         if self.couleur_joueur_courant == "noir":
             self.joueur_courant = self.joueur_blanc
             self.couleur_joueur_courant = "blanc"
@@ -226,98 +225,3 @@ class Partie:
         self.coups_du_tour = self.planche.lister_coups_possibles_de_couleur(
                 self.joueur_courant.couleur)
         self.coups_possibles = self.coups_du_tour[0]
-
-
-    def passer_tour(self):
-        """ Passe tour au besoin en changeant l'attribut correspondant """
-
-        if len(self.coups_possibles) < 1:
-            if not self.tour_precedent_passe:
-                self.tour_precedent_passe = True
-                print('tour passé')
-            else:
-                self.deux_tours_passes = True
-                print('deux tours passés')
-        else:
-            self.tour_precedent_passe = False
-
-    def sauvegarder(self, nom_fichier):
-        """
-        Sauvegarde une partie dans un fichier. Le fichier condiendra:
-        - Une ligne indiquant la couleur du joueur courant.
-        - Une ligne contenant True ou False, si le tour précédent a été passé.
-        - Une ligne contenant True ou False, si les deux derniers tours ont été
-          passés.
-        - Une ligne contenant le type du joueur blanc.
-        - Une ligne contenant le type du joueur noir.
-        - Le reste des lignes correspondant à la planche. Voir la méthode
-          convertir_en_chaine de la planche
-         pour le format.
-
-        Args:
-            nom_fichier: Le nom du fichier où sauvegarder, un string.
-
-        Returns:
-            Fichier .txt contenant les informations de la partie sauvegardée
-        """
-
-        fichier = open(nom_fichier, "w")
-        fichier.write(self.couleur_joueur_courant + "\n" +
-                      str(self.tour_precedent_passe) + "\n" +
-                      str(self.deux_tours_passes) + "\n" +
-                      str(self.joueur_blanc.obtenir_type_joueur()) + "\n" +
-                      str(self.joueur_noir.obtenir_type_joueur()) + "\n" +
-                      self.planche.convertir_en_chaine())
-
-        fichier.close()
-
-    def charger(self, nom_fichier):
-        """
-        Charge une partie dans à partir d'un fichier. Le fichier a le même
-        format que la méthode de sauvegarde.
-
-        Args:
-            nom_fichier: Le nom du fichier à charger, un string.
-
-        Returns:
-            La partie à charger
-        """
-
-        self.nom_fichier = nom_fichier
-
-        nom_fichier = input("Entrez le nom de la partie à charger : ")
-        nom_fichier = nom_fichier + ".txt"
-        f = open(nom_fichier, "r")
-
-        self.couleur_joueur_courant = f.readline().strip("\n")
-
-        self.planche.cases.clear()
-
-        if f.readline() == "True":
-            self.tour_precedent_passe = True
-        else:
-            self.tour_precedent_passe = False
-
-        if f.readline() == "True":
-            self.deux_tours_passes = True
-        else:
-            self.deux_tours_passes = False
-
-        if f.readline() == "Ordinateur":
-            self.joueur_noir = self.creer_joueur("Ordinateur", "noir")
-        else:
-            self.joueur_noir = self.creer_joueur("Humain", "noir")
-
-        if f.readline() == "Ordinateur":
-            self.joueur_blanc = self.creer_joueur("Ordinateur", "blanc")
-        else:
-            self.joueur_blanc = self.creer_joueur("Humain", "blanc")
-
-        if self.couleur_joueur_courant == "noir":
-            self.joueur_courant = self.joueur_noir
-        else:
-            self.joueur_courant = self.joueur_blanc
-
-        self.planche.charger_dune_chaine(f.read())
-
-        f.close()

@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import colorchooser, messagebox, filedialog, ttk
 from othello.partie import Partie
 from othello.exceptions import ErreurPositionCoup
+from othello.piece import Piece
 from time import sleep
 from winsound import *
 from PIL import Image, ImageTk
@@ -612,11 +613,6 @@ class Brothello(Tk):
         self.mainmenu.add_cascade(label="Aide", menu=third_menu)
         Brothello.config(self, menu=self.mainmenu)
 
-        # Gestion couleur du board
-        # Bouton(self, text="Changer couleur",
-        #        command=self.action_bouton_couleur) \
-        #     .grid(row=1, column=0, padx=5, pady=5, sticky=W)
-
         # Définition des caractéristiques de la partie par défaut
         self.nb_cases = 8
         self.difficulte = 'Normal'
@@ -675,7 +671,7 @@ class Brothello(Tk):
             if box_fin:
                 self.nouvelle_partie()
             else:
-                self.destroy()
+                exit()
 
         # Création de l'instance du jeu et liste des coups possibles
         self.initialiser_damier()
@@ -835,17 +831,15 @@ class Brothello(Tk):
         for piece in self.partie.planche.cases:
             if piece not in self.anciennes_pieces:
                 # Placer au centre de la case
-                mid_x = piece[0] * self.largeur + self.largeur // 2
-                mid_y = piece[1] * self.largeur + self.largeur // 2
-
-                couleur_piece = self.partie.planche.cases[piece].couleur
-                if couleur_piece == "blanc":
-                    couleur_piece = "white"
-                elif couleur_piece == "noir":
-                    couleur_piece = "black"
-                self.anciennes_pieces[piece] = self.partie.planche.cases[
-                    piece].couleur
-                self.dessiner_piece(mid_x, mid_y, couleur_piece)
+                self.couleur_piece = self.partie.planche.cases[piece].couleur
+                if self.couleur_piece == "blanc":
+                    self.couleur_piece = "white"
+                elif self.couleur_piece == "noir":
+                    self.couleur_piece = "black"
+            #TODO =======================================
+                self.anciennes_pieces[piece] = Piece(self.couleur_piece)
+                self.dessiner_piece(piece, self.couleur_piece)
+            #todo =======================================
                 self.damier.update_idletasks()
                 self.plop()
                 sleep(0.35)
@@ -853,49 +847,53 @@ class Brothello(Tk):
         for piece in self.partie.planche.cases:
             if piece in self.anciennes_pieces:
                 if self.partie.planche.cases[piece].couleur != \
-                        self.anciennes_pieces[piece]:
+                        self.anciennes_pieces[piece].couleur:
                     # Placer au centre de la case
-                    mid_x = piece[0] * self.largeur + self.largeur // 2
-                    mid_y = piece[1] * self.largeur + self.largeur // 2
-
                     couleur_piece = self.partie.planche.cases[piece].couleur
                     if couleur_piece == "blanc":
                         couleur_piece = "white"
                     elif couleur_piece == "noir":
                         couleur_piece = "black"
-                    self.anciennes_pieces[piece] = \
-                        self.partie.planche.cases[piece].couleur
-                    self.dessiner_piece(mid_x, mid_y, couleur_piece)
+                    self.anciennes_pieces[piece] = Piece(self.couleur_piece)
+                    self.dessiner_piece(piece, self.couleur_piece)
+                    self.dessiner_piece(piece, couleur_piece)
                     self.damier.update_idletasks()
                     self.blip()
                     sleep(0.35)
 
         for piece in self.partie.planche.cases:
             # Placer au centre de la case
-            mid_x = piece[0] * self.largeur + self.largeur // 2
-            mid_y = piece[1] * self.largeur + self.largeur // 2
-
             couleur_piece = self.partie.planche.cases[piece].couleur
             if couleur_piece == "blanc":
                 couleur_piece = "white"
             elif couleur_piece == "noir":
                 couleur_piece = "black"
 
-            self.dessiner_piece(mid_x, mid_y, couleur_piece)
+            self.dessiner_piece(piece, couleur_piece)
 
-    def dessiner_piece(self, mid_x: int, mid_y: int, couleur_piece: str):
+    def dessiner_piece(self, position: tuple, couleur_piece: str):
         """ Trace la pièce dans le canevas"""
-        r = self.largeur // 5 * 4
-        if couleur_piece in ['noir', 'black']:
-            piece = ImageTk.PhotoImage(Image.open('noir.png').resize((r, r)))
+        r = self.largeur
+        mid_x = position[0] * self.largeur + self.largeur // 2
+        mid_y = position[1] * self.largeur + self.largeur // 2
+        # TODO =================================
+        if self.anciennes_pieces[position].couleur in ['noir', 'black']:
+            img = ImageTk.PhotoImage(Image.open('noir3d.png').resize((r, r)))
+            self.anciennes_pieces[position].image = img
+            self.damier.create_image(
+                mid_x, mid_y, anchor=CENTER,
+                image=self.anciennes_pieces[position].image)
+        elif self.anciennes_pieces[position].couleur in ['blanc', 'white']:
+            img = ImageTk.PhotoImage(Image.open('blanc3d.png').resize((r, r)))
+            self.anciennes_pieces[position].image = img
+            self.damier.create_image(
+                mid_x, mid_y, anchor=CENTER,
+                image=self.anciennes_pieces[position].image)
         else:
-            piece = ImageTk.PhotoImage(Image.open('blanc.png').resize((r, r)))
-        self.damier.create_image(mid_x, mid_y, anchor=NE, image=piece)
-
-        # r = self.largeur // 5 * 2
-        # self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
-        #                         fill=couleur_piece, outline='black')
-
+            r = self.largeur // 5 * 3
+            self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
+                                     fill=couleur_piece, outline='black')
+        # TODO ================================================
     def tour_humain(self, case_clic: tuple):
         """ Joue le coup du clic humain """
 
@@ -992,7 +990,7 @@ class Brothello(Tk):
                 box_fin = messagebox.askyesno('Partie teminée!',
                                               txt_fin)
                 if not box_fin:
-                    self.destroy()
+                    exit()
                 elif box_fin:
                     self.nouvelle_partie()
             elif not victoire[0]:
@@ -1004,7 +1002,7 @@ class Brothello(Tk):
                           '\nVoulez vous jouer une nouvelle partie?'
                 box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
                 if not box_fin:
-                    self.destroy()
+                    exit()
                 elif box_fin:
                     self.nouvelle_partie()
 
@@ -1083,20 +1081,18 @@ class Brothello(Tk):
             self.update_idletasks()
         box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
         if not box_fin:
-            self.destroy()
+            exit()
         elif box_fin:
             self.nouvelle_partie()
 
     def quitter(self):
         """ Quitte le jeu """
-        self.quit()
+        exit()
 
     def nouvelle_partie(self):
         """ Démarre une nouvelle partie (Redémarre l'application) """
 
-        self.destroy()
-        le_jeu = Brothello()
-        le_jeu.mainloop()
+        self.__init__()
 
     @staticmethod
     def aide():
@@ -1110,6 +1106,7 @@ class Brothello(Tk):
                    " de l’othellier, ni déplacés d’une case à l’autre.\n\n"
                    "Source: http://www.ffothello.org/othello/regles-du-jeu/")
         messagebox.showinfo(title="Comment jouer", message=aidemsg)
+
         # ====== Définition des effets sonores ====== #
 
     @staticmethod

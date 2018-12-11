@@ -12,9 +12,13 @@ class Piece:
             couleur: couleur de la pièce ("blanc", "noir"), un string.
         """
 
-        assert couleur in ["blanc", "noir"], "Piece: couleur invalide."
-
+        assert couleur in ["blanc", "noir", 'white', 'black'], "Piece: couleur invalide."
+        if couleur == 'white':
+            couleur = 'blanc'
+        if couleur == 'black':
+            couleur = 'noir'
         self.couleur = couleur
+        self.image = None
 
     def est_blanc(self):
         """

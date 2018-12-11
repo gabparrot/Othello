@@ -15,6 +15,9 @@ import sys
 # TODO    (0, 0) avant de la valider ou de la jouer
 
 
+#LES ANCIENNES COULEURS: color = "#400000" color2 = "#800000" beige : #e2ceb1
+
+
 # === Définition des objets esclaves et de leurs éléments de style === #
 
 
@@ -23,9 +26,9 @@ class Color:
     Classe définissant la couleur utilisée dans le damier
     """
 
-    color = "#400000"
+    color = "#7b7f84"
 
-    color2 = "#800000"
+    color2 = "#d9dadb"
 
     def choisir_couleur(self):
         """ Permet de changer la couleur avec un sélecteur de couleur """
@@ -155,26 +158,26 @@ class PlancheDeJeu(Canvas):
                 txt = str(self.gettags(carre)[0])
                 if self.nb_cases == 6:
                     self.create_text(coords[0] + 2, coords[1] + 1, text=txt,
-                                     fill='#e2ceb1',
+                                     fill='black',
                                      font='RobotoMono 8 bold', anchor=NW)
                 elif self.nb_cases == 8:
                     self.create_text(coords[0] + 2, coords[1] + 1, text=txt,
-                                     fill='#e2ceb1',
+                                     fill='black',
                                      font='RobotoMono 7 bold', anchor=NW)
                 elif self.nb_cases == 10:
                     lettre = txt[0]
                     chiffre = txt[1]
-                    self.create_text(coords[0]+2, coords[1]+1, text=lettre, fill='#e2ceb1',
+                    self.create_text(coords[0]+2, coords[1]+1, text=lettre, fill='black',
                                     font='RobotoMono 7 bold', anchor=NW)
-                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-10, fill='#e2ceb1',
+                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-10, fill='black',
                                      text=chiffre,font='RobotoMono 7 bold', anchor=NW)
 
                 else:  # 12x12
                     lettre = txt[0]
                     chiffre = txt[1]
-                    self.create_text(coords[0]+1, coords[1]+1, text=lettre, fill='#e2ceb1',
+                    self.create_text(coords[0]+1, coords[1]+1, text=lettre, fill='black',
                                     font='RobotoMono 7 bold', anchor=NW)
-                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-11, text=chiffre, fill='#e2ceb1',
+                    self.create_text(coords[0]+self.largeur-8, coords[1]+self.largeur-11, text=chiffre, fill='black',
                                     font='RobotoMono 7 bold', anchor=NW)
 
 
@@ -186,7 +189,7 @@ class Historique(ttk.Frame):
 
         ttk.Frame.__init__(self, root,
                        width=width, height=height, relief=SUNKEN)
-        self.text = Text(self, font='Helvetica 12 bold', bg='#e2ceb1', bd=1,
+        self.text = Text(self, font='Helvetica 12 bold', bg='#7b7f84', bd=1,
                          width=width, height=height)
         scroll = ttk.Scrollbar(self, command=self.text.yview)
         self.text.configure(yscrollcommand=scroll.set)
@@ -231,7 +234,7 @@ class FenJoueurs(Toplevel):
         self.geometry("200x200+550+250")  # 300x300 dimension+posX+posY
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
-        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond = PhotoImage(file='star.gif')
         self.minifond_label = Label(self, image=self.minifond)
         self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         ttk.Button(self, text=" 1 joueur  ", command=self.unjoueur).\
@@ -279,7 +282,7 @@ class FenNiveauDif(Toplevel):
         self.geometry("200x200+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
-        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond = PhotoImage(file='star.gif')
         self.minifond_label = Label(self, image=self.minifond)
         self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         ttk.Button(self, text="Facile", command=self.set_easy).\
@@ -353,7 +356,7 @@ class FenTypePartie(Toplevel):
         self.geometry("200x200+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
-        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond = PhotoImage(file='star.gif')
         self.minifond_label = Label(self, image=self.minifond)
         self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         ttk.Button(self, text="  Partie Classique  ",
@@ -406,7 +409,7 @@ class FenPartiePerso(Toplevel):
 
         self.geometry("250x250+550+250")
         self.attributes('-topmost', 'true')
-        self.minifond = PhotoImage(file='bois.gif')
+        self.minifond = PhotoImage(file='star.gif')
         self.minifond_label = Label(self, image=self.minifond)
         self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
         Label(self, text="Combien de cases?", bg='#e2ceb1', bd=2,
@@ -434,6 +437,7 @@ class FenPartiePerso(Toplevel):
 # ================= BROTHELLO ==================== #
 # ************************************************ #
 
+
 class Brothello(Tk):
     """Classe de la fenêtre principale du jeu"""
 
@@ -446,7 +450,7 @@ class Brothello(Tk):
         self.title("Brothello")
         self.geometry("850x625+550+250")
         self.resizable(height=0, width=0)
-        self.fond = PhotoImage(file='bois.gif')
+        self.fond = PhotoImage(file='star.gif')
         self.fond_label = Label(self, image=self.fond)
         self.fond_label.image = self.fond_label
         self.fond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -455,9 +459,23 @@ class Brothello(Tk):
 
 
         # Widgets esclaves
-        bout_conseil = ttk.Button(self, text="Voir les coups possibles",
-                                  command=self.conseil, state=DISABLED)
-        bout_conseil.grid(row=0, column=1, padx=(10, 20), pady=(73, 3), sticky=W+E)
+
+        frame1 = Frame(self)
+        frame1.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),sticky=NW)
+        # pick a (small) image file you have in the working directory ...
+        photo1 = PhotoImage(file="bouton.png")
+        # create the image button, image is above (top) the optional text
+        bout_conseil = Button(frame1,  image=photo1, command=self.conseil)
+        bout_conseil.grid(row=1, column=1, sticky=NW)
+        # save the button's image from garbage collection (needed?)
+        bout_conseil.image = photo1
+
+
+
+        #bout_conseil = ttk.Button(self, text="Voir les coups possibles",
+        #command=self.conseil, state=DISABLED)
+
+        #bout_conseil.grid(row=0, column=1, padx=(10, 20), pady=(73, 3), sticky=W)
         self.histo = Historique(self, height=21)
         self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10), sticky=S)
 
@@ -472,13 +490,15 @@ class Brothello(Tk):
             label="Enregistrer sous", command=self.sauvegarder)
         first_menu.add_command(
             label="Abandonner la partie", command=self.abandon)
-        first_menu.add_command(label='Changer la couleur du damier',
-                               command=self.action_bouton_couleur)
         first_menu.add_command(label='Quitter', command=self.quitter)
         second_menu = Menu(self.mainmenu, tearoff=0)
-        second_menu.add_command(label="Comment jouer", command=self.aide)
+        second_menu.add_command(label='Changer la couleur du damier',
+                               command=self.action_bouton_couleur)
+        third_menu = Menu(self.mainmenu,tearoff=0)
+        third_menu.add_command(label="Comment jouer", command=self.aide)
         self.mainmenu.add_cascade(label="Fichier", menu=first_menu)
-        self.mainmenu.add_cascade(label="Aide", menu=second_menu)
+        self.mainmenu.add_cascade(label="Option", menu=second_menu)
+        self.mainmenu.add_cascade(label="Aide", menu=third_menu)
         Brothello.config(self, menu=self.mainmenu)
 
         # Gestion couleur du board

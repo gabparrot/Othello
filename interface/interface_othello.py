@@ -88,7 +88,7 @@ class Glissoir(Scale):
     def __init__(self, boss, **kwargs):
         """ Constructeur des glissoirs """
 
-        Scale.__init__(self, boss, bg='#e2ceb1', bd=2, relief=SOLID, **kwargs)
+        Scale.__init__(self, boss, bd=2, relief=SOLID, **kwargs)
 
 
 class PlancheDeJeu(Canvas):
@@ -470,7 +470,7 @@ class FenPartiePerso(Toplevel):
                   relief=SOLID).pack(padx=20, pady=20, fill=X)
             self.gliss = Glissoir(self, orient=HORIZONTAL,
                                   from_=6, to_=12, tickinterval=2,
-                                  resolution=2)
+                                  resolution=2, bg='#e2ceb1')
             self.gliss.pack(padx=20, pady=20, fill=X)
             ttk.Button(self, text="Jouer!", command=self.set_perso).\
                 pack(padx=20, pady=20, fill=X)
@@ -478,11 +478,11 @@ class FenPartiePerso(Toplevel):
             self.minifond = PhotoImage(file='star.gif')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
-            Label(self, text="Combien de cases?", bg='#e2ceb1', bd=2,
+            Label(self, text="Combien de cases?", bg='#d9dadb', bd=2,
                   relief=SOLID).pack(padx=20, pady=20, fill=X)
             self.gliss = Glissoir(self, orient=HORIZONTAL,
                                   from_=6, to_=12, tickinterval=2,
-                                  resolution=2)
+                                  resolution=2, bg='#d9dadb')
             self.gliss.pack(padx=20, pady=20, fill=X)
             ttk.Button(self, text="Jouer!", command=self.set_perso).\
                 pack(padx=20, pady=20, fill=X)
@@ -717,6 +717,7 @@ class Brothello(Tk):
                                   "appliqué.")
             self.theme = fen_theme.theme
             self.mettre_theme()
+            self.bout_conseil.config(state=NORMAL)
         except ErreurChoix:
             self.messagebox.ERROR("Une erreur s'est produite. Aucun changement"
                                   " n'a été apporté au thème.")
@@ -877,20 +878,21 @@ class Brothello(Tk):
         mid_x = position[0] * self.largeur + self.largeur // 2
         mid_y = position[1] * self.largeur + self.largeur // 2
         # TODO =================================
-        if self.anciennes_pieces[position].couleur in ['noir', 'black']:
-            img = ImageTk.PhotoImage(Image.open('noir3d.png').resize((r, r)))
-            self.anciennes_pieces[position].image = img
-            self.damier.create_image(
-                mid_x, mid_y, anchor=CENTER,
-                image=self.anciennes_pieces[position].image)
-        elif self.anciennes_pieces[position].couleur in ['blanc', 'white']:
-            img = ImageTk.PhotoImage(Image.open('blanc3d.png').resize((r, r)))
-            self.anciennes_pieces[position].image = img
-            self.damier.create_image(
-                mid_x, mid_y, anchor=CENTER,
-                image=self.anciennes_pieces[position].image)
+        if position in self.anciennes_pieces:
+            if self.anciennes_pieces[position].couleur in ['noir', 'black']:
+                img = ImageTk.PhotoImage(Image.open('noir3d.png').resize((r, r)))
+                self.anciennes_pieces[position].image = img
+                self.damier.create_image(
+                    mid_x, mid_y, anchor=CENTER,
+                    image=self.anciennes_pieces[position].image)
+            elif self.anciennes_pieces[position].couleur in ['blanc', 'white']:
+                img = ImageTk.PhotoImage(Image.open('blanc3d.png').resize((r, r)))
+                self.anciennes_pieces[position].image = img
+                self.damier.create_image(
+                    mid_x, mid_y, anchor=CENTER,
+                    image=self.anciennes_pieces[position].image)
         else:
-            r = self.largeur // 5 * 3
+            r = round(self.largeur / 5 * 1.75)
             self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
                                      fill=couleur_piece, outline='black')
         # TODO ================================================
@@ -1041,24 +1043,24 @@ class Brothello(Tk):
 
     def conseil(self):
         """ Affiche à l'utilisateur les coups possibles """
-
+        self.bout_conseil.config(state=DISABLED)
         if self.difficulte in ["Facile", "Normal"]:
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
                 self.histo.ajouter_texte("Aucun coup possible!")
             for coup in coups_possibles:
-                mid_x = coup[0] * self.largeur + self.largeur // 2
-                mid_y = coup[1] * self.largeur + self.largeur // 2
                 couleur_piece = 'light green'
-                self.dessiner_piece(mid_x, mid_y, couleur_piece)
+                self.dessiner_piece(coup, couleur_piece)
+                self.hint()
                 self.damier.update_idletasks()
-                sleep(0.35)
+                sleep(0.55)
             self.damier.dessiner_carres()
             self.placer_pieces()
         else:
             self.histo.ajouter_texte(" Aide seulement disponible en difficulté"
                                      " Facile ou normale! Débrouillez-vous! ")
 
+        self.bout_conseil.config(state=ACTIVE)
     def abandon(self):
         """
         Concède la victoire à l'ennemi et demande si le joueur souhaite jouer
@@ -1120,6 +1122,7 @@ class Brothello(Tk):
             PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
             PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
             PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('hint.wav', SND_FILENAME | SND_PURGE)
 
     @staticmethod
     def blip():
@@ -1132,12 +1135,12 @@ class Brothello(Tk):
             PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
             PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
             PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('hint.wav', SND_FILENAME | SND_PURGE)
 
     @staticmethod
     def woohoo():
         try:
-            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
-            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+
             PlaySound('woohoo.wav', SND_FILENAME | SND_ASYNC | SND_NOSTOP)
 
         except RuntimeError:
@@ -1150,8 +1153,7 @@ class Brothello(Tk):
     @staticmethod
     def gameover():
         try:
-            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
-            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+
             PlaySound('gameover.wav', SND_FILENAME | SND_ASYNC | SND_NOSTOP)
 
         except RuntimeError:
@@ -1160,8 +1162,21 @@ class Brothello(Tk):
             PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
             PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
             PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('hint.wav', SND_FILENAME | SND_PURGE)
 
+    @staticmethod
+    def hint():
+        """ Son lors de l'apparation des pièces vertes pour conseil() """
+        try:
+            PlaySound('hint.wav', SND_FILENAME | SND_ASYNC)
 
+        except RuntimeError:
+            print("RUNTIME ERROR SON ÉVITÉE")
+            PlaySound('blip.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('plop.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('woohoo.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('gameover.wav', SND_FILENAME | SND_PURGE)
+            PlaySound('hint.wav', SND_FILENAME | SND_PURGE)
     # ====== Fonctions de sauvegarde / chargement ===== #
 
     def charger(self):

@@ -253,7 +253,7 @@ class FenJoueurs(Toplevel):
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
 
-        if boss.theme in ['bois', 'redwood']:
+        if boss.theme == 'redwood':
             self.minifond = PhotoImage(file='bois.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -268,6 +268,14 @@ class FenJoueurs(Toplevel):
             ttk.Button(self, text=" 1 joueur  ", command=self.unjoueur).\
                 grid(row=0, column=0, pady=(50, 20), padx=40)
             ttk.Button(self, text=" 2 joueurs  ", command=self.deuxjoueurs).\
+                grid(row=1, column=0, pady=20, padx=60)
+        elif boss.theme == 'forest':
+            self.minifond = PhotoImage(file='forest.png')
+            self.minifond_label = Label(self, image=self.minifond)
+            self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
+            ttk.Button(self, text=" 1 joueur  ", command=self.unjoueur). \
+                grid(row=0, column=0, pady=(50, 20), padx=40)
+            ttk.Button(self, text=" 2 joueurs  ", command=self.deuxjoueurs). \
                 grid(row=1, column=0, pady=20, padx=60)
         # === Anciens Boutons === #
         # Bouton(self, text="1 joueur", command=self.unjoueur).pack(pady=20,
@@ -309,7 +317,7 @@ class FenNiveauDif(Toplevel):
         self.geometry("200x200+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
-        if boss.theme in ['bois', 'redwood']:
+        if boss.theme == 'redwood':
             self.minifond = PhotoImage(file='bois.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -323,6 +331,18 @@ class FenNiveauDif(Toplevel):
                 grid(row=3, column=1, pady=10, padx=60)
         elif boss.theme == 'espace':
             self.minifond = PhotoImage(file='star.gif')
+            self.minifond_label = Label(self, image=self.minifond)
+            self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
+            ttk.Button(self, text="Facile", command=self.set_easy). \
+                grid(row=0, column=1, pady=(20, 10), padx=60)
+            ttk.Button(self, text="Normal", command=self.set_normal). \
+                grid(row=1, column=1, pady=10, padx=60)
+            ttk.Button(self, text="Difficile", command=self.set_hard). \
+                grid(row=2, column=1, pady=10, padx=60)
+            ttk.Button(self, text="Légendaire", command=self.set_legend). \
+                grid(row=3, column=1, pady=10, padx=60)
+        elif boss.theme == 'forest':
+            self.minifond = PhotoImage(file='forest.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
             ttk.Button(self, text="Facile", command=self.set_easy). \
@@ -396,7 +416,7 @@ class FenTypePartie(Toplevel):
         self.geometry("200x200+550+250")
         self.resizable(width=0, height=0)
         self.attributes('-topmost', 'true')
-        if boss.theme in ['bois', 'redwood']:
+        if boss.theme == 'redwood':
             self.minifond = PhotoImage(file='bois.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -409,6 +429,18 @@ class FenTypePartie(Toplevel):
                                                        pady=20, padx=40)
         elif boss.theme == 'espace':
             self.minifond = PhotoImage(file='star.gif')
+            self.minifond_label = Label(self, image=self.minifond)
+            self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
+            ttk.Button(self, text="  Partie Classique  ",
+                       command=self.partie_classique).grid(row=0, column=0,
+                                                           pady=(50, 20),
+                                                           padx=40)
+            ttk.Button(self, text="Partie Personalisée",
+                       command=self.partie_perso).grid(row=1, column=0,
+                                                       pady=20, padx=40)
+
+        elif boss.theme == 'forest':
+            self.minifond = PhotoImage(file='forest.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
             ttk.Button(self, text="  Partie Classique  ",
@@ -462,7 +494,7 @@ class FenPartiePerso(Toplevel):
 
         self.geometry("250x250+550+250")
         self.attributes('-topmost', 'true')
-        if boss.theme in ['bois', 'redwood']:
+        if boss.theme == 'redwood':
             self.minifond = PhotoImage(file='bois.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -470,7 +502,7 @@ class FenPartiePerso(Toplevel):
                   relief=SOLID).pack(padx=20, pady=20, fill=X)
             self.gliss = Glissoir(self, orient=HORIZONTAL,
                                   from_=6, to_=12, tickinterval=2,
-                                  resolution=2, bg='#e2ceb1')
+                                  resolution=2)
             self.gliss.pack(padx=20, pady=20, fill=X)
             ttk.Button(self, text="Jouer!", command=self.set_perso).\
                 pack(padx=20, pady=20, fill=X)
@@ -478,11 +510,23 @@ class FenPartiePerso(Toplevel):
             self.minifond = PhotoImage(file='star.gif')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
-            Label(self, text="Combien de cases?", bg='#d9dadb', bd=2,
+            Label(self, text="Combien de cases?", bg='#e2ceb1', bd=2,
                   relief=SOLID).pack(padx=20, pady=20, fill=X)
             self.gliss = Glissoir(self, orient=HORIZONTAL,
                                   from_=6, to_=12, tickinterval=2,
-                                  resolution=2, bg='#d9dadb')
+                                  resolution=2)
+            self.gliss.pack(padx=20, pady=20, fill=X)
+            ttk.Button(self, text="Jouer!", command=self.set_perso).\
+                pack(padx=20, pady=20, fill=X)
+        elif boss.theme == 'forest':
+            self.minifond = PhotoImage(file='forest.png')
+            self.minifond_label = Label(self, image=self.minifond)
+            self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
+            Label(self, text="Combien de cases?", bg='#e2ceb1', bd=2,
+                  relief=SOLID).pack(padx=20, pady=20, fill=X)
+            self.gliss = Glissoir(self, orient=HORIZONTAL,
+                                  from_=6, to_=12, tickinterval=2,
+                                  resolution=2)
             self.gliss.pack(padx=20, pady=20, fill=X)
             ttk.Button(self, text="Jouer!", command=self.set_perso).\
                 pack(padx=20, pady=20, fill=X)
@@ -515,7 +559,7 @@ class ChoixTheme(Toplevel):
         self.resizable(width=0, height=0)  # empeche resize
         self.attributes('-topmost', 'true')
 
-        if boss.theme in ['bois', 'redwood']:
+        if boss.theme == 'redwood':
             self.minifond = PhotoImage(file='bois.png')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -523,7 +567,11 @@ class ChoixTheme(Toplevel):
             self.minifond = PhotoImage(file='star.gif')
             self.minifond_label = Label(self, image=self.minifond)
             self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
-        ttk.Button(self, text=" Bois  ", command=self.bois).\
+        elif boss.theme == 'forest':
+            self.minifond = PhotoImage(file='forest.png')
+            self.minifond_label = Label(self, image=self.minifond)
+            self.minifond_label.place(x=0, y=0, relwidth=1, relheight=1)
+        ttk.Button(self, text=" Forest  ", command=self.forest).\
             grid(row=0, column=0, pady=(30, 17), padx=40)
         ttk.Button(self, text=" Redwood", command=self.redwood).\
             grid(row=1, column=0, pady=17, padx=40)
@@ -536,12 +584,12 @@ class ChoixTheme(Toplevel):
         # Bouton(self, text="2 joueurs", command=self.deuxjoueurs).pack(pady=5,
         #                                                              padx=10)
 
-    def bois(self):
+    def forest(self):
         """
         Donne la valeur bois à self.theme, l'applique et ferme la fenêtre
         """
 
-        self.theme = 'bois'
+        self.theme = 'forest'
         self.grab_release()
         self.master.focus_set()
         self.destroy()
@@ -712,7 +760,7 @@ class Brothello(Tk):
         try:
             fen_theme = ChoixTheme(self)
             self.wait_window(fen_theme)
-            if fen_theme.theme not in ['bois','redwood', 'espace']:
+            if fen_theme.theme not in ['forest','redwood', 'espace']:
                 raise ErreurChoix("Erreur dans le choix. Aucun changement "
                                   "appliqué.")
             self.theme = fen_theme.theme
@@ -725,7 +773,7 @@ class Brothello(Tk):
     def mettre_theme(self):
         """ Applique le thème courant en definissant les Widgets """
 
-        if self.theme in ['bois', 'redwood']:
+        if self.theme == 'redwood':
 
             # Fenêtre principale
             self.fond = PhotoImage(file='bois.png')
@@ -741,35 +789,31 @@ class Brothello(Tk):
                 couleur.color = '#400000'
                 couleur.color2 = '#800000'
                 self.bout_conseil.grid_remove()
-                self.bout_conseil = ttk.Button(
-                    self, text="Voir les coups possibles",
-                    command=self.conseil, state=DISABLED)
+                self.photo_forest = PhotoImage(file="bouton_forest.png")
                 self.bout_conseil.grid(row=0, column=1, padx=(10, 20),
-                                       pady=(73, 3), sticky=W+E)
+                                       pady=(73, 3), sticky=W + E)
                 self.histo = Historique(self, height=21)
 
                 self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
                                 sticky=S)
-                self.histo.text.config(bg='#e2ceb1')
-            elif self.theme == 'bois':
-                couleur.color = "#7b7f84"
-                couleur.color2 = "#d9dadb"
-                self.histo.text.config(bg='#7b7f84')
+                self.histo.text.config(bg='#dbc0c0')
+            self.photo_bois = PhotoImage(file="bouton_bois.png")
+            if hasattr(self, 'bout_conseil'):
+                print('AVAIT BOUTON')
                 self.bout_conseil.grid_remove()
-                self.photo1 = PhotoImage(file="bouton.png")
-                self.bout_conseil = Button(self.frame1, image=self.photo1,
-                                           command=self.conseil)
-                self.bout_conseil.grid(row=1, column=1, sticky=NW)
-                self.bout_conseil.image = self.photo1
-                self.histo = Historique(self, height=21)
+            else:
+                print('pas de bouton')
+            self.bout_conseil = Button(self.frame1, image=self.photo_bois,
+                                       command=self.conseil)
+            self.bout_conseil.grid(row=1, column=1, sticky=NW)
+            self.bout_conseil.image = self.photo_bois
 
-                self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
-                                sticky=S)
             if len(self.anciennes_pieces) > 0:  # Si partie en cours, met score
                 self.changer_score()
                 self.initialiser_damier()
                 self.placer_pieces()
             self.update_idletasks()
+
         elif self.theme == 'espace':
             # Fenêtre principale
             couleur.color = "#7b7f84"
@@ -783,18 +827,60 @@ class Brothello(Tk):
             self.frame1 = Frame(self)
             self.frame1.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
                              sticky=NW)
-            self.photo1 = PhotoImage(file="bouton.png")
+            self.histo = Historique(self, height=21)
+
+            self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
+                            sticky=S)
+            self.histo.text.config(bg='#7b7f84')
+            self.histo = Historique(self, height=21)
+
+            self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
+                            sticky=S)
+            self.photo_espace = PhotoImage(file="bouton_espace.png")
             if hasattr(self, 'bout_conseil'):
                 print('AVAIT BOUTON')
                 self.bout_conseil.grid_remove()
             else:
                 print('pas de bouton')
-            self.bout_conseil = Button(self.frame1, image=self.photo1,
+            self.bout_conseil = Button(self.frame1, image=self.photo_espace,
                                        command=self.conseil)
             self.bout_conseil.grid(row=1, column=1, sticky=NW)
-            self.bout_conseil.image = self.photo1
+            self.bout_conseil.image = self.photo_espace
+            if len(self.anciennes_pieces) > 0:  # Si partie en cours, met score
+                self.changer_score()
+                self.initialiser_damier()
+                self.placer_pieces()
+            self.update_idletasks()
+
+        elif self.theme == 'forest':
+            # Fenêtre principale
+            couleur.color = "#ded3ed"
+            couleur.color2 = "#9071ba"
+            self.fond = PhotoImage(file='forest.png')
+            self.fond_label = Label(self, image=self.fond)
+            self.fond_label.image = self.fond_label
+            self.fond_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+            # Widgets esclaves
+            self.frame1 = Frame(self)
+            self.frame1.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
+                             sticky=NW)
+            self.histo.text.config(bg='#ded3ed')
+            self.photo_forest = PhotoImage(file="bouton_forest.png")
+            if hasattr(self, 'bout_conseil'):
+                print('AVAIT BOUTON')
+                self.bout_conseil.grid_remove()
+            else:
+                print('pas de bouton')
+            self.bout_conseil = Button(self.frame1, image=self.photo_forest,
+                                       command=self.conseil)
+            self.bout_conseil.grid(row=1, column=1, sticky=NW)
+            self.bout_conseil.image = self.photo_forest
             self.histo = Historique(self, height=21)
 
+            self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
+                            sticky=S)
+            self.histo.text.config(bg='#ded3ed')
             self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
                             sticky=S)
             if len(self.anciennes_pieces) > 0:  # Si partie en cours, met score

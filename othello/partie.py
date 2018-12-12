@@ -129,15 +129,15 @@ class Partie:
         if self.joueur_courant.obtenir_type_joueur() == "Humain":
             coup_choisi = coup_clic
         else:
-            if self.difficulte == "Légendaire":
+            if self.difficulte == "legendaire":
                 self.intelligenceartificielle = IALegendaire(
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)
-            elif self.difficulte == "Difficile":
+            elif self.difficulte == "difficile":
                 self.intelligenceartificielle = IADifficile(
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)
-            elif self.difficulte == "Normal":
+            elif self.difficulte == "normale":
                 self.intelligenceartificielle = IANormale(
                     self.planche.nb_cases, self.planche.cases,
                     self.couleur_joueur_courant)

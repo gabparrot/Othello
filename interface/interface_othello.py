@@ -979,7 +979,7 @@ class Brothello(Tk):
                     image=self.anciennes_pieces[position].image)
         else:
             r = round(self.largeur / 5 * 1.75)
-            self.damier.create_oval(mid_x - r, mid_y - r, mid_x + r, mid_y + r,
+            self.damier.create_oval(mid_x - r, mid_y - r + 1, mid_x + r - 1, mid_y + r -5,
                                      fill=couleur_piece, outline='black')
         # TODO ================================================
     def tour_humain(self, case_clic: tuple):

@@ -140,6 +140,8 @@ class PlancheDeJeu(Canvas):
             for carre in liste_carres:
                 coords = self.coords(carre)
                 txt = str(self.gettags(carre)[0])
+                lettre = txt[0]
+                chiffre = txt[1]
                 if self.nb_cases == 6:
                     self.create_text(coords[0] + 2, coords[1] + 1, text=txt,
                                      fill='black',
@@ -149,8 +151,7 @@ class PlancheDeJeu(Canvas):
                                      fill='black',
                                      font='RobotoMono 7 bold', anchor=NW)
                 elif self.nb_cases == 10:
-                    lettre = txt[0]
-                    chiffre = txt[1]
+
                     self.create_text(coords[0] + 2, coords[1] + 1, text=lettre,
                                      fill='black', font='RobotoMono 7 bold',
                                      anchor=NW)
@@ -159,8 +160,6 @@ class PlancheDeJeu(Canvas):
                                      text=chiffre, font='RobotoMono 7 bold',
                                      anchor=NW)
                 else:  # 12x12
-                    lettre = txt[0]
-                    chiffre = txt[1]
                     self.create_text(coords[0] + 1, coords[1] + 1, text=lettre,
                                      fill='black', font='RobotoMono 7 bold',
                                      anchor=NW)
@@ -665,10 +664,9 @@ class Brothello(Tk):
                     self.couleur_piece = "white"
                 elif self.couleur_piece == "noir":
                     self.couleur_piece = "black"
-            #TODO =======================================
+
                 self.anciennes_pieces[piece] = Piece(self.couleur_piece)
                 self.dessiner_piece(piece, self.couleur_piece)
-            #todo =======================================
                 self.damier.update_idletasks()
                 self.plop()
                 sleep(0.35)
@@ -684,7 +682,6 @@ class Brothello(Tk):
                     elif couleur_piece == "noir":
                         couleur_piece = "black"
                     self.anciennes_pieces[piece] = Piece(self.couleur_piece)
-                    self.dessiner_piece(piece, self.couleur_piece)
                     self.dessiner_piece(piece, couleur_piece)
                     self.damier.update_idletasks()
                     self.blip()
@@ -705,25 +702,22 @@ class Brothello(Tk):
         r = self.largeur
         mid_x = position[0] * self.largeur + self.largeur // 2
         mid_y = position[1] * self.largeur + self.largeur // 2
-        # TODO =================================
+
         if position in self.anciennes_pieces:
             if self.anciennes_pieces[position].couleur in ['noir', 'black']:
-                img = ImageTk.PhotoImage(Image.open('noir3d.png').resize((r, r)))
-                self.anciennes_pieces[position].image = img
-                self.damier.create_image(
-                    mid_x, mid_y, anchor=CENTER,
-                    image=self.anciennes_pieces[position].image)
-            elif self.anciennes_pieces[position].couleur in ['blanc', 'white']:
+                img = ImageTk.PhotoImage(Image.open('noir3d.png').
+                                         resize((r, r)))
+            else:
                 img = ImageTk.PhotoImage(Image.open('blanc3d.png').resize((r, r)))
-                self.anciennes_pieces[position].image = img
-                self.damier.create_image(
-                    mid_x, mid_y, anchor=CENTER,
-                    image=self.anciennes_pieces[position].image)
+            self.anciennes_pieces[position].image = img
+            self.damier.create_image(mid_x, mid_y, anchor=CENTER,
+                image=self.anciennes_pieces[position].image)
         else:
             r = round(self.largeur / 5 * 1.75)
-            self.damier.create_oval(mid_x - r, mid_y - r + 1, mid_x + r - 1, mid_y + r -5,
-                                     fill=couleur_piece, outline='black')
-        # TODO ================================================
+            self.damier.create_oval(mid_x - r, mid_y - r + 1, mid_x + r - 1,
+                                    mid_y + r -5, fill=couleur_piece,
+                                    outline='black')
+
     def tour_humain(self, case_clic: tuple):
         """ Joue le coup du clic humain """
 
@@ -757,8 +751,7 @@ class Brothello(Tk):
         if self.valider_coup(case_clic):
             self.tour_humain(case_clic)
             self.placer_pieces()
-            self.damier.update_idletasks()
-            self.histo.update_idletasks()
+            self.update_idletasks()
             sleep(0.5)
             self.changer_joueur()
             if self.partie.joueur_courant.obtenir_type_joueur() == \
@@ -791,12 +784,12 @@ class Brothello(Tk):
             if self.partie.joueur_courant.obtenir_type_joueur() == 'Humain':
                 txt = "Aucun coup possible! Vous passez votre tour!"
                 messagebox.showinfo('Aucun coup possible', txt)
-                self.histo.ajouter_texte(txt)
             else:
                 txt = "L'ordinateur n'a aucun coup possible. Il passe donc " \
                       "son tour!"
                 messagebox.showinfo('Aucun coup possible', txt)
-                self.histo.ajouter_texte(txt)
+
+            self.histo.ajouter_texte(txt)
             self.verifier_fin()
             self.changer_joueur()
 
@@ -814,27 +807,19 @@ class Brothello(Tk):
                 sleep(0.2)
                 self.update_idletasks()
                 self.woohoo()
-                self.histo.ajouter_texte(victoire[1])
-                txt_fin = victoire[1] + \
-                          '\nVoulez vous jouer une nouvelle partie?'
-                box_fin = messagebox.askyesno('Partie teminée!',
-                                              txt_fin)
-                if not box_fin:
-                    exit()
-                elif box_fin:
-                    self.nouvelle_partie()
             elif not victoire[0]:
                 sleep(0.2)
                 self.update_idletasks()
                 self.gameover()
-                self.histo.ajouter_texte(victoire[1])
-                txt_fin = victoire[1] + \
-                          '\nVoulez vous jouer une nouvelle partie?'
-                box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
-                if not box_fin:
-                    exit()
-                elif box_fin:
-                    self.nouvelle_partie()
+
+            self.histo.ajouter_texte(victoire[1])
+            txt_fin = victoire[1] + \
+                      '\nVoulez vous jouer une nouvelle partie?'
+            box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
+            if not box_fin:
+                exit()
+            elif box_fin:
+                self.nouvelle_partie()
 
     def tour_ordi(self):
         """ Fait jouer l'ordinateur """
@@ -872,7 +857,7 @@ class Brothello(Tk):
     def conseil(self):
         """ Affiche à l'utilisateur les coups possibles """
         self.bout_conseil.config(state=DISABLED)
-        if self.difficulte in ["Facile", "Normal"]:
+        if self.difficulte in ["facile", "normale"]:
             coups_possibles = self.partie.coups_possibles
             if not coups_possibles or len(coups_possibles) < 1:
                 self.histo.ajouter_texte("Aucun coup possible!")
@@ -1061,10 +1046,10 @@ class Brothello(Tk):
         self.partie.planche.cases.clear()
         self.anciennes_pieces.clear()
         self.partie.nb_cases = 8
-        self.partie.difficulte = 'Normal'
+        self.partie.difficulte = 'normale'
         self.partie.nb_joueurs = 2
         self.nb_cases = 8
-        self.difficulte = 'Normal'
+        self.difficulte = 'normal'
         self.type_partie = 'classique'
         self.nb_joueurs = 2
         self.largeur = 500//self.nb_cases
@@ -1142,10 +1127,4 @@ class ErreurChoix(Exception):
     TopLevel sans répondre
     """
     pass
-
-
-# ====== Thèmes ====== #
-
-# = = = Thème de bois = = = #
-
 

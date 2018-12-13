@@ -1,12 +1,12 @@
 from random import choice
 
 
-class Joueur:
+class Joueur(object):
     """
     Classe générale de joueur. Vous est fournie.
     """
 
-    def __init__(self, couleur):
+    def __init__(self, couleur: str):
         """
        Le constructeur global de Joueur.
 
@@ -26,7 +26,7 @@ class Joueur:
 
         pass
 
-    def choisir_coup(self, coups_possibles):
+    def choisir_coup(self, coups_possibles: list):
         """
         Cette méthode sera implémentée par les sous-classes JoueurHumain et
         JoueurOrdinateur.
@@ -43,7 +43,7 @@ class JoueurHumain(Joueur):
             Le joueur humain.
     """
 
-    def __init__(self, couleur):
+    def __init__(self, couleur: str):
         """
         Cette méthode va construire un objet Joueur et l'initialiser avec la
         bonne couleur.
@@ -71,7 +71,7 @@ class JoueurOrdinateur(Joueur):
             La couleur du joueur Ordinateur
     """
 
-    def __init__(self, couleur):
+    def __init__(self, couleur: str):
         """
         Cette méthode va construire un objet Joueur et l'initialiser avec la
         bonne couleur.
@@ -91,7 +91,7 @@ class JoueurOrdinateur(Joueur):
 
         return "Ordinateur"
 
-    def choisir_coup(self, coups_possibles):
+    def choisir_coup(self, coups_possibles: list):
         """
         Intelligence artificielle du joueur ordinateur.
 

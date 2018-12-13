@@ -30,7 +30,7 @@ class Planche:
         for i in np.argwhere(matrice_cases == 1):
             self.liste_cases.append(tuple(i))
 
-    def get_piece(self, position):
+    def get_piece(self, position: tuple):
         """
         Récupère une pièce dans la planche.
 
@@ -47,7 +47,7 @@ class Planche:
         else:
             return None
 
-    def position_valide(self, position):
+    def position_valide(self, position: tuple):
         """
         Vérifie si une position est valide.
 
@@ -63,7 +63,7 @@ class Planche:
         else:
             return False
 
-    def obtenir_positions_mangees(self, position, couleur):
+    def obtenir_positions_mangees(self, position: tuple, couleur: str):
         """
         Détermine quelles positions seront mangées si un coup de la couleur
         passée est joué à la position passée.
@@ -95,8 +95,8 @@ class Planche:
         else:
             return pieces_mangees
 
-    def obtenir_positions_mangees_direction(self, couleur, direction,
-                                            position):
+    def obtenir_positions_mangees_direction(self, couleur: str,
+                                            direction: tuple, position: tuple):
         """
         Détermine les positions qui seront mangées si un coup de couleur
         "couleur" est joué à la position "position",
@@ -127,7 +127,7 @@ class Planche:
                 return []
         return []
 
-    def lister_coups_possibles_de_couleur(self, couleur):
+    def lister_coups_possibles_de_couleur(self, couleur: str):
         """
         Fonction établissant, pour chaque case, si le joueur courant peut
         jouer une pièce ou non, et sinon, si c'est parce qu'il y a déjà une
@@ -160,7 +160,7 @@ class Planche:
         return self.coups_possibles, self.impossible_piece_la, \
             self.impossible_zero_mangee
 
-    def jouer_coup(self, position, couleur):
+    def jouer_coup(self, position: tuple, couleur: str):
         """
         Joue une pièce de la couleur "couleur" à la position "position".
 
@@ -199,7 +199,7 @@ class Planche:
 
         return chaine_planche
 
-    def charger_dune_chaine(self, chaine):
+    def charger_dune_chaine(self, chaine: str):
         """
         Remplit la planche à partir d'une chaîne de caractères comportant
         l'information d'une pièce sur chaque ligne.
@@ -265,7 +265,7 @@ class IANormale(Planche):
         """Retourne le ou les coups mangeant le plus de pièces"""
         return self.coup_mange_le_plus(self.coups_possibles)
 
-    def coup_mange_le_plus(self, coups_a_verifier):
+    def coup_mange_le_plus(self, coups_a_verifier: list):
         """
         Trouve le ou les coups qui mangent le plus de pièces ennemies et en
         retourne la liste.
@@ -352,7 +352,7 @@ class IADifficile(Planche):
             return coups_les_plus_forts
         return self.coups_possibles
 
-    def verifier_priorite_1(self, coups_a_verifier):
+    def verifier_priorite_1(self, coups_a_verifier: list):
         """
         Permet de vérifier si l'IA peut jouer des coups sur les coins de la
         planche. Si plusieurs coups aux coins sont possibles, elle tente de
@@ -379,7 +379,7 @@ class IADifficile(Planche):
         else:
             return None
 
-    def verifier_priorite_2(self, coups_a_verifier):
+    def verifier_priorite_2(self, coups_a_verifier: list):
         """
         Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
         la planche, en ligne droite de ceux-ci. Si oui, en retourne la liste,
@@ -407,7 +407,7 @@ class IADifficile(Planche):
         else:
             return None
 
-    def verifier_priorite_3(self, coups_a_verifier):
+    def verifier_priorite_3(self, coups_a_verifier: list):
         """
         Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
         la planche, en diagonale de ceux-ci. Si oui, en retourne la liste,
@@ -504,7 +504,7 @@ class IALegendaire(Planche):
 
         return coups_les_plus_forts
 
-    def verifier_priorite_1(self, coups_a_verifier):
+    def verifier_priorite_1(self, coups_a_verifier: list):
         """
         Permet de vérifier si l'IA peut jouer des coups sur les coins de la
         planche. Si plusieurs coups aux coins sont possibles, elle tente de
@@ -531,7 +531,7 @@ class IALegendaire(Planche):
         else:
             return None
 
-    def verifier_priorite_2(self, coups_a_verifier):
+    def verifier_priorite_2(self, coups_a_verifier: list):
         """
         Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
         la planche, en ligne droite de ceux-ci. Si oui, en retourne la liste,
@@ -559,7 +559,7 @@ class IALegendaire(Planche):
         else:
             return None
 
-    def verifier_priorite_3(self, coups_a_verifier):
+    def verifier_priorite_3(self, coups_a_verifier: list):
         """
         Permet de verifier si l'IA peut jouer des coups à 2 cases des coins de
         la planche, en diagonale de ceux-ci. Si oui, en retourne la liste,
@@ -584,7 +584,7 @@ class IALegendaire(Planche):
         else:
             return None
 
-    def verifier_priorite_4(self, coups_a_verifier):
+    def verifier_priorite_4(self, coups_a_verifier: list):
         """
         Permet de verifier si l'IA peut jouer des coups sur les bordures de
         la planche, excluant les cases en contact avec les coins, afin d'éviter
@@ -618,7 +618,7 @@ class IALegendaire(Planche):
         else:
             return None
 
-    def verifier_priorite_5(self, coups_a_verifier):
+    def verifier_priorite_5(self, coups_a_verifier: list):
         """
         Trouve le ou les coups qui mangent le plus de pièces ennemies et en
         retourne la liste.

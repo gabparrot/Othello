@@ -3,7 +3,7 @@ class Piece:
     Classe modélisant une pièce d'un jeu d'Othello.
     """
 
-    def __init__(self, couleur):
+    def __init__(self, couleur: str):
         """
         Constructeur des objets pièces représentant chacune des pièces sur
         la planche de jeu

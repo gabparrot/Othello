@@ -57,18 +57,6 @@ class Color:
 couleur = Color()
 
 
-class Bouton(Button):
-    """ Classe définissant le style des boutons non ttk utilisés """
-
-    def __init__(self, boss, **kwargs):
-        """ Constructeur des boutons"""
-
-        Button.__init__(self, boss, bg="dark grey", fg="black", bd=5,
-                        activebackground="grey",
-                        activeforeground="white",
-                        font='Helvetica', **kwargs)
-
-
 class Glissoir(Scale):
     """ Classe définissant le style des glissoirs gradués """
 
@@ -103,36 +91,27 @@ class PlancheDeJeu(Canvas):
         for i in range(1, self.nb_cases + 1):
             liste_carres = []
             lettres_rangs = (chr(i + 64), chr(i + 65))
-            if i % 2 != 0:
-                for j in range(self.nb_cases // 2):
-                    num_col = (str(j * 2 + 1), str(j * 2 + 2))
-                    carre = self.create_rectangle(
-                        x, y, x + self.largeur, y + self.largeur,
-                        fill=couleur.afficher_couleur()[0], outline='black',
-                        tag=lettres_rangs[0] + num_col[0])
-                    liste_carres.append(carre)
-                    x += self.largeur
-                    carre = self.create_rectangle(
-                        x, y, x + self.largeur, y + self.largeur,
-                        fill=couleur.afficher_couleur()[1], outline='black',
-                        tag=lettres_rangs[0] + num_col[1])
-                    liste_carres.append(carre)
-                    x += self.largeur
-            else:
-                for j in range(self.nb_cases // 2):
-                    num_col = (str(j * 2 + 1), str(j * 2 + 2))
-                    carre = self.create_rectangle(
-                        x, y, x + self.largeur, y + self.largeur,
-                        fill=couleur.afficher_couleur()[1], outline='black',
-                        tag=lettres_rangs[0] + num_col[0])
-                    liste_carres.append(carre)
-                    x += self.largeur
-                    carre = self.create_rectangle(
-                        x, y, x + self.largeur, y + self.largeur,
-                        fill=couleur.afficher_couleur()[0], outline='black',
-                        tag=lettres_rangs[0] + num_col[1])
-                    liste_carres.append(carre)
-                    x += self.largeur
+
+            coul1 = couleur.afficher_couleur()[0]
+            coul2 = couleur.afficher_couleur()[1]
+            if i % 2 == 0:
+                coul1, coul2 = coul2, coul1
+
+            for j in range(self.nb_cases // 2):
+                num_col = (str(j * 2 + 1), str(j * 2 + 2))
+                carre = self.create_rectangle(
+                    x, y, x + self.largeur, y + self.largeur,
+                    fill=coul1, outline='black',
+                    tag=lettres_rangs[0] + num_col[0])
+                liste_carres.append(carre)
+                x += self.largeur
+                carre = self.create_rectangle(
+                    x, y, x + self.largeur, y + self.largeur,
+                    fill=coul2, outline='black',
+                    tag=lettres_rangs[0] + num_col[1])
+                liste_carres.append(carre)
+                x += self.largeur
+
             x = 1
             y += self.largeur
 
@@ -227,7 +206,7 @@ class FenJoueurs(Toplevel):
     def donner_nb(self, nb: int):
         """ Donne le nombre de joueurs choisi à self.nb et ferme la fenêtre """
 
-        self.nb = int(nb)
+        self.nb = nb
         self.grab_release()
         self.master.focus_set()
         self.destroy()
@@ -404,7 +383,7 @@ class ChoixTheme(Toplevel):
 # ************************************************ #
 
 class Brothello(Tk):
-    """Classe de la fenêtre principale du jeu"""
+    """ Classe de la fenêtre principale du jeu """
 
     def __init__(self, theme=None):
         """Constructeur de la fenêtre principale"""
@@ -427,7 +406,32 @@ class Brothello(Tk):
         self.anciennes_pieces = {}  # dictionnaire pieces tour precedent
         self.mettre_theme()
 
-        # Menu
+        # Menus
+        self.creer_menus()
+
+        # Définition des caractéristiques de la partie par défaut
+        self.nb_cases = 8
+        self.difficulte = 'normale'
+        self.type_partie = 'perso'
+        self.nb_joueurs = 1
+        self.largeur = 500//self.nb_cases
+        self.initialiser_damier()
+        self.update_idletasks()
+
+        # # Popups choix options du jeu
+        self.poser_questions()
+
+        # Création de l'instance du jeu et liste des coups possibles
+        self.initialiser_damier()
+        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
+        self.placer_pieces()
+
+        # Activation des éléments de l'interface
+        self.bout_conseil.config(state=NORMAL)
+
+    def creer_menus(self):
+        """ Crée la barre de menus / sous-menus de la fenêtre principale """
+
         self.mainmenu = Menu(self)
         first_menu = Menu(self.mainmenu, tearoff=0)
         first_menu.add_command(
@@ -451,28 +455,8 @@ class Brothello(Tk):
         self.mainmenu.add_cascade(label="Aide", menu=third_menu)
         Brothello.config(self, menu=self.mainmenu)
 
-        # Définition des caractéristiques de la partie par défaut
-        self.nb_cases = 8
-        self.difficulte = 'normale'
-        self.type_partie = 'perso'
-        self.nb_joueurs = 1
-        self.largeur = 500//self.nb_cases
-        self.initialiser_damier()
-        self.update_idletasks()
-
-        # # Popups choix options du jeu
-        self.poser_questions()
-
-        # Création de l'instance du jeu et liste des coups possibles
-        self.initialiser_damier()
-        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
-        self.placer_pieces()
-
-        # Activation des éléments de l'interface
-        self.bout_conseil.config(state=NORMAL)
-
     def poser_questions(self):
-        # # Popups choix options du jeu
+        """ Popups choix options du jeu """
         try:
             # Choix nombre joueurs
             fen_joueur = FenJoueurs(self)
@@ -590,12 +574,7 @@ class Brothello(Tk):
         if self.theme == 'redwood':
             couleur.color = '#400000'
             couleur.color2 = '#800000'
-
-            self.photo_bois = PhotoImage(file="bouton_bois.png")
-            self.bout_conseil = Button(self.frame1, image=self.photo_bois,
-                                       command=self.conseil, state=DISABLED)
-            self.bout_conseil.grid(row=1, column=1, sticky=NW)
-            self.bout_conseil.image = self.photo_bois
+            self.photo_bouton = PhotoImage(file="bouton_bois.png")
 
         elif self.theme == 'espace':
             # Fenêtre principale
@@ -604,12 +583,7 @@ class Brothello(Tk):
 
             # Widgets esclaves
             self.histo.text.config(bg='#7b7f84')
-
-            self.photo_espace = PhotoImage(file="bouton_espace.png")
-            self.bout_conseil = Button(self.frame1, image=self.photo_espace,
-                                       command=self.conseil, state=DISABLED)
-            self.bout_conseil.grid(row=1, column=1, sticky=NW)
-            self.bout_conseil.image = self.photo_espace
+            self.photo_bouton = PhotoImage(file="bouton_espace.png")
 
         elif self.theme == 'forest':
             # Fenêtre principale
@@ -618,25 +592,18 @@ class Brothello(Tk):
 
             # Widgets esclaves
             self.histo.text.config(bg='#ded3ed')
-            self.photo_forest = PhotoImage(file="bouton_forest.png")
+            self.photo_bouton = PhotoImage(file="bouton_forest.png")
 
-            self.bout_conseil = Button(self.frame1, image=self.photo_forest,
-                                       command=self.conseil, state=DISABLED)
-            self.bout_conseil.grid(row=1, column=1, sticky=NW)
-            self.bout_conseil.image = self.photo_forest
-            self.histo.grid(row=1, column=1, padx=(10, 20), pady=(3, 10),
-                            sticky=S)
+        self.bout_conseil = Button(self.frame1, image=self.photo_bouton,
+                                   command=self.conseil, state=DISABLED)
+        self.bout_conseil.grid(row=1, column=1, sticky=NW)
+        self.bout_conseil.image = self.photo_bouton
 
         if len(self.anciennes_pieces) > 0:  # Si partie en cours, met score
             self.changer_score()
             self.initialiser_damier()
             self.placer_pieces()
         self.update_idletasks()
-
-    # Ancien bouton
-    # bout_conseil = ttk.Button(self, text="Voir les coups possibles",
-    # command=self.conseil, state=DISABLED)
-    # bout_conseil.grid(row=0, column=1, padx=(10, 20), pady=(73, 3), sticky=W)
 
     def changer_score(self):
         """ Calcul le score à chaque tour."""
@@ -660,38 +627,32 @@ class Brothello(Tk):
         """ Dessine les pieces nouvelles ou modifies """
 
         for piece in self.partie.planche.cases:
-            if piece not in self.anciennes_pieces:
-                # Placer au centre de la case
-                self.couleur_piece = self.partie.planche.cases[piece].couleur
-                if self.couleur_piece == "blanc":
-                    self.couleur_piece = "white"
-                elif self.couleur_piece == "noir":
-                    self.couleur_piece = "black"
 
-                self.anciennes_pieces[piece] = Piece(self.couleur_piece)
-                self.dessiner_piece(piece, self.couleur_piece)
+            couleur_piece = self.partie.planche.cases[piece].couleur
+            if couleur_piece == "blanc":
+                couleur_piece = "white"
+            elif couleur_piece == "noir":
+                couleur_piece = "black"
+
+            if piece not in self.anciennes_pieces:
+                self.anciennes_pieces[piece] = Piece(couleur_piece)
+                self.dessiner_piece(piece, couleur_piece)
                 self.damier.update_idletasks()
                 self.plop()
                 sleep(0.35)
 
-        for piece in self.partie.planche.cases:
-            if piece in self.anciennes_pieces:
+            elif piece in self.anciennes_pieces:
                 if self.partie.planche.cases[piece].couleur != \
                         self.anciennes_pieces[piece].couleur:
-                    # Placer au centre de la case
-                    couleur_piece = self.partie.planche.cases[piece].couleur
-                    if couleur_piece == "blanc":
-                        couleur_piece = "white"
-                    elif couleur_piece == "noir":
-                        couleur_piece = "black"
-                    self.anciennes_pieces[piece] = Piece(self.couleur_piece)
+
+                    self.anciennes_pieces[piece] = Piece(couleur_piece)
                     self.dessiner_piece(piece, couleur_piece)
                     self.damier.update_idletasks()
                     self.blip()
                     sleep(0.35)
 
+        # Reparcourir pour replacer tout quand on change thème
         for piece in self.partie.planche.cases:
-            # Placer au centre de la case
             couleur_piece = self.partie.planche.cases[piece].couleur
             if couleur_piece == "blanc":
                 couleur_piece = "white"
@@ -819,7 +780,7 @@ class Brothello(Tk):
 
             self.histo.ajouter_texte(victoire[1])
             txt_fin = victoire[1] + \
-                      '\nVoulez vous jouer une nouvelle partie?'
+                '\nVoulez vous jouer une nouvelle partie?'
             box_fin = messagebox.askyesno('Partie teminée!', txt_fin)
             if not box_fin:
                 exit()
@@ -907,7 +868,8 @@ class Brothello(Tk):
         elif box_fin:
             self.nouvelle_partie()
 
-    def quitter(self):
+    @staticmethod
+    def quitter():
         """ Quitte le jeu """
         exit()
 
@@ -917,7 +879,7 @@ class Brothello(Tk):
         self.bout_conseil.config(state=DISABLED)
         self.anciennes_pieces.clear()
         self.poser_questions()
-        self.partie = Partie(self.nb_joueurs,self.difficulte, self.nb_cases)
+        self.partie = Partie(self.nb_joueurs, self.difficulte, self.nb_cases)
         self.initialiser_damier()
         self.update_idletasks()
         self.placer_pieces()
@@ -1121,8 +1083,3 @@ class Brothello(Tk):
                       self.partie.planche.convertir_en_chaine())
 
         fichier.close()
-
-
-# ====== Classes  ====== #
-
-

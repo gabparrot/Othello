@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import colorchooser, messagebox, filedialog, ttk
 from othello.partie import Partie
-from othello.exceptions import ErreurPositionCoup
+from othello.exceptions import ErreurPositionCoup, ErreurChoix
 from othello.piece import Piece
 from time import sleep
 from winsound import *
@@ -129,7 +129,7 @@ class PlancheDeJeu(Canvas):
                     x += self.largeur
                     carre = self.create_rectangle(
                         x, y, x + self.largeur, y + self.largeur,
-                        fill=couleur.afficher_couleur()[0],outline='black',
+                        fill=couleur.afficher_couleur()[0], outline='black',
                         tag=lettres_rangs[0] + num_col[1])
                     liste_carres.append(carre)
                     x += self.largeur
@@ -177,14 +177,14 @@ class Historique(ttk.Frame):
     def __init__(self, root, width=25, height=25):
         """ Constructeur de l'historique de texte """
 
-        ttk.Frame.__init__(self, root,
-                       width=width, height=height, relief=SUNKEN)
+        ttk.Frame.__init__(self, root, width=width, height=height,
+                           relief=SUNKEN)
         self.text = Text(self, font='Helvetica 12 bold', bg='#7b7f84', bd=1,
                          width=width, height=height, wrap=WORD)
         scroll = ttk.Scrollbar(self, command=self.text.yview)
         self.text.configure(yscrollcommand=scroll.set)
         self.text.pack(side=LEFT, expand=YES, fill=BOTH, padx=2, pady=2)
-        scroll.pack(side=RIGHT, expand=YES, fill=BOTH, padx=(0,2), pady=2)
+        scroll.pack(side=RIGHT, expand=YES, fill=BOTH, padx=(0, 2), pady=2)
 
     def ajouter_texte(self, action_a_ecrire):
         """
@@ -304,12 +304,12 @@ class FenTypePartie(Toplevel):
                    command=lambda: self.donner_type('perso')).\
             grid(row=1, column=0, pady=20, padx=40)
 
-    def donner_type(self, type: str):
+    def donner_type(self, type_partie: str):
         """
         Donne la valeur 'classique' à self.type_partie et ferme la fenêtre
         """
 
-        self.type = type
+        self.type_partie = type_partie
         self.grab_release()
         self.master.focus_set()
         self.destroy()
@@ -376,11 +376,14 @@ class ChoixTheme(Toplevel):
         self.fond_label = Label(self, image=boss.fond)
         self.fond_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        ttk.Button(self, text=" Forest  ", command=lambda: self.donner_theme('forest')).\
+        ttk.Button(self, text=" Forest  ",
+                   command=lambda: self.donner_theme('forest')).\
             grid(row=0, column=0, pady=(30, 17), padx=40)
-        ttk.Button(self, text=" Redwood",command=lambda: self.donner_theme('redwood')).\
+        ttk.Button(self, text=" Redwood",
+                   command=lambda: self.donner_theme('redwood')).\
             grid(row=1, column=0, pady=17, padx=40)
-        ttk.Button(self, text=" Espace ", command=lambda: self.donner_theme('espace')).\
+        ttk.Button(self, text=" Espace ",
+                   command=lambda: self.donner_theme('espace')).\
             grid(row=2, column=0, pady=17, padx=60)
 
     def donner_theme(self, theme: str):
@@ -438,7 +441,7 @@ class Brothello(Tk):
         first_menu.add_command(label='Quitter', command=self.quitter)
         second_menu = Menu(self.mainmenu, tearoff=0)
         second_menu.add_command(label='Changer la couleur du damier',
-                               command=self.action_bouton_couleur)
+                                command=self.action_bouton_couleur)
         second_menu.add_command(label='Changer le thème',
                                 command=self.choisir_theme)
         third_menu = Menu(self.mainmenu, tearoff=0)
@@ -490,9 +493,9 @@ class Brothello(Tk):
             # Choix partie classique ou personnalisee
             fen_type = FenTypePartie(self)
             self.wait_window(fen_type)
-            if fen_type.type not in ['classique', 'perso']:
+            if fen_type.type_partie not in ['classique', 'perso']:
                 raise ErreurChoix("Erreur. Fin de la partie.")
-            self.type_partie = fen_type.type
+            self.type_partie = fen_type.type_partie
 
             # 8 cases si type classique, sinon choix nb cases
             if self.type_partie == 'classique':
@@ -544,7 +547,7 @@ class Brothello(Tk):
         try:
             fen_theme = ChoixTheme(self)
             self.wait_window(fen_theme)
-            if fen_theme.theme not in ['forest','redwood', 'espace']:
+            if fen_theme.theme not in ['forest', 'redwood', 'espace']:
                 raise ErreurChoix("Erreur dans le choix. Aucun changement "
                                   "appliqué.")
             self.theme = fen_theme.theme
@@ -708,14 +711,16 @@ class Brothello(Tk):
                 img = ImageTk.PhotoImage(Image.open('noir3d.png').
                                          resize((r, r)))
             else:
-                img = ImageTk.PhotoImage(Image.open('blanc3d.png').resize((r, r)))
+                img = ImageTk.PhotoImage(Image.open('blanc3d.png').
+                                         resize((r, r)))
             self.anciennes_pieces[position].image = img
-            self.damier.create_image(mid_x, mid_y, anchor=CENTER,
+            self.damier.create_image(
+                mid_x, mid_y, anchor=CENTER,
                 image=self.anciennes_pieces[position].image)
         else:
             r = round(self.largeur / 5 * 1.75)
             self.damier.create_oval(mid_x - r, mid_y - r + 1, mid_x + r - 1,
-                                    mid_y + r -5, fill=couleur_piece,
+                                    mid_y + r - 5, fill=couleur_piece,
                                     outline='black')
 
     def tour_humain(self, case_clic: tuple):
@@ -1022,8 +1027,8 @@ class Brothello(Tk):
         return self.__type_partie
 
     @type_partie.setter
-    def type_partie(self, type: str):
-        self.__type_partie = type
+    def type_partie(self, type_partie: str):
+        self.__type_partie = type_partie
 
     @property
     def nb_cases(self):
@@ -1120,11 +1125,4 @@ class Brothello(Tk):
 
 # ====== Classes  ====== #
 
-class ErreurChoix(Exception):
-    """
-    Classe d'erreur servant à attraper des données invalides lors des choix de
-    l'utilisateur au début de la partie. Ou si celui-ci ferme les fenêtres
-    TopLevel sans répondre
-    """
-    pass
 

@@ -179,7 +179,6 @@ class Partie:
 
         pieces_noires = 0
         pieces_blanches = 0
-        msg = None
 
         # Compte les pièces de chaque couleur
         for case in self.planche.liste_cases:
@@ -200,7 +199,8 @@ class Partie:
             if gagnant.obtenir_type_joueur() == 'Humain':
                 msg = "Félicitation! Vous avez gagné! Le joueur {} l'emporte "\
                       "{} à {}".\
-                    format(gagnant.couleur, max(pieces_noires, pieces_blanches),
+                    format(gagnant.couleur,
+                           max(pieces_noires, pieces_blanches),
                            min(pieces_noires, pieces_blanches))
                 return True, msg
             else:  # si ordi gagne

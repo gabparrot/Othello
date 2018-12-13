@@ -12,7 +12,8 @@ class Piece:
             couleur: couleur de la pièce ("blanc", "noir"), un string.
         """
 
-        assert couleur in ["blanc", "noir", 'white', 'black'], "Piece: couleur invalide."
+        assert couleur in ["blanc", "noir", 'white', 'black'], \
+            "Piece: couleur invalide."
         if couleur == 'white':
             couleur = 'blanc'
         if couleur == 'black':

@@ -627,32 +627,38 @@ class Brothello(Tk):
         """ Dessine les pieces nouvelles ou modifies """
 
         for piece in self.partie.planche.cases:
-
-            couleur_piece = self.partie.planche.cases[piece].couleur
-            if couleur_piece == "blanc":
-                couleur_piece = "white"
-            elif couleur_piece == "noir":
-                couleur_piece = "black"
-
             if piece not in self.anciennes_pieces:
-                self.anciennes_pieces[piece] = Piece(couleur_piece)
-                self.dessiner_piece(piece, couleur_piece)
+                # Placer au centre de la case
+                self.couleur_piece = self.partie.planche.cases[piece].couleur
+                if self.couleur_piece == "blanc":
+                    self.couleur_piece = "white"
+                elif self.couleur_piece == "noir":
+                    self.couleur_piece = "black"
+
+                self.anciennes_pieces[piece] = Piece(self.couleur_piece)
+                self.dessiner_piece(piece, self.couleur_piece)
                 self.damier.update_idletasks()
                 self.plop()
                 sleep(0.35)
 
-            elif piece in self.anciennes_pieces:
+        for piece in self.partie.planche.cases:
+            if piece in self.anciennes_pieces:
                 if self.partie.planche.cases[piece].couleur != \
                         self.anciennes_pieces[piece].couleur:
-
-                    self.anciennes_pieces[piece] = Piece(couleur_piece)
+                    # Placer au centre de la case
+                    couleur_piece = self.partie.planche.cases[piece].couleur
+                    if couleur_piece == "blanc":
+                        couleur_piece = "white"
+                    elif couleur_piece == "noir":
+                        couleur_piece = "black"
+                    self.anciennes_pieces[piece] = Piece(self.couleur_piece)
                     self.dessiner_piece(piece, couleur_piece)
                     self.damier.update_idletasks()
                     self.blip()
                     sleep(0.35)
 
-        # Reparcourir pour replacer tout quand on change thème
         for piece in self.partie.planche.cases:
+            # Placer au centre de la case
             couleur_piece = self.partie.planche.cases[piece].couleur
             if couleur_piece == "blanc":
                 couleur_piece = "white"

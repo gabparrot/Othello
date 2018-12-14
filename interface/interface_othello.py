@@ -397,6 +397,7 @@ class Brothello(Tk):
 
         # Évite crash si quitte avec 'X', fait exit() au lieu de self.destroy()
         self.protocol("WM_DELETE_WINDOW", self.quitter)
+        self.occupe = False
 
         if theme:
             self.theme = theme  # conserve theme choisi
@@ -625,7 +626,10 @@ class Brothello(Tk):
 
     def placer_pieces(self):
         """ Dessine les pieces nouvelles ou modifies """
-
+        self.damier.delete("all")
+        self.damier.dessiner_carres()
+        for piece in self.anciennes_pieces:
+            self.dessiner_piece(piece, self.anciennes_pieces[piece].couleur)
         for piece in self.partie.planche.cases:
             if piece not in self.anciennes_pieces:
                 # Placer au centre de la case
@@ -651,6 +655,7 @@ class Brothello(Tk):
                         couleur_piece = "white"
                     elif couleur_piece == "noir":
                         couleur_piece = "black"
+                    del(self.anciennes_pieces[piece])
                     self.anciennes_pieces[piece] = Piece(self.couleur_piece)
                     self.dessiner_piece(piece, couleur_piece)
                     self.damier.update_idletasks()
@@ -665,7 +670,8 @@ class Brothello(Tk):
             elif couleur_piece == "noir":
                 couleur_piece = "black"
 
-            self.dessiner_piece(piece, couleur_piece)
+            if couleur_piece not in ['white', 'black']:
+                self.dessiner_piece(piece, couleur_piece)
 
     def dessiner_piece(self, position: tuple, couleur_piece: str):
         """ Trace la pièce dans le canevas"""
